@@ -13,6 +13,9 @@ public class Hud : MonoBehaviour
 	TextMesh score;
 
 	[SerializeField]
+	TextMesh scoreRequired;
+
+	[SerializeField]
 	Transform barFilluTimer;
 
 	[SerializeField]
@@ -25,6 +28,12 @@ public class Hud : MonoBehaviour
 	void Awake()
 	{
 		Instance = this;
+	}
+
+	public void Init(int actualScore, int requiredScore)
+	{
+		scoreRequired.text = requiredScore.ToString ();
+		score.text = actualScore.ToString ();
 	}
 
 	public void SetuTimerProgress(float value)

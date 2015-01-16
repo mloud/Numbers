@@ -18,6 +18,7 @@ public class Game : MonoBehaviour
 	private float FlipTimer { get; set; }
 
 	private ComboEffect ComboEffect;
+	private OverScoreEffect OverScoreEffect;
 
 	private enum State
 	{
@@ -36,6 +37,7 @@ public class Game : MonoBehaviour
 		Numbers = new List<int>();
 		Playground = GameObject.FindObjectOfType<Playground> ();
 		ComboEffect = GameObject.FindObjectOfType<ComboEffect> ();
+		OverScoreEffect = GameObject.FindObjectOfType<OverScoreEffect> ();
 
 		CurrState = State.Stopped;
 
@@ -70,6 +72,8 @@ public class Game : MonoBehaviour
 		MicroTimer = LevelDef.MicroTime;
 		LevelTimer = LevelDef.TotalTime;
 		FlipTimer = LevelDef.FlipTime;
+
+		Hud.Instance.Init (Score, LevelDef.Score);
 
 		var win = WindowManager.Instance.OpenWindow (WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level});
 		win.GetComponentInChildren<Button> ().onClick.AddListener (() => { RunLevel();  WindowManager.Instance.CloseWindow(win.Name);});
@@ -334,36 +338,68 @@ public class Game : MonoBehaviour
 
 			Hud.Instance.AddScore (Score, score, ScoreAdded);
 			Score += score;
+
+			if (Score >= LevelDef.Score)
+			{
+				int overScore = Score - LevelDef.Score;
+
+				if (overScore > 0)
+				{
+					OverScoreEffect.Show(overScore);
+				}
+			}
 		}
 	}
 
 	private void GameOver()
 	{
 		App.Instance.GoogleAnalytics.LogEvent("LevelFinished", (LevelDef.Order.ToString() + 1).ToString(), LevelDef.Name, Score);
-		App.Instance.Player.LevelFinished (LevelDef, Score);
 
-		CurrState = State.GameOver;
+		var levelStats = DbUtils.GetLevelStatistic (LevelDef);
+	
+		bool levelFinished = Score >= LevelDef.Score;
 
-		bool gameFinished = DbUtils.IsGameFinished ();
-
-
-		if (gameFinished)
+		if (levelFinished)
 		{
-			WindowManager.Instance.OpenWindow (WindowDef.GameFinished, new GameFinishedWindow.Param() 
+			App.Instance.Player.LevelFinished (LevelDef, Score);
+
+			bool gameFinished = DbUtils.IsGameFinished ();
+
+			
+			if (gameFinished)
 			{
+				WindowManager.Instance.OpenWindow (WindowDef.GameFinished, new GameFinishedWindow.Param() 
+				{
+					OnMenuClick = OnMenu
+				});
+			}
+
+			
+			WindowManager.Instance.OpenWindow (WindowDef.GameOver, new GameOverWindow.Param() 
+			{ 	
+				Score = this.Score,
+				BestScore = levelStats == null ? 0 : levelStats.Score,
+				LevelName = "Level " + (LevelDef.Order + 1),
+				OnRestartClick = OnRestart,
+				OnNextClick = OnNextLevel,
+				OnMenuClick = OnMenu,
+				IsNextLevel = !gameFinished
+			});
+
+		}
+		else
+		{
+			WindowManager.Instance.OpenWindow (WindowDef.LevelFailed, new LevelFailedWindow.Param() 
+			                                   { 	
+				Score = this.Score,
+				RequiredScore = LevelDef.Score,
+				LevelName = "Level " + (LevelDef.Order + 1),
+				OnRestartClick = OnRestart,
 				OnMenuClick = OnMenu
 			});
 		}
 
-
-		WindowManager.Instance.OpenWindow (WindowDef.GameOver, new GameOverWindow.Param() 
-	    { 	
-			Score = this.Score,
-		  	OnRestartClick = OnRestart,
-			OnNextClick = OnNextLevel,
-			OnMenuClick = OnMenu,
-			IsNextLevel = !gameFinished
-		});
+		CurrState = State.GameOver;
 
 
 		Sound.Instance.StopMusic ();
