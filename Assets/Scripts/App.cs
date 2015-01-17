@@ -19,9 +19,9 @@ public class App : MonoBehaviour
 
 		DontDestroyOnLoad (gameObject);
 
-		DontDestroyOnLoad (GoogleAnalytics.gameObject);
+		//DontDestroyOnLoad (GoogleAnalytics.gameObject);
 
-		GoogleAnalytics.StartSession();
+		//GoogleAnalytics.StartSession();
 	
 		Init ();
 	}
@@ -43,7 +43,10 @@ public class App : MonoBehaviour
 	}
 
 	void Start ()
-	{}
+	{
+
+		GameObject.FindObjectOfType<LevelUi> ().Init ();
+	}
 
 	void Init()
 	{

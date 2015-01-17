@@ -1,24 +1,30 @@
 using UnityEngine;
 using System.Collections;
 using System;
+using UnityEngine.UI;
 
 public class LevelUi : MonoBehaviour
 {
 	[SerializeField]
 	private RectTransform List; 
 
+	[SerializeField]
+	private Text Titles; 
+
 
 	void Start ()
 	{
-		Init ();
+		//Init ();
 	}
 
-	void Init()
+	public void Init()
 	{
-		App.Instance.GoogleAnalytics.LogScreen ("LevelSelection");
+		//App.Instance.GoogleAnalytics.LogScreen ("LevelSelection");
 	
 
 		GameObject levelPrefab = Resources.Load ("Prefabs/Ui/Level") as GameObject;
+
+		Titles.text = "Levels " + App.Instance.Db.LevelDb.Levels.Count;
 
 		for (int i = 0; i < App.Instance.Db.LevelDb.Levels.Count; ++i)
 		{

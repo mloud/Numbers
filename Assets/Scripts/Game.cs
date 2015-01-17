@@ -17,6 +17,9 @@ public class Game : MonoBehaviour
 	private float LevelTimer { get; set; }
 	private float FlipTimer { get; set; }
 
+
+	private List<NumberPattern> NumberPatterns { get; set; }
+
 	private ComboEffect ComboEffect;
 	private OverScoreEffect OverScoreEffect;
 
@@ -31,7 +34,8 @@ public class Game : MonoBehaviour
 
 	void Start () 
 	{
-		App.Instance.GoogleAnalytics.LogScreen ("Game");
+		//App.Instance.GoogleAnalytics.LogScreen ("Game");
+		NumberPatterns = new List<NumberPattern> () { new EqualNumberPattern(), new PlusOneNumberPattern() };
 
 		Circles = new List<Circle> ();
 		Numbers = new List<int>();
@@ -217,7 +221,6 @@ public class Game : MonoBehaviour
 			score = 0;
 		else
 		{
-			//score = (int)Mathf.Pow(2, Numbers.Count - 2) * 10;
 			score = ComputeScore(Numbers);
 		}
 
@@ -270,16 +273,11 @@ public class Game : MonoBehaviour
 
 	private int ComputeScore(List<int> nums)
 	{
+		var numPattern = NumberPatterns.Find(x=>x.IsPattern(nums));
 
-		if (IsSequence(nums))
+		if (numPattern != null)
 		{
-			int[] scoreTable = {0, 0, 10, 13, 17, 25, 35, 50, 70, 95, 130, 175, 230, 290, 355, 430};	
-			return scoreTable[nums.Count];
-		}
-		if (IsSameValue(nums))
-		{
-			int[] scoreTable = {0, 0, 5, 6, 9, 12, 17, 25, 35, 42, 68, 90, 115, 145, 170, 215};	
-			return scoreTable[nums.Count];
+			return numPattern.ComputeScore(nums);
 		}
 
 		return 0;
@@ -287,6 +285,7 @@ public class Game : MonoBehaviour
 
 	private bool CanAddNumber(Circle circle)
 	{
+		// first number - can be added
 		if (Numbers.Count == 0)
 			return true;
 
@@ -301,14 +300,11 @@ public class Game : MonoBehaviour
 		List<int> nums = new List<int> (Numbers);
 		nums.Add (circle.Value);
 
-		// sequence
-		if (IsSequence(nums))
-			return true;
 
-		// same values
-		if (IsSameValue(nums))
+		if (NumberPatterns.Find(x=>x.IsPattern(nums)) != null)
+		{
 			return true;
-
+		}
 
 		return false;
 	}
@@ -333,7 +329,7 @@ public class Game : MonoBehaviour
 	{
 		if (score > 0)
 		{
-				//if (score > 0)
+			//if (score > 0)
 			//	Sound.Instance.Play ("score");
 
 			Hud.Instance.AddScore (Score, score, ScoreAdded);
@@ -353,7 +349,7 @@ public class Game : MonoBehaviour
 
 	private void GameOver()
 	{
-		App.Instance.GoogleAnalytics.LogEvent("LevelFinished", (LevelDef.Order.ToString() + 1).ToString(), LevelDef.Name, Score);
+		//App.Instance.GoogleAnalytics.LogEvent("LevelFinished", (LevelDef.Order.ToString() + 1).ToString(), LevelDef.Name, Score);
 
 		var levelStats = DbUtils.GetLevelStatistic (LevelDef);
 	
