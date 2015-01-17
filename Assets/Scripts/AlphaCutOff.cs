@@ -4,11 +4,15 @@ using UnityEngine;
 public class AlphaCutOff : MonoBehaviour
 {
 	[SerializeField]
-	public float CutOff = 0.5f;
+	private float CutOff = 0.5f;
+
+	public void SetCutOff(float value)
+	{
+		CutOff = Mathf.Clamp (value, 0.001f, 1f);
+	}
 
 	private void Update () 
 	{ 
-		CutOff = Mathf.Clamp (CutOff, 0.01f, 1f);
 		renderer.sharedMaterial.SetFloat("_Cutoff", CutOff); 
 	}
 }

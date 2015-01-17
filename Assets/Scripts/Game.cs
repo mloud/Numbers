@@ -16,12 +16,15 @@ public class Game : MonoBehaviour
 	private float MicroTimer { get; set; }
 	private float LevelTimer { get; set; }
 	private float FlipTimer { get; set; }
+	private int FlipNumberIndex { get; set; }
 
 
 	private List<NumberPattern> NumberPatterns { get; set; }
 
 	private ComboEffect ComboEffect;
 	private OverScoreEffect OverScoreEffect;
+
+	private BonusGenerator BonusGenerator { get; set; }
 
 	private enum State
 	{
@@ -36,6 +39,8 @@ public class Game : MonoBehaviour
 	{
 		//App.Instance.GoogleAnalytics.LogScreen ("Game");
 		NumberPatterns = new List<NumberPattern> () { new EqualNumberPattern(), new PlusOneNumberPattern() };
+		BonusGenerator = new BonusGenerator ();
+		BonusGenerator.Init ();
 
 		Circles = new List<Circle> ();
 		Numbers = new List<int>();
@@ -113,19 +118,17 @@ public class Game : MonoBehaviour
 			FlipTimer = LevelDef.FlipTime;
 			var rndCircle = Circles[Random.Range(0, Circles.Count)];
 
-			float rnd = Random.Range(0,100);
-			Circle.SpecialAttribute attr = Circle.SpecialAttribute.None;
-			if (rnd > 80)
-			{
-				attr = Circle.SpecialAttribute.Golden;
-			}
+			int number = LevelDef.FlipNumbers[FlipNumberIndex];
+			Circle.SpecialAttribute attr = number == 0 ? Circle.SpecialAttribute.Golden : Circle.SpecialAttribute.None;
+			rndCircle.StartCoroutine(rndCircle.ChangeValueTo(number, attr));
 
-
-			rndCircle.StartCoroutine(rndCircle.ChangeValueTo(Random.Range(0, 15), attr));
+			FlipNumberIndex = (FlipNumberIndex + 1) == LevelDef.FlipNumbers.Count ? 0 : FlipNumberIndex + 1;
 		}
 
 		Hud.Instance.SetuTimerProgress (MicroTimer / LevelDef.MicroTime);
 		Hud.Instance.SetLevelTimerProgress (LevelTimer / LevelDef.TotalTime, LevelDef.TotalTime);
+
+		BonusGenerator.Update ();
 	}
 
 	void Update ()
