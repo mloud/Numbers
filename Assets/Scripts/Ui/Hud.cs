@@ -10,16 +10,22 @@ public class Hud : MonoBehaviour
 	TextMesh text;
 
 	[SerializeField]
+	TextMesh levelTimer;
+
+	[SerializeField]
 	TextMesh score;
 
 	[SerializeField]
 	TextMesh scoreRequired;
 
 	[SerializeField]
-	Transform barFilluTimer;
+	ProgressBar barFilluTimer;
 
 	[SerializeField]
-	Transform barFillLevelTimer;
+	ProgressBar barFillLevelTimer;
+
+	[SerializeField]
+	NumberContainer numberContainer;
 
 
 
@@ -30,39 +36,56 @@ public class Hud : MonoBehaviour
 		Instance = this;
 	}
 
-	public void Init(int actualScore, int requiredScore)
+	public void Init(int actualScore, int requiredScore, float levelDuration)
 	{
 		scoreRequired.text = requiredScore.ToString ();
 		score.text = actualScore.ToString ();
+
+		SetLevelTimerProgress (1, levelDuration);
+		SetuTimerProgress (1);
 	}
 
 	public void SetuTimerProgress(float value)
 	{
-		var scale = barFilluTimer.transform.localScale;
-
-		scale.x = value;
-
-		barFilluTimer.transform.localScale = scale;
+		barFilluTimer.Set (value);
 	}
 
-	public void SetLevelTimerProgress(float value)
+	public void SetLevelTimerProgress(float value, float levelDuration)
 	{
-		var scale = barFillLevelTimer.transform.localScale;
+		barFillLevelTimer.Set (value);
+
+
+		float secondsLeft = value * levelDuration;
+
+		TimeSpan t = TimeSpan.FromSeconds( secondsLeft );
 		
-		scale.x = value;
-		
-		barFillLevelTimer.transform.localScale = scale;
+		string res = string.Format ("{0:D1}:{1:D2}", 
+		                              t.Minutes, 
+		                              t.Seconds);
+		                     
+		levelTimer.text = res;
+	}
+
+
+	public void AddNumber(Circle circle)
+	{
+		numberContainer.AddNumber (circle);
+	}
+
+	public void ClearNumbers()
+	{
+		numberContainer.Clear ();
 	}
 
 	public void SetNumbers(List<int> num)
 	{
-		string s = "";
-		for (int i = 0; i < num.Count; ++i)
-		{
-			s += num[i].ToString() + " "; 
-		}
-
-		text.text = s;
+//		string s = "";
+//		for (int i = 0; i < num.Count; ++i)
+//		{
+//			s += num[i].ToString() + " "; 
+//		}
+//
+//		text.text = s;
 	}
 
 	public void AddScore(int actualScore, int score, Action scoreAdded)

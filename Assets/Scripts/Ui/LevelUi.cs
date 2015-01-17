@@ -21,11 +21,9 @@ public class LevelUi : MonoBehaviour
 	{
 		//App.Instance.GoogleAnalytics.LogScreen ("LevelSelection");
 	
-
 		GameObject levelPrefab = Resources.Load ("Prefabs/Ui/Level") as GameObject;
 
-		Titles.text = "Levels " + App.Instance.Db.LevelDb.Levels.Count;
-
+	
 		for (int i = 0; i < App.Instance.Db.LevelDb.Levels.Count; ++i)
 		{
 			var levelDef =  App.Instance.Db.LevelDb.Levels[i];

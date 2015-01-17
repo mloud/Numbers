@@ -67,6 +67,6 @@ public class App : MonoBehaviour
 
 	void OnDestroy()
 	{
-		GoogleAnalytics.StopSession ();
+		//GoogleAnalytics.StopSession ();
 	}
 }

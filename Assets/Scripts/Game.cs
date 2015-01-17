@@ -72,12 +72,12 @@ public class Game : MonoBehaviour
 		LevelDef = level;
 
 		InitPlayground ();
-		
+
 		MicroTimer = LevelDef.MicroTime;
 		LevelTimer = LevelDef.TotalTime;
 		FlipTimer = LevelDef.FlipTime;
 
-		Hud.Instance.Init (Score, LevelDef.Score);
+		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
 		var win = WindowManager.Instance.OpenWindow (WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level});
 		win.GetComponentInChildren<Button> ().onClick.AddListener (() => { RunLevel();  WindowManager.Instance.CloseWindow(win.Name);});
@@ -125,7 +125,7 @@ public class Game : MonoBehaviour
 		}
 
 		Hud.Instance.SetuTimerProgress (MicroTimer / LevelDef.MicroTime);
-		Hud.Instance.SetLevelTimerProgress (LevelTimer / LevelDef.TotalTime);
+		Hud.Instance.SetLevelTimerProgress (LevelTimer / LevelDef.TotalTime, LevelDef.TotalTime);
 	}
 
 	void Update ()
@@ -227,6 +227,7 @@ public class Game : MonoBehaviour
 		Numbers.Clear ();
 
 		Hud.Instance.SetNumbers (Numbers);
+		Hud.Instance.ClearNumbers ();
 		
 		AddScore (score);
 	}
@@ -317,7 +318,10 @@ public class Game : MonoBehaviour
 
 			Circles.Remove (circle);
 
-			Destroy (circle.gameObject, 0.1f);
+			//Destroy (circle.gameObject, 0.1f);
+
+			Hud.Instance.AddNumber(circle);
+		
 
 			Hud.Instance.SetNumbers (Numbers);
 		}

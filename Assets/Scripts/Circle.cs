@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -46,6 +46,10 @@ public class Circle : MonoBehaviour
 
 	private SpecialAttribute attribute;
 
+	private Transform VisualTransform { get; set; }
+
+
+
 	public SpecialAttribute Attribute 
 	{ 
 		get { return attribute; }
@@ -71,6 +75,35 @@ public class Circle : MonoBehaviour
 		Timer = Time.time;
 	}
 
+	public void SetScale(float scale)
+	{
+		//VisualTransform.localScale = new Vector3 (scale, scale, scale);
+		transform.localScale = new Vector3 (scale, scale, scale);
+	}
+
+	public IEnumerator MoveToCoroutine(Vector3 locPos, float speed)
+	{
+		Vector3 dirN = (locPos - transform.localPosition).normalized;
+		Vector3 startLocPos = transform.localPosition;
+		float totDistanceSqr = (locPos - transform.localPosition).sqrMagnitude;
+
+		float t = 0;
+
+		while (true)
+		{
+			transform.localPosition = transform.localPosition + dirN * speed * Time.deltaTime;
+			t = (transform.localPosition - startLocPos).sqrMagnitude / totDistanceSqr;
+			t = Mathf.Clamp01(t);
+		
+			if (t < 1)
+				yield return 0;
+
+			else
+				break;
+		}
+
+		transform.localPosition = locPos;
+	}
 
 	public IEnumerator ChangeValueTo(int value, SpecialAttribute attribute = SpecialAttribute.None)
 	{
@@ -114,7 +147,7 @@ public class Circle : MonoBehaviour
 
 	private void DoOnClick()
 	{
-		Animator.SetTrigger ("click");
+		//Animator.SetTrigger ("click");
 	
 		if (OnClick != null)
 		{
@@ -126,6 +159,7 @@ public class Circle : MonoBehaviour
 	{
 		TxtMesh = GetComponent<TextMesh> ();
 		Animator = GetComponent<Animator> ();
+		VisualTransform = gameObject.transform.FindChild ("Visual");
 	}
 
 	private void Start ()
