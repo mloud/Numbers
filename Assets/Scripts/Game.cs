@@ -23,6 +23,7 @@ public class Game : MonoBehaviour
 
 	private ComboEffect ComboEffect;
 	private OverScoreEffect OverScoreEffect;
+	private BonusEffect BonusEffect;
 
 	private BonusGenerator BonusGenerator { get; set; }
 
@@ -39,14 +40,17 @@ public class Game : MonoBehaviour
 	{
 		//App.Instance.GoogleAnalytics.LogScreen ("Game");
 		NumberPatterns = new List<NumberPattern> () { new EqualNumberPattern(), new PlusOneNumberPattern() };
+
+		// Bonus generator
 		BonusGenerator = new BonusGenerator ();
-		BonusGenerator.Init ();
+		BonusGenerator.OnBonusReleased += OnBonusReleased;
 
 		Circles = new List<Circle> ();
 		Numbers = new List<int>();
 		Playground = GameObject.FindObjectOfType<Playground> ();
 		ComboEffect = GameObject.FindObjectOfType<ComboEffect> ();
 		OverScoreEffect = GameObject.FindObjectOfType<OverScoreEffect> ();
+		BonusEffect = GameObject.FindObjectOfType<BonusEffect> ();
 
 		CurrState = State.Stopped;
 
@@ -313,24 +317,6 @@ public class Game : MonoBehaviour
 		return false;
 	}
 
-	private void OnCircleClick(Circle circle)
-	{
-		if (CurrState == State.Running)
-		{
-			AddNumber (circle);
-
-			Circles.Remove (circle);
-
-			//Destroy (circle.gameObject, 0.1f);
-
-			Hud.Instance.AddNumber(circle);
-		
-
-			Hud.Instance.SetNumbers (Numbers);
-		}
-	}
-
-
 
 	private void AddScore(int score)
 	{
@@ -408,6 +394,28 @@ public class Game : MonoBehaviour
 		Sound.Instance.StopMusic ();
 	}
 
+
+	private void ApplyBonus(BonusBase bonus)
+	{
+		ScoreBonus scoreBonus = bonus as ScoreBonus;
+	
+		if ( scoreBonus != null )
+		{
+			AddScore(scoreBonus.Score);
+		}
+
+		
+		// effect
+		BonusEffect.Show(bonus.GetText());
+		
+
+	}
+
+	private void OnBonusReleased(Bubble bubble)
+	{
+		bubble.OnClick += OnBonusClick;
+	}
+
 	private void OnRestart()
 	{
 		Restart ();
@@ -427,4 +435,32 @@ public class Game : MonoBehaviour
 	{
 		Sound.Instance.StopEffects ();
 	}
+
+
+
+	private void OnBonusClick(Bubble bubble)
+	{
+		if (CurrState == State.Running)
+		{
+			ApplyBonus(bubble.Bonus);
+		}
+	}
+
+	private void OnCircleClick(Circle circle)
+	{
+		if (CurrState == State.Running)
+		{
+			AddNumber (circle);
+			
+			Circles.Remove (circle);
+			
+			//Destroy (circle.gameObject, 0.1f);
+			
+			Hud.Instance.AddNumber(circle);
+			
+			
+			Hud.Instance.SetNumbers (Numbers);
+		}
+	}
+
 }

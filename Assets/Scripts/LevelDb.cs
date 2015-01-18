@@ -19,6 +19,8 @@ public class LevelDb : MonoBehaviour
 		public string Name;
 		public List<int> Numbers;
 		public List<int> FlipNumbers;
+
+		public List<float> BonusTime;
 	}
 
 	[SerializeField]

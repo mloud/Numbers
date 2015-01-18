@@ -1,16 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 
 public class BonusGenerator
 {
-	private float Interval = 4;
+	public Action<Bubble> OnBonusReleased;
 
+	private float Interval = 4;
 
 	private float Timer { get; set; }
 
-	public void Init()
+
+	public BonusGenerator()
+	{
+		Init ();
+	}
+
+	private void Init()
 	{
 		Timer = Interval;
 	}
@@ -29,15 +37,26 @@ public class BonusGenerator
 
 	private void Release()
 	{
-		GameObject bonusGo = GameObject.Instantiate(Resources.Load ("Prefabs/Bubble")) as GameObject;
+		// Create bubble holder
+		GameObject bubbleGo = GameObject.Instantiate(Resources.Load ("Prefabs/Bonuses/Bubble")) as GameObject;
+		Bubble bubble = bubbleGo.GetComponent<Bubble> ();
 
-		Bubble bubble = bonusGo.GetComponent<Bubble> ();
+		float posX = UnityEngine.Random.Range (0, Screen.width);
+		float posY = -Screen.height * 0.5f;
+		Vector3 worldPoint = Camera.main.ScreenToWorldPoint (new Vector2 (posX, posY));
+		worldPoint.z = -1.0f;
 
+		// create bonus
+		GameObject bonusGo = GameObject.Instantiate(Resources.Load ("Prefabs/Bonuses/ScoreBonus")) as GameObject;
+		var bonus = bonusGo.GetComponent<ScoreBonus> ();
+		bonus.Init (10);
 
-		Vector3 worldPoint = Camera.main.ScreenToWorldPoint (new Vector3 (Random.Range (-Screen.width * 0.5f, Screen.width * 0.5f), -Screen.height * 0.5f, 0));
-		worldPoint.z = 0;
+		bubble.Run (worldPoint, Vector3.up, 0.05f, bonus);
 
-		bubble.Run (worldPoint, Vector3.up, 0.10f);
+		if (OnBonusReleased != null)
+		{
+			OnBonusReleased(bubble);
+		}
 	}
 
 }
