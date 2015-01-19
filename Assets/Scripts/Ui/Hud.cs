@@ -77,17 +77,6 @@ public class Hud : MonoBehaviour
 		numberContainer.Clear ();
 	}
 
-	public void SetNumbers(List<int> num)
-	{
-//		string s = "";
-//		for (int i = 0; i < num.Count; ++i)
-//		{
-//			s += num[i].ToString() + " "; 
-//		}
-//
-//		text.text = s;
-	}
-
 	public void AddScore(int actualScore, int score, Action scoreAdded)
 	{
 		StartCoroutine(AddScoreEffectCoroutine(actualScore, score, 0.2f, scoreAdded));

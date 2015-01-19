@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class Game : MonoBehaviour
 {
-	private List<Circle> Circles { get; set; }
-	private List<int> Numbers { get; set; }
+
 	private Playground Playground { get; set; }
 
 	private LevelDb.LevelDef LevelDef { get; set; }
@@ -18,14 +17,13 @@ public class Game : MonoBehaviour
 	private float FlipTimer { get; set; }
 	private int FlipNumberIndex { get; set; }
 
-
-	private List<NumberPattern> NumberPatterns { get; set; }
-
-	private ComboEffect ComboEffect;
+    private ComboEffect ComboEffect;
 	private OverScoreEffect OverScoreEffect;
 	private BonusEffect BonusEffect;
 
 	private BonusGenerator BonusGenerator { get; set; }
+    private GameModel Model { get; set; }
+
 
 	private enum State
 	{
@@ -39,14 +37,12 @@ public class Game : MonoBehaviour
 	void Start () 
 	{
 		//App.Instance.GoogleAnalytics.LogScreen ("Game");
-		NumberPatterns = new List<NumberPattern> () { new EqualNumberPattern(), new PlusOneNumberPattern() };
-
+	
 		// Bonus generator
 		BonusGenerator = new BonusGenerator ();
 		BonusGenerator.OnBonusReleased += OnBonusReleased;
 
-		Circles = new List<Circle> ();
-		Numbers = new List<int>();
+
 		Playground = GameObject.FindObjectOfType<Playground> ();
 		ComboEffect = GameObject.FindObjectOfType<ComboEffect> ();
 		OverScoreEffect = GameObject.FindObjectOfType<OverScoreEffect> ();
@@ -71,11 +67,14 @@ public class Game : MonoBehaviour
 
 	public void Init(LevelDb.LevelDef level)
 	{
-		Score = 0;
+        // Tap manager
+        Model = new GameModel(new GameContext() { LevelDef = level });
 
-		Numbers.Clear ();
-		Circles.ForEach (x => Destroy (x.gameObject));
-		Circles.Clear ();
+        Score = 0;
+
+		Model.Numbers.Clear ();
+		Model.Circles.ForEach (x => Destroy (x.gameObject));
+		Model.Circles.Clear ();
 
 
 		LevelDef = level;
@@ -106,7 +105,7 @@ public class Game : MonoBehaviour
 		LevelTimer -= Time.deltaTime;
 		FlipTimer -= Time.deltaTime;
 
-		if (LevelTimer <= 0 || Circles.Count == 0)
+		if (LevelTimer <= 0 || Model.Circles.Count == 0)
 		{
 			ProcessNumbers();
 			GameOver();
@@ -117,16 +116,13 @@ public class Game : MonoBehaviour
 			ProcessNumbers();
 		}
 	
-		if (FlipTimer < 0 && Circles.Count > 1)
+		if (FlipTimer < 0 && Model.Circles.Count > 1)
 		{
 			FlipTimer = LevelDef.FlipTime;
-			var rndCircle = Circles[Random.Range(0, Circles.Count)];
-
-			int number = LevelDef.FlipNumbers[FlipNumberIndex];
-			Circle.SpecialAttribute attr = number == 0 ? Circle.SpecialAttribute.Golden : Circle.SpecialAttribute.None;
-			rndCircle.StartCoroutine(rndCircle.ChangeValueTo(number, attr));
-
-			FlipNumberIndex = (FlipNumberIndex + 1) == LevelDef.FlipNumbers.Count ? 0 : FlipNumberIndex + 1;
+			
+            var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count)];
+    
+            FlipCircle(rndCircle);
 		}
 
 		Hud.Instance.SetuTimerProgress (MicroTimer / LevelDef.MicroTime);
@@ -134,6 +130,35 @@ public class Game : MonoBehaviour
 
 		BonusGenerator.Update ();
 	}
+
+    private void FlipCircle(Circle circle)
+    {
+        var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count - 1)];
+
+        int number = LevelDef.FlipNumbers[FlipNumberIndex];
+        
+        // special attribute
+        Circle.SpecialAttribute attr = number == 0 ? Circle.SpecialAttribute.Joker : Circle.SpecialAttribute.None;
+        
+        // tap behaviour
+        float rnd01 = Random.Range(0.0f, 1.0f);
+        float sum = 0;
+        var tapBehav = Circle.TapBehaviour.None;
+        foreach (var tap in LevelDef.TapBehaviours)
+        {
+            sum += tap.Probability;
+            if (rnd01 < sum)
+            {
+                tapBehav = tap.Behaviour;
+                break;
+            }
+        }
+
+
+        rndCircle.StartCoroutine(rndCircle.ChangeValueTo(number, attr, tapBehav));
+        
+        FlipNumberIndex = (FlipNumberIndex + 1) >= LevelDef.FlipNumbers.Count ? 0 : FlipNumberIndex + 1;
+    }
 
 	void Update ()
 	{
@@ -180,12 +205,12 @@ public class Game : MonoBehaviour
 
 				circle.transform.position = new Vector3(xPos, yPos, 0);
 
-				Circles.Add(circle);
+				Model.Circles.Add(circle);
 
 				//circle.Value = Random.Range(LevelDef.FromNum, LevelDef.ToNum);
 				circle.Value = numbers[index];
 
-				circle.Run();
+				circle.Run(Circle.TapBehaviour.None);
 
 				circle.OnClick += OnCircleClick;
 
@@ -200,123 +225,23 @@ public class Game : MonoBehaviour
 	
 	}
 
-	private void AddNumber(Circle circle)
-	{
-		if (CanAddNumber(circle))
-		{
-			Numbers.Add(circle.Value);
-			if (Numbers.Count > 1)
-			{
-				ComboEffect.Show(Numbers.Count);
-				Sound.Instance.PlayEffect("combo" + Numbers.Count);
-			}
-		}
-		else
-		{
-			ProcessNumbers();
-			Numbers.Add(circle.Value);
-		}
-
-		MicroTimer = LevelDef.MicroTime;
-	}
-
 	private void ProcessNumbers()
 	{
 		int score = 0;
 
-		if (Numbers.Count == 1)
+		if (Model.Numbers.Count == 1)
 			score = 0;
 		else
 		{
-			score = ComputeScore(Numbers);
+			score = Model.ComputeScore(Model.Numbers);
 		}
 
-		Numbers.Clear ();
+		Model.Numbers.Clear ();
 
-		Hud.Instance.SetNumbers (Numbers);
 		Hud.Instance.ClearNumbers ();
 		
 		AddScore (score);
 	}
-
-	private bool IsSequence(List<int> nums)
-	{
-		bool sequence = true;
-		for (int i = 1; i < nums.Count; ++i)
-		{
-			bool seqInPair =  ((nums[i-1] + 1) == (nums[i])) || (nums[i] == 0 || nums[i - 1] == 0 );
-			
-			if (!seqInPair)
-			{
-				sequence = false;
-				break;
-			}
-		}
-		
-		return sequence;
-	}
-
-	private bool IsSameValue(List<int> nums)
-	{
-		int lastNum = -1;
-		bool sameValue = true;
-
-		for (int i = 0; i < nums.Count; ++i)
-		{
-			bool isSameValue = lastNum == -1 || (nums[i] == lastNum) || nums[i] == 0;
-			
-			if (!isSameValue)
-			{
-				sameValue = false;
-				break;
-			}
-			
-			if (lastNum != nums[i] && nums[i] != 0)
-			{
-				lastNum = nums[i];
-			}
-		}
-		return sameValue;
-	}
-
-	private int ComputeScore(List<int> nums)
-	{
-		var numPattern = NumberPatterns.Find(x=>x.IsPattern(nums));
-
-		if (numPattern != null)
-		{
-			return numPattern.ComputeScore(nums);
-		}
-
-		return 0;
-	}
-
-	private bool CanAddNumber(Circle circle)
-	{
-		// first number - can be added
-		if (Numbers.Count == 0)
-			return true;
-
-		// special number
-		if (circle.Attribute == Circle.SpecialAttribute.Golden)
-		{
-			circle.Value = 0;
-			return true;
-		}
-
-		// copy with new number
-		List<int> nums = new List<int> (Numbers);
-		nums.Add (circle.Value);
-
-
-		if (NumberPatterns.Find(x=>x.IsPattern(nums)) != null)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
 
 	private void AddScore(int score)
 	{
@@ -450,16 +375,40 @@ public class Game : MonoBehaviour
 	{
 		if (CurrState == State.Running)
 		{
-			AddNumber (circle);
-			
-			Circles.Remove (circle);
-			
-			//Destroy (circle.gameObject, 0.1f);
-			
-			Hud.Instance.AddNumber(circle);
-			
-			
-			Hud.Instance.SetNumbers (Numbers);
+            // Number patterns
+            var patternResult = Model.ProcessPatterns(circle);
+
+            if (patternResult.FitSequence)
+            {
+                Model.Numbers.Add(circle.Value);
+
+                if (Model.Numbers.Count > 1)
+                {
+                    ComboEffect.Show(Model.Numbers.Count);
+                    Sound.Instance.PlayEffect("combo" + Model.Numbers.Count);
+                }
+            }
+            else
+            {
+                ProcessNumbers();
+                Model.Numbers.Add(circle.Value);
+            }
+
+            Hud.Instance.AddNumber(circle);
+
+            // Tap handlers
+            var tapResult = Model.ProcessTapHandlers(circle);            
+
+            if (tapResult.Remove)
+            {
+		    	Model.Circles.Remove (circle);
+
+                Destroy(circle.gameObject);
+            }
+
+
+
+            MicroTimer = LevelDef.MicroTime;
 		}
 	}
 

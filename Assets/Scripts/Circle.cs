@@ -6,6 +6,19 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class Circle : MonoBehaviour
 {
+    public enum ScoreType
+    {
+        Copper, 
+        Silver,
+        Gold
+    }
+
+    public enum TapBehaviour
+    {
+        None,
+        Minus
+    }
+
 	[System.Serializable]
 	public class AttributeConfig
 	{
@@ -16,14 +29,18 @@ public class Circle : MonoBehaviour
 	public enum SpecialAttribute
 	{
 		None,
-		Golden
+		Joker
 	}
 
-	[SerializeField]
+    [SerializeField]
 	private List<AttributeConfig> attributesConfig;
 
-	[SerializeField]
-	private SpriteRenderer visualSpriteRenderer;
+    [SerializeField]
+    private SpriteRenderer visualSpriteRenderer;
+
+    [SerializeField]
+    private Transform minusTransform;
+
 
 	public delegate void ClickDelegate(Circle cirlce);
 
@@ -46,9 +63,20 @@ public class Circle : MonoBehaviour
 
 	private SpecialAttribute attribute;
 
+    private TapBehaviour tapBehaviour;
+
 	private Transform VisualTransform { get; set; }
 
+    public TapBehaviour TapBehav
+    {
+        get { return tapBehaviour; }
 
+        set 
+        {
+            tapBehaviour = value;
+            minusTransform.gameObject.SetActive(value == TapBehaviour.Minus);
+        }
+    }
 
 	public SpecialAttribute Attribute 
 	{ 
@@ -56,7 +84,7 @@ public class Circle : MonoBehaviour
 
 		set
 		{
-			if (value == SpecialAttribute.Golden)
+			if (value == SpecialAttribute.Joker)
 			{
 				TxtMesh.renderer.enabled = false;
 			}
@@ -70,10 +98,25 @@ public class Circle : MonoBehaviour
 		}
 	}
 
-	public void Run()
+    public Circle Clone()
+    {
+        return (Instantiate(gameObject) as GameObject).GetComponent<Circle>();
+    }
+
+    public void SetForHud()
+    {
+        Destroy (GetComponent<CircleCollider2D> ()); // no touches anymore
+        Destroy (GetComponent<Animator> ()); // no anims
+    
+        minusTransform.gameObject.SetActive(false);
+    }
+
+	public void Run(TapBehaviour behaviour)
 	{
 		Timer = Time.time;
-	}
+	
+        TapBehav = behaviour;
+    }
 
 	public void SetScale(float scale)
 	{
@@ -105,7 +148,7 @@ public class Circle : MonoBehaviour
 		transform.localPosition = locPos;
 	}
 
-	public IEnumerator ChangeValueTo(int value, SpecialAttribute attribute = SpecialAttribute.None)
+	public IEnumerator ChangeValueTo(int value, SpecialAttribute attribute, TapBehaviour tapBehav)
 	{
 		float startTime = Time.time;
 		float flipTime = 0.3f;
@@ -129,6 +172,7 @@ public class Circle : MonoBehaviour
 
 		Attribute = attribute;
 
+        TapBehav = tapBehav;
 
 		startTime = Time.time;
 		t = 0;

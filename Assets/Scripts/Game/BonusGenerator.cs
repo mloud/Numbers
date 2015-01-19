@@ -27,7 +27,7 @@ public class BonusGenerator
 	{
 		Timer -= Time.deltaTime;
 
-		if (Timer <= 0)
+		if (Timer <= 0 && false)
 		{
 			Release();
 			Timer = Interval;

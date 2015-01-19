@@ -30,7 +30,9 @@ public class EqualNumberPattern : NumberPattern
 
 	public override int ComputeScore(List<int> nums)
 	{
-		int[] scoreTable = {0, 0, 5, 6, 9, 12, 17, 25, 35, 42, 68, 90, 115, 145, 170, 215};	
-		return scoreTable[nums.Count];
+		//int[] scoreTable = {0, 0, 5, 6, 9, 12, 17, 25, 35, 42, 68, 90, 115, 145, 170, 215};	
+		//return scoreTable[nums.Count];
+
+         return nums.Count * nums.Find(x => x != 0);
 	}
 }

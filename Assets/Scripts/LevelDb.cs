@@ -19,9 +19,18 @@ public class LevelDb : MonoBehaviour
 		public string Name;
 		public List<int> Numbers;
 		public List<int> FlipNumbers;
-
 		public List<float> BonusTime;
-	}
+	
+        [System.Serializable]
+        public class TapBehaviour
+        {
+            public Circle.TapBehaviour Behaviour;
+            public float Probability;
+        }
+
+        public List<TapBehaviour> TapBehaviours;
+
+    }
 
 	[SerializeField]
 	public List<LevelDef> Levels;

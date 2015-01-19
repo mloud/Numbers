@@ -18,8 +18,11 @@ public class NumberContainer : MonoBehaviour
 	}
 
 
-	public void AddNumber(Circle circle)
+	public void AddNumber(Circle circleSrc)
 	{
+        var circle = circleSrc.Clone();
+        circle.SetForHud();
+
 		Numbers.Add (circle);
 
 		circle.transform.SetParent (gameObject.transform);
@@ -37,10 +40,6 @@ public class NumberContainer : MonoBehaviour
 
 		//circle.transform.localPosition = pos;
 		circle.StartCoroutine(circle.MoveToCoroutine(pos, 30));
-
-
-		Destroy (circle.GetComponent<CircleCollider2D> ()); // no touches anymore
-		Destroy (circle.GetComponent<Animator> ()); // no anims
 
 		circle.SetScale (0.7f);
 	}
