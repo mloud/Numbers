@@ -34,8 +34,17 @@ public class Game : MonoBehaviour
 
 	private State CurrState;
 
+    void Awake()
+    {
+        if (GameObject.FindObjectOfType<App>() == null)
+        {
+            var appGo = Instantiate(Resources.Load("Prefabs/__App__"));
+        }
+    }
+
 	void Start () 
 	{
+
 		//App.Instance.GoogleAnalytics.LogScreen ("Game");
 	
 		// Bonus generator
@@ -50,7 +59,11 @@ public class Game : MonoBehaviour
 
 		CurrState = State.Stopped;
 
-		Init (App.Instance.PersistentData.Pop<LevelDb.LevelDef>());
+        var levelToRun = App.Instance.PersistentData.Pop<LevelDb.LevelDef>();
+        if (levelToRun == null)
+            levelToRun = App.Instance.Db.LevelDb.Levels.Find(x => x.Order == App.Instance.Db.LevelDb.DefaultLevel);
+
+        Init (levelToRun);
 	}
 
 	private void RunLevel()

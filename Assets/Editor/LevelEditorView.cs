@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class LevelEditorView : EditorWindow
 {
 
-    private LevelEditorController Controller
+    public LevelEditorController Controller
     { 
         get
         {
@@ -18,7 +18,7 @@ public class LevelEditorView : EditorWindow
     }
 
     private LevelEditorController controller; 
-
+    private Vector2 scrollPos;
 
     [MenuItem ("Window/LevelEditor")]
     static void Init () {
@@ -40,8 +40,23 @@ public class LevelEditorView : EditorWindow
 
     private void OnGUI ()
     {
+        scrollPos = GUILayout.BeginScrollView(scrollPos);
+
         GUILayout.BeginVertical();
 
+        
+        if (GUILayout.Button("Save"))
+        {
+            Controller.Save();
+        }
+
+        if (GUILayout.Button("Add new"))
+        {
+            Controller.AddNewLevel();
+            Setup();
+        }
+
+        GUILayout.Space(30);
 
         for (int i = 0; i < Controller.Levels.Count; ++i)
         {
@@ -49,81 +64,164 @@ public class LevelEditorView : EditorWindow
 
             FoldOut[i] = EditorGUILayout.Foldout(FoldOut[i], new GUIContent(level.Name));
 
+
             if (FoldOut[i])
-            {   //Name
+            {   
+                if (GUILayout.Button("Play"))
+                {
+                    Controller.PlayLevel(level);
+                }
+
+                if (GUILayout.Button("Delete"))
+                {
+                    Controller.DeleteLevel(level);
+                }
+
+                //Name
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Name");
-                EditorGUILayout.TextField(level.Name);
+                level.Name = EditorGUILayout.TextField(level.Name);
                 GUILayout.EndHorizontal();
 
+               
                 //Order
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Order");
-                EditorGUILayout.IntField(level.Order);
+                level.Order = EditorGUILayout.IntField(level.Order);
                 GUILayout.EndHorizontal();
             
                 //From number
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("From number");
-                EditorGUILayout.IntField(level.FromNum);
+                level.FromNum = EditorGUILayout.IntField(level.FromNum);
                 GUILayout.EndHorizontal();
 
                 //To number
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("To number");
-                EditorGUILayout.IntField(level.FromNum);
+                level.ToNum = EditorGUILayout.IntField(level.ToNum);
                 GUILayout.EndHorizontal();
 
                 //Dimension
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("X-Y");
-                EditorGUILayout.IntField(level.Cols);
-                EditorGUILayout.IntField(level.Rows);
+                level.Cols = EditorGUILayout.IntField(level.Cols);
+                level.Rows = EditorGUILayout.IntField(level.Rows);
                 GUILayout.EndHorizontal();
 
                 //Score
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Score");
-                EditorGUILayout.IntField(level.Score);
+                level.Score = EditorGUILayout.IntField(level.Score);
                 GUILayout.EndHorizontal();
 
                 //Level duration
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Level duration (sec)");
-                EditorGUILayout.FloatField(level.TotalTime);
+                level.TotalTime = EditorGUILayout.FloatField(level.TotalTime);
                 GUILayout.EndHorizontal();
 
                 // MicroTime
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Micro duration (sec)");
-                EditorGUILayout.FloatField(level.MicroTime);
+                level.MicroTime = EditorGUILayout.FloatField(level.MicroTime);
                 GUILayout.EndHorizontal();
 
                 // FlipTime
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Flip time (sec)");
-                EditorGUILayout.FloatField(level.FlipTime);
+                level.FlipTime = EditorGUILayout.FloatField(level.FlipTime);
                 GUILayout.EndHorizontal();
 
 
-                
-                
+                // Initial numbers
+                DrawInitialNumbers(level);
+
+                // Flip numbers
+                DrawFlipNumbers(level);
+
+                EditorGUILayout.Space();
             }
+        }
+
+        GUILayout.EndVertical();
+
+        GUILayout.EndScrollView();
+    }
+
+    private void DrawFlipNumbers(LevelDb.LevelDef level)
+    {
+        GUILayout.BeginVertical();
+
+        EditorGUILayout.LabelField("Flip numbers");
+
+        // Flip numbers count
+        GUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Count)");
+        level.FlipNumbersCount = EditorGUILayout.IntField(level.FlipNumbersCount);
+        GUILayout.EndHorizontal();
+
+        if (level.FlipNumbers != null)
+        {
+            GUILayout.BeginHorizontal();
+
+            for (int i = 0; i < level.FlipNumbers.Count; ++i)
+            {
+                level.FlipNumbers [i] = EditorGUILayout.IntField(level.FlipNumbers [i], GUILayout.Width(35));
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        if (GUILayout.Button("Create Numbers"))
+        {
+            Controller.CreateFlipNumbers(level);
+        }
+        
+        if (GUILayout.Button("Fill Random"))
+        {
+            Controller.RandomizeFlipNumbers(level);
+        }
+
+        GUILayout.EndVertical();
+    }
+
+
+    private void DrawInitialNumbers(LevelDb.LevelDef level)
+    {
+        GUILayout.BeginVertical();
+
+        EditorGUILayout.LabelField("InitialNumbers");
+
+        if (level.Numbers != null && level.Numbers.Count == level.Rows * level.Cols)
+        {
+            for (int y = 0; y < level.Rows; ++y)
+            {
+                GUILayout.BeginHorizontal();
+
+                for (int x = 0; x < level.Cols; ++x)
+                {
+                    int index = y * level.Cols + x;
+                    level.Numbers [index] = EditorGUILayout.IntField(level.Numbers [index], GUILayout.Width(35));
+                }
+
+                GUILayout.EndHorizontal();
+            }
+        }
+
+        if (GUILayout.Button("Create Numbers"))
+        {
+            Controller.CreateNumbers(level);
+        }
+
+        if (GUILayout.Button("Fill Random"))
+        {
+            Controller.RandomizeInitialLevelNumbers(level);
         }
 
 
         GUILayout.EndVertical();
 
-
-        //GUILayout.Label ("Base Settings", EditorStyles.boldLabel);
-        //myString = EditorGUILayout.TextField ("Text Field", myString);
-        
-        //groupEnabled = EditorGUILayout.BeginToggleGroup ("Optional Settings", groupEnabled);
-        //myBool = EditorGUILayout.Toggle ("Toggle", myBool);
-        //myFloat = EditorGUILayout.Slider ("Slider", myFloat, -3, 3);
-        //EditorGUILayout.EndToggleGroup ();
     }
-
-
 
 }

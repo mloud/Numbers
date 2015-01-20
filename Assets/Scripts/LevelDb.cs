@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class LevelDb : MonoBehaviour 
-{
+{   
+   
+    public int DefaultLevel = 0;
+
 	[System.Serializable]
 	public class LevelDef
 	{
@@ -13,6 +16,7 @@ public class LevelDb : MonoBehaviour
 		public int Rows;
 		public int Cols;
 		public int Score;
+        public int FlipNumbersCount;
 		public float TotalTime;
 		public float MicroTime;
 		public float FlipTime;

@@ -45,11 +45,14 @@ public class PersistentData : MonoBehaviour
 
 		List.Remove (pObj);
 
-		var data = pObj.Data;
-
-		Destroy (pObj.gameObject);
-
-		return data as T;
+        object data = null;
+        if (pObj != null)
+        {
+            data = pObj.Data;
+            Destroy(pObj.gameObject);
+        }
+		
+        return data as T;
 	}
 
 }

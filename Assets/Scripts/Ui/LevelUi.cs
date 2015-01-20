@@ -14,7 +14,7 @@ public class LevelUi : MonoBehaviour
 
 	void Start ()
 	{
-		//Init ();
+		Init ();
 	}
 
 	public void Init()
@@ -35,8 +35,9 @@ public class LevelUi : MonoBehaviour
 			level.transform.localScale = Vector3.one;
 
 			level.Set(levelDef);
-
+#if !UNLOCK_LEVELS
 			if (DbUtils.IsLevelUnlocked(levelDef))
+#endif
 				level.Button.onClick.AddListener ( () => OnLevelClick(levelDef));
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public class App : MonoBehaviour
 {
 	public static App Instance { get; private set; }
@@ -13,6 +14,11 @@ public class App : MonoBehaviour
 
 	public PersistentData PersistentData { get; private set; }
 
+    private bool Awaken = false;
+
+#if UNITY_EDITOR
+    private int StartLevelOrder = -1;
+#endif 
 	void Awake()
 	{
 		Instance = this;
@@ -24,9 +30,18 @@ public class App : MonoBehaviour
 		//GoogleAnalytics.StartSession();
 	
 		Init ();
+
+        Awaken = true;
 	}
 
-	public void StartLevel(LevelDb.LevelDef level)
+#if UNITY_EDITOR
+    public void StartLevelFromEditor(LevelDb.LevelDef level)
+    {
+        StartLevelOrder = level.Order;
+    }
+#endif 
+
+    public void StartLevel(LevelDb.LevelDef level)
 	{
 		PersistentData.Push (level);
 		Application.LoadLevel (1);// GameScene
@@ -42,12 +57,7 @@ public class App : MonoBehaviour
 		App.Instance.Player.Reset ();
 	}
 
-	void Start ()
-	{
-
-		GameObject.FindObjectOfType<LevelUi> ().Init ();
-	}
-
+	
 	void Init()
 	{
 		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Db> ();
@@ -69,4 +79,13 @@ public class App : MonoBehaviour
 	{
 		//GoogleAnalytics.StopSession ();
 	}
+
+    void Update()
+    {
+        if (Awaken && StartLevelOrder != -1)
+        {
+            StartLevel(Db.LevelDb.Levels.Find(x=>x.Order == StartLevelOrder));
+            StartLevelOrder = -1;
+        }
+    }
 }
