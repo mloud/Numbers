@@ -24,6 +24,7 @@ public class Game : MonoBehaviour
 	private BonusGenerator BonusGenerator { get; set; }
     private GameModel Model { get; set; }
 
+ 
 
 	private enum State
 	{
@@ -80,15 +81,17 @@ public class Game : MonoBehaviour
 
 	public void Init(LevelDb.LevelDef level)
 	{
+        if (Model != null)
+        {
+            Model.Numbers.Clear ();
+            Model.Circles.ForEach (x => Destroy (x.gameObject));
+            Model.Circles.Clear ();
+        }
+
         // Tap manager
-        Model = new GameModel(new GameContext() { LevelDef = level });
+        Model = new GameModel(new GameContext() { LevelDef = level, Controller = this });
 
         Score = 0;
-
-		Model.Numbers.Clear ();
-		Model.Circles.ForEach (x => Destroy (x.gameObject));
-		Model.Circles.Clear ();
-
 
 		LevelDef = level;
 
@@ -135,7 +138,7 @@ public class Game : MonoBehaviour
 			
             var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count)];
     
-            FlipCircle(rndCircle);
+            Flip(rndCircle);
 		}
 
 		Hud.Instance.SetuTimerProgress (MicroTimer / LevelDef.MicroTime);
@@ -144,33 +147,25 @@ public class Game : MonoBehaviour
 		BonusGenerator.Update ();
 	}
 
-    private void FlipCircle(Circle circle)
+    public int GetNextFlipNumber()
+    {
+        int number = LevelDef.FlipNumbers[FlipNumberIndex];
+        FlipNumberIndex = (FlipNumberIndex + 1) >= LevelDef.FlipNumbers.Count ? 0 : FlipNumberIndex + 1;
+
+        return number;
+    }
+
+    private void Flip(CircleVisual circle)
     {
         var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count - 1)];
 
-        int number = LevelDef.FlipNumbers[FlipNumberIndex];
+        int number = GetNextFlipNumber();
         
         // special attribute
-        Circle.SpecialAttribute attr = number == 0 ? Circle.SpecialAttribute.Joker : Circle.SpecialAttribute.None;
-        
-        // tap behaviour
-        float rnd01 = Random.Range(0.0f, 1.0f);
-        float sum = 0;
-        var tapBehav = Circle.TapBehaviour.None;
-        foreach (var tap in LevelDef.TapBehaviours)
-        {
-            sum += tap.Probability;
-            if (rnd01 < sum)
-            {
-                tapBehav = tap.Behaviour;
-                break;
-            }
-        }
+        CircleVisual.SpecialAttribute attr = number == 0 ? CircleVisual.SpecialAttribute.Joker : CircleVisual.SpecialAttribute.None;
 
 
-        rndCircle.StartCoroutine(rndCircle.ChangeValueTo(number, attr, tapBehav));
-        
-        FlipNumberIndex = (FlipNumberIndex + 1) >= LevelDef.FlipNumbers.Count ? 0 : FlipNumberIndex + 1;
+        rndCircle.StartCoroutine(rndCircle.ChangeValueTo(number, attr));
     }
 
 	void Update ()
@@ -197,7 +192,7 @@ public class Game : MonoBehaviour
 	
 		GameObject circlePrefab = Resources.Load ("Prefabs/Circle") as GameObject;
 
-		float circleSize = circlePrefab.GetComponent<Circle> ().Radius * 2 * 1.1f;
+		float circleSize = circlePrefab.GetComponent<CircleVisual> ().Radius * 2 * 1.1f;
 
 		List<int> numbers = new List<int> (LevelDef.Numbers);
 
@@ -214,7 +209,7 @@ public class Game : MonoBehaviour
 
 			for (int x = 0; x < LevelDef.Cols; ++x)
 			{
-				var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<Circle>();
+				var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<CircleVisual>();
 
 				circle.transform.position = new Vector3(xPos, yPos, 0);
 
@@ -223,7 +218,12 @@ public class Game : MonoBehaviour
 				//circle.Value = Random.Range(LevelDef.FromNum, LevelDef.ToNum);
 				circle.Value = numbers[index];
 
-				circle.Run(Circle.TapBehaviour.None);
+
+                // add specialities
+                List<LevelDb.SpecialityDef> specs = DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
+                specs.ForEach(spec => circle.AddSpeciality(SpecialityFactory.Create(spec.Name, spec.Param)));
+
+				circle.Run();
 
 				circle.OnClick += OnCircleClick;
 
@@ -384,7 +384,7 @@ public class Game : MonoBehaviour
 		}
 	}
 
-	private void OnCircleClick(Circle circle)
+	private void OnCircleClick(CircleVisual circle)
 	{
 		if (CurrState == State.Running)
 		{

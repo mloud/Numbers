@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class NumberContainer : MonoBehaviour 
 {
-	private List<Circle> Numbers { get; set; }
+	private List<CircleVisual> Numbers { get; set; }
 
 	private Vector2 Size { get { return BCollider.size; } }
 
@@ -14,11 +14,11 @@ public class NumberContainer : MonoBehaviour
 	{
 		BCollider = GetComponent<BoxCollider2D> ();
 
-		Numbers = new List<Circle> ();
+		Numbers = new List<CircleVisual> ();
 	}
 
 
-	public void AddNumber(Circle circleSrc)
+	public void AddNumber(CircleVisual circleSrc)
 	{
         var circle = circleSrc.Clone();
         circle.SetForHud();
@@ -46,7 +46,25 @@ public class NumberContainer : MonoBehaviour
 
 	public void Clear()
 	{
-		Numbers.ForEach (x => Destroy (x.gameObject));
-		Numbers.Clear ();
-	}
+		//Numbers.ForEach (x => Destroy (x.gameObject));
+		//Numbers.Clear ();
+	
+        StartCoroutine(ClearCoroutine());
+    }
+
+    private IEnumerator ClearCoroutine()
+    {
+        var numCopy = new List<CircleVisual>(Numbers);
+        Numbers.Clear();
+
+        float time = 0.3f / numCopy.Count;
+
+        while (numCopy.Count > 0)
+        {
+            Destroy(numCopy[numCopy.Count - 1].gameObject);
+            numCopy.RemoveAt(numCopy.Count - 1);
+            yield return new WaitForSeconds(time);
+        }
+    }
+
 }

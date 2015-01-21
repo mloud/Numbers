@@ -42,4 +42,53 @@ public static class DbUtils
 		return null;
 	}
 
+
+    public static string SpecialityToString(LevelDb.SpecialityDef spec)
+    {
+        return spec.Name + "(" + spec.Param + ")";
+    }
+
+    public static string SpecialitiesToString(List<LevelDb.SpecialityDef> specs)
+    {
+        string res = "";
+
+        foreach (var spec in specs)
+        {
+            res += SpecialityToString(spec);
+        }
+
+        return res;
+    }
+
+    public static List<LevelDb.SpecialityDef> SpecialitiesFromString(string s)
+    {
+        var specList = new List<LevelDb.SpecialityDef>();
+
+        int index = 0;
+        while (index < s.Length)
+        {
+            string name = s.Substring(index, 1);
+            string param = "";
+
+            int pL = s.IndexOf('(', index + 1);
+           
+
+            if (pL != -1)
+            {
+                int pR = s.IndexOf(')', pL + 1);
+
+                param = s.Substring(pL + 1, pR - (pL + 1));
+                index = pR + 1;
+            }
+            else
+            {
+                index++;
+            }
+        
+            specList.Add(new LevelDb.SpecialityDef() { Name = name, Param = param });
+        }
+
+        return specList;
+    }
+
 }

@@ -14,13 +14,15 @@ public class App : MonoBehaviour
 
 	public PersistentData PersistentData { get; private set; }
 
-    private bool Awaken = false;
+
 
 #if UNITY_EDITOR
     private int StartLevelOrder = -1;
 #endif 
 	void Awake()
 	{
+        Application.targetFrameRate = 30;
+
 		Instance = this;
 
 		DontDestroyOnLoad (gameObject);
@@ -30,8 +32,6 @@ public class App : MonoBehaviour
 		//GoogleAnalytics.StartSession();
 	
 		Init ();
-
-        Awaken = true;
 	}
 
 #if UNITY_EDITOR
@@ -79,13 +79,4 @@ public class App : MonoBehaviour
 	{
 		//GoogleAnalytics.StopSession ();
 	}
-
-    void Update()
-    {
-        if (Awaken && StartLevelOrder != -1)
-        {
-            StartLevel(Db.LevelDb.Levels.Find(x=>x.Order == StartLevelOrder));
-            StartLevelOrder = -1;
-        }
-    }
 }

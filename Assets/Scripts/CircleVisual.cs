@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 
 [ExecuteInEditMode]
-public class Circle : MonoBehaviour
+public class CircleVisual : MonoBehaviour
 {
     public enum ScoreType
     {
@@ -13,11 +13,6 @@ public class Circle : MonoBehaviour
         Gold
     }
 
-    public enum TapBehaviour
-    {
-        None,
-        Minus
-    }
 
 	[System.Serializable]
 	public class AttributeConfig
@@ -32,6 +27,9 @@ public class Circle : MonoBehaviour
 		Joker
 	}
 
+    public List<Speciality> Specialities { get; private set; }
+
+
     [SerializeField]
 	private List<AttributeConfig> attributesConfig;
 
@@ -41,8 +39,10 @@ public class Circle : MonoBehaviour
     [SerializeField]
     private Transform minusTransform;
 
-
-	public delegate void ClickDelegate(Circle cirlce);
+    [SerializeField]
+    private Transform renewTransform;
+        
+	public delegate void ClickDelegate(CircleVisual cirlce);
 
 	public ClickDelegate OnClick;
 
@@ -63,20 +63,7 @@ public class Circle : MonoBehaviour
 
 	private SpecialAttribute attribute;
 
-    private TapBehaviour tapBehaviour;
-
 	private Transform VisualTransform { get; set; }
-
-    public TapBehaviour TapBehav
-    {
-        get { return tapBehaviour; }
-
-        set 
-        {
-            tapBehaviour = value;
-            minusTransform.gameObject.SetActive(value == TapBehaviour.Minus);
-        }
-    }
 
 	public SpecialAttribute Attribute 
 	{ 
@@ -98,9 +85,40 @@ public class Circle : MonoBehaviour
 		}
 	}
 
-    public Circle Clone()
+    public void AddSpeciality(Speciality spec)
     {
-        return (Instantiate(gameObject) as GameObject).GetComponent<Circle>();
+        Specialities.Add(spec);
+
+        // TODO to view
+        if ((spec as MinusOneSpeciality) != null)
+        {
+            minusTransform.gameObject.SetActive(true);
+        }
+        else if ( (spec as ReappearSpeciality) != null)
+        {
+            renewTransform.gameObject.SetActive(true);
+        }
+    }
+
+    public void Removepeciality(Speciality spec)
+    {
+        Specialities.Remove(spec);
+
+        if ((spec as MinusOneSpeciality) != null)
+        {
+            minusTransform.gameObject.SetActive(false);
+        }
+        else if ( (spec as ReappearSpeciality) != null)
+        {
+            renewTransform.gameObject.SetActive(false);
+        }
+    }
+
+
+
+    public CircleVisual Clone()
+    {
+        return (Instantiate(gameObject) as GameObject).GetComponent<CircleVisual>();
     }
 
     public void SetForHud()
@@ -111,11 +129,9 @@ public class Circle : MonoBehaviour
         minusTransform.gameObject.SetActive(false);
     }
 
-	public void Run(TapBehaviour behaviour)
+	public void Run()
 	{
 		Timer = Time.time;
-	
-        TapBehav = behaviour;
     }
 
 	public void SetScale(float scale)
@@ -148,7 +164,7 @@ public class Circle : MonoBehaviour
 		transform.localPosition = locPos;
 	}
 
-	public IEnumerator ChangeValueTo(int value, SpecialAttribute attribute, TapBehaviour tapBehav)
+	public IEnumerator ChangeValueTo(int value, SpecialAttribute attribute)
 	{
 		float startTime = Time.time;
 		float flipTime = 0.3f;
@@ -171,8 +187,6 @@ public class Circle : MonoBehaviour
 		Value = value;
 
 		Attribute = attribute;
-
-        TapBehav = tapBehav;
 
 		startTime = Time.time;
 		t = 0;
@@ -201,6 +215,8 @@ public class Circle : MonoBehaviour
 
 	private void Awake()
 	{
+        Specialities = new List<Speciality>();
+
 		TxtMesh = GetComponent<TextMesh> ();
 		Animator = GetComponent<Animator> ();
 		VisualTransform = gameObject.transform.FindChild ("Visual");
@@ -210,7 +226,9 @@ public class Circle : MonoBehaviour
 	{}
 
 	private void Update () 
-	{}
+	{
+        Specialities.ForEach(x=>x.UpdateMe());
+    }
 
 	private void OnMouseDown()
 	{

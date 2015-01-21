@@ -10,14 +10,13 @@ public class GameModel
     public List<int> Numbers { get; set; }
 
     // List of numbers on playground 
-    public List<Circle> Circles { get; set; }
+    public List<CircleVisual> Circles { get; set; }
 
-
-    private Dictionary<Circle.TapBehaviour, TapHandler> TapHandlers { get; set; }
+    private List<string> Specialities { get; set; }
+   
     private List<NumberPattern> NumberPatterns { get; set; }
 
     private GameContext Context { get; set; }
-
 
     public GameModel(GameContext context)
     {
@@ -29,18 +28,13 @@ public class GameModel
         Context = context;
         Context.Model = this;
   
-        TapHandlers = new Dictionary<Circle.TapBehaviour, TapHandler> 
-        { 
-            {Circle.TapBehaviour.Minus, new MinusOneTapHandler()}
-        };
-
         // Register Pattern recognizers
         NumberPatterns = new List<NumberPattern> () 
         {   new EqualNumberPattern(), 
             new PlusOneNumberPattern() 
         };
 
-        Circles = new List<Circle> ();
+        Circles = new List<CircleVisual> ();
         Numbers = new List<int>();
     }
 
@@ -49,7 +43,7 @@ public class GameModel
         public bool FitSequence;
     }
 
-    public ClickResult ProcessPatterns(Circle circle)
+    public ClickResult ProcessPatterns(CircleVisual circle)
     {
         var result = new ClickResult();
        
@@ -69,18 +63,13 @@ public class GameModel
     {
         public bool Remove;
     }
-    public TapResult ProcessTapHandlers(Circle circle)
+    public TapResult ProcessTapHandlers(CircleVisual circle)
     {
         var result = new TapResult();
         result.Remove = true;
 
-        TapHandler tapHandler = null;
-        TapHandlers.TryGetValue(circle.TapBehav, out tapHandler); 
-        if (tapHandler != null)
-        {
-            result.Remove = tapHandler.Handle(circle, Context);
-        }
-        
+        circle.Specialities.ForEach(x=>result.Remove = x.Handle(circle, Context));
+
         return result;
     }
 

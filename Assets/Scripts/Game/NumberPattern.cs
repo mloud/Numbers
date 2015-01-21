@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,13 +9,13 @@ public abstract class NumberPattern
 
 	public abstract int ComputeScore(List<int> nums);
 
-    public bool CanAdd(Circle circle, GameContext context)
+    public bool CanAdd(CircleVisual circle, GameContext context)
     {
         if (context.Model.Numbers.Count == 0)
             return true;
     
         // special number
-        if (circle.Attribute == Circle.SpecialAttribute.Joker)
+        if (circle.Attribute == CircleVisual.SpecialAttribute.Joker)
         {
             circle.Value = 0;
             return true;

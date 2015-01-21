@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 
 public class LevelEditorView : EditorWindow
@@ -12,13 +13,19 @@ public class LevelEditorView : EditorWindow
         get
         {
             if (controller == null)
+            {
                 controller = new LevelEditorController();
+                controller.OnNumLimitsChange += this.OnNumLimitsChanged;
+                controller.OnProbabilityChange += this.OnProbabilityChanged;
+            }
             return controller;
         }
     }
 
     private LevelEditorController controller; 
     private Vector2 scrollPos;
+   
+
 
     [MenuItem ("Window/LevelEditor")]
     static void Init () {
@@ -27,7 +34,15 @@ public class LevelEditorView : EditorWindow
         window.Setup();
     }
 
+
+
     private List<bool> FoldOut { get; set; }
+    private Dictionary<LevelDb.LevelDef, AnimationCurve> ProbabilityCurves { get; set; }
+
+    private static class Config
+    {
+        public static int ButtonWidth = 50;
+    }
 
     public void Setup()
     {
@@ -35,7 +50,7 @@ public class LevelEditorView : EditorWindow
 
         FoldOut = new List<bool>(Controller.Levels.Count);
         Controller.Levels.ForEach(x => FoldOut.Add(false));
-
+        ProbabilityCurves = new Dictionary<LevelDb.LevelDef, AnimationCurve>();
     }
 
     private void OnGUI ()
@@ -93,13 +108,17 @@ public class LevelEditorView : EditorWindow
                 //From number
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("From number");
-                level.FromNum = EditorGUILayout.IntField(level.FromNum);
+
+                int newFromNum = EditorGUILayout.IntField(level.FromNum);
+                Controller.SetNumLimits(newFromNum, level.ToNum, level);
+
                 GUILayout.EndHorizontal();
 
                 //To number
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("To number");
-                level.ToNum = EditorGUILayout.IntField(level.ToNum);
+                int newToNum = EditorGUILayout.IntField(level.ToNum);
+                Controller.SetNumLimits(level.FromNum, newToNum, level);
                 GUILayout.EndHorizontal();
 
                 //Dimension
@@ -133,12 +152,20 @@ public class LevelEditorView : EditorWindow
                 level.FlipTime = EditorGUILayout.FloatField(level.FlipTime);
                 GUILayout.EndHorizontal();
 
+                GUILayout.Space(30);
 
                 // Initial numbers
                 DrawInitialNumbers(level);
 
+                GUILayout.Space(30);
+
                 // Flip numbers
                 DrawFlipNumbers(level);
+
+                GUILayout.Space(30);
+
+                // Probability
+                DrawProbabilityCurve(level);
 
                 EditorGUILayout.Space();
             }
@@ -157,7 +184,7 @@ public class LevelEditorView : EditorWindow
 
         // Flip numbers count
         GUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Count)");
+        EditorGUILayout.LabelField("Count");
         level.FlipNumbersCount = EditorGUILayout.IntField(level.FlipNumbersCount);
         GUILayout.EndHorizontal();
 
@@ -186,7 +213,6 @@ public class LevelEditorView : EditorWindow
         GUILayout.EndVertical();
     }
 
-
     private void DrawInitialNumbers(LevelDb.LevelDef level)
     {
         GUILayout.BeginVertical();
@@ -202,7 +228,11 @@ public class LevelEditorView : EditorWindow
                 for (int x = 0; x < level.Cols; ++x)
                 {
                     int index = y * level.Cols + x;
-                    level.Numbers [index] = EditorGUILayout.IntField(level.Numbers [index], GUILayout.Width(35));
+                    level.Numbers [index] = EditorGUILayout.IntField(level.Numbers [index], GUILayout.Width(30));
+
+                    // spec string
+                    if (level.SpecialitiesForNumbers != null && index < level.SpecialitiesForNumbers.Count)
+                        level.SpecialitiesForNumbers [index] = EditorGUILayout.TextField(level.SpecialitiesForNumbers [index], GUILayout.Width(30));
                 }
 
                 GUILayout.EndHorizontal();
@@ -221,7 +251,111 @@ public class LevelEditorView : EditorWindow
 
 
         GUILayout.EndVertical();
+    }
 
+    private bool SyncProbCurve = false;
+    private void DrawProbabilityCurve(LevelDb.LevelDef level)
+    {
+        EditorGUILayout.LabelField("Probablity");
+
+      
+        if (level.Probabilities != null)
+        {
+            AnimationCurve curve = null;
+            bool exist = ProbabilityCurves.TryGetValue(level, out curve);
+            SyncProbabilityCurve(level, ref curve, true && !SyncProbCurve);
+            SyncProbCurve = false;
+            if (!exist)
+                ProbabilityCurves.Add(level, curve);
+
+            ProbabilityCurves[level] = EditorGUILayout.CurveField("Number probability", curve);
+
+            if (GUILayout.Button("Update Probability"))
+            {
+                UpdateProbabilityFromCurve( ProbabilityCurves[level], level);
+                SyncProbCurve = true;
+            }
+        }
+
+        if (GUILayout.Button("Create Probability"))
+        {
+            Controller.CreateProbability(level);
+        }
+
+
+    }
+
+
+    private void SyncProbabilityCurve(LevelDb.LevelDef level, ref AnimationCurve curve, bool onlyIfNull)
+    {
+        bool isNull = false;
+        if (curve == null || (curve.keys.Length != level.Probabilities.Count))
+        {
+            curve = new AnimationCurve();
+            isNull = true;
+        }
+
+        var keys = curve.keys;
+
+        if (keys.Length != level.Probabilities.Count)
+        {
+            keys = new Keyframe[level.Probabilities.Count];
+            isNull = true;
+        }
+
+        if (!onlyIfNull || isNull)
+        {
+            Debug.Log("Syncing curve from LevelDef.Probability");
+            for (int i = 0; i < level.Probabilities.Count; ++i)
+            {
+                var keyFrame = keys [i];
+                keyFrame.time = level.FromNum + i;
+                keyFrame.value = level.Probabilities [i];
+                keys [i] = keyFrame;
+            }
+        
+            curve.keys = keys;
+        }
+    }
+
+    private void UpdateProbabilityFromCurve(AnimationCurve curve, LevelDb.LevelDef level)
+    {
+        float sum = 0;
+        Array.ForEach<Keyframe>(curve.keys, x => sum += x.value);
+
+        if (sum > 0)
+        {
+            float coef = 1.0f / sum;
+
+            var keys = curve.keys;
+
+            for (int i = 0; i < keys.Length; ++i)
+            {
+                var keyframe = keys[i];
+                keyframe.value *= coef;
+                keys[i] = keyframe;
+                level.Probabilities[i] = keys[i].value;
+            }
+        }
+
+        String str = "Updating LevelDef.Probability -> ";
+        level.Probabilities.ForEach(x => str += x.ToString() + " " );
+        Debug.Log(str);
+
+    }
+
+    private void OnNumLimitsChanged(LevelDb.LevelDef level)
+    {
+    
+    }
+
+    private void OnProbabilityChanged(LevelDb.LevelDef level)
+    {
+        AnimationCurve curve = null;
+        bool exist = ProbabilityCurves.TryGetValue(level, out curve);
+        SyncProbabilityCurve(level, ref curve, false);
+        if (!exist)
+            ProbabilityCurves.Add(level, curve);
     }
 
 }
