@@ -77,6 +77,23 @@ public class LevelEditorController
         level.FlipNumbers = new List<int>(rndNum);
     }
 
+    public void CreatePatterns(LevelDb.LevelDef level)
+    {
+        level.Patterns = new List<string>();
+    }
+
+    public void AddPattern(LevelDb.LevelDef level, string pattern)
+    {
+        if (level.Patterns.Find(x => x== pattern) == null)
+            level.Patterns.Add(pattern);
+    }
+
+    public void RemovePattern(LevelDb.LevelDef level, string pattern)
+    {
+        if (level.Patterns.Find(x => x== pattern) != null)
+            level.Patterns.Remove(pattern);
+    }
+
     public void CreateNumbers(LevelDb.LevelDef level)
     {
         int count = level.Rows * level.Cols;

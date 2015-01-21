@@ -33,6 +33,7 @@ public class LevelDb : MonoBehaviour
 		public List<float> BonusTime;
         public List<string> SpecialitiesForNumbers;
         public List<float> Probabilities;
+        public List<string> Patterns;
 
     }
 

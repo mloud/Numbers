@@ -27,12 +27,11 @@ public class GameModel
     {
         Context = context;
         Context.Model = this;
-  
-        // Register Pattern recognizers
-        NumberPatterns = new List<NumberPattern> () 
-        {   new EqualNumberPattern(), 
-            new PlusOneNumberPattern() 
-        };
+
+        NumberPatterns = new List<NumberPattern>();
+
+        context.LevelDef.Patterns.ForEach(x => NumberPatterns.Add(PatternFactory.Create(x)));
+       
 
         Circles = new List<CircleVisual> ();
         Numbers = new List<int>();

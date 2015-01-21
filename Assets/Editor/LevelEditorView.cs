@@ -167,6 +167,9 @@ public class LevelEditorView : EditorWindow
                 // Probability
                 DrawProbabilityCurve(level);
 
+                // Patterns
+                DrawPatternsUsed(level);
+
                 EditorGUILayout.Space();
             }
         }
@@ -284,6 +287,40 @@ public class LevelEditorView : EditorWindow
 
 
     }
+
+
+    private int PatternIndex = 0;
+    public void DrawPatternsUsed(LevelDb.LevelDef level)
+    {
+        EditorGUILayout.LabelField("Patterns");
+
+        var fields = typeof(PatternDef).GetFields();
+        List<string> allPatterns = new List<string>();
+        Array.ForEach(fields, x => allPatterns.Add(x.GetValue(null).ToString()));
+        allPatterns.RemoveAll(x=>level.Patterns.Find(y=>y ==x) != null); 
+
+        PatternIndex = EditorGUILayout.Popup(PatternIndex, allPatterns.ToArray());
+        if (GUILayout.Button("Add"))
+        {
+            Controller.AddPattern(level, allPatterns[PatternIndex]);
+        }
+
+
+        for (int i = 0; i < level.Patterns.Count; ++i)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(level.Patterns[i]);
+            
+            if (GUILayout.Button("Remove"))
+            {
+                Controller.RemovePattern(level, level.Patterns[i]);
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+    }
+
 
 
     private void SyncProbabilityCurve(LevelDb.LevelDef level, ref AnimationCurve curve, bool onlyIfNull)

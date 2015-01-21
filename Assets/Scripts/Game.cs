@@ -109,7 +109,7 @@ public class Game : MonoBehaviour
 	
 		if (!App.Instance.Player.TutorialDone)
 		{
-			WindowManager.Instance.OpenWindow (WindowDef.Tutorial, null);
+            WindowManager.Instance.OpenWindow (WindowDef.Tutorial, new TutorialWindow.Param() {Level = LevelDef});
 			win.GetComponentInChildren<Button> ().onClick.AddListener (() => { App.Instance.Player.TutorialDone = true; });
 		}
 	}
