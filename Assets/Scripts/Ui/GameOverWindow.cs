@@ -15,8 +15,11 @@ public class GameOverWindow : Window
 	[SerializeField]
 	Text txtLevelName;
 
-	[SerializeField]
-	Button btnNextLevel;
+    [SerializeField]
+    Button btnNextLevel;
+
+    [SerializeField]
+    Button btnOk;
 
 	[SerializeField]
 	Button btnMenu;
@@ -45,6 +48,11 @@ public class GameOverWindow : Window
 		txtScoreValue.text = Parameters.Score.ToString ();
 		txtBestScoreValue.text = Parameters.BestScore.ToString ();
 		btnNextLevel.gameObject.SetActive (Parameters.IsNextLevel);
+
+        btnRepeat.gameObject.SetActive(Parameters.IsNextLevel);
+        btnMenu.gameObject.SetActive(Parameters.IsNextLevel);
+
+        btnOk.gameObject.SetActive(!Parameters.IsNextLevel);
 	}
 
 	public void OnNextClick()
@@ -67,5 +75,10 @@ public class GameOverWindow : Window
 		
 		Parameters.OnRestartClick ();
 	}
+
+    public void OnOkClick()
+    {
+        WindowManager.Instance.CloseWindow (Name);  
+    }
 
 }

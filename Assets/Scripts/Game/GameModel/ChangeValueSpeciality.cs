@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System;
 
 
-public class ReappearSpeciality : Speciality
+public class ChangeValueSpeciality : Speciality
 {
     private float Time { get; set; }
 
     private float Timer { get; set; }
 
-    public ReappearSpeciality(CircleController circle, GameContext context) : base(circle, context)
+    public ChangeValueSpeciality(CircleController circle, GameContext context) : base(circle, context)
     {}
 
     public override void Init(string par)
@@ -23,21 +23,17 @@ public class ReappearSpeciality : Speciality
         {
             Time = c;
         }
+
+        Circle.ShowProgressBar(true);
+     
+        Timer = Time;
     }
 
     public override bool Handle()
     {
-        bool remove = false;
+        bool remove = true;
 
-        Circle.SetValue(Context.Controller.GetNextFlipNumber());
-
-        Timer = Time;
-
-        if (Time > 0)
-        {
-            Circle.Enable(false, 0.2f);
-            Circle.ShowProgressBar(true);
-        }
+        Circle.RemoveSpeciality(this);
 
         return remove;
     }
@@ -53,8 +49,11 @@ public class ReappearSpeciality : Speciality
             if (Timer <= 0)
             {
                 Timer = -1;
-                Circle.Enable(true, 0.2f);
                 Circle.ShowProgressBar(false);
+
+                Circle.ChangeValueTo(Context.Controller.GetNextFlipNumber());
+
+                Circle.RemoveSpeciality(this);
             }
         }
     }

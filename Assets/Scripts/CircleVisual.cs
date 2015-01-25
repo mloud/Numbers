@@ -1,38 +1,13 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 
 [ExecuteInEditMode]
 public class CircleVisual : MonoBehaviour
 {
-    public enum ScoreType
-    {
-        Copper, 
-        Silver,
-        Gold
-    }
-
-
-	[System.Serializable]
-	public class AttributeConfig
-	{
-		public SpecialAttribute Attribute;
-		public Sprite Visual;
-	}
-
-	public enum SpecialAttribute
-	{
-		None,
-		Joker
-	}
-
-    public List<Speciality> Specialities { get; private set; }
-
-
-    [SerializeField]
-	private List<AttributeConfig> attributesConfig;
-
+   
     [SerializeField]
     private SpriteRenderer visualSpriteRenderer;
 
@@ -41,17 +16,24 @@ public class CircleVisual : MonoBehaviour
 
     [SerializeField]
     private Transform renewTransform;
-        
-	public delegate void ClickDelegate(CircleVisual cirlce);
 
-	public ClickDelegate OnClick;
+    [SerializeField]
+    private Transform outerTransform;
 
-	[SerializeField]
-	private int value;
+    [SerializeField]
+    public AlphaCutOff progressBar;
 
-	public int Value { get { return value; } set { this.value = value; TxtMesh.text = value.ToString();} } 
+    public Vector3 Position { set { transform.position = value; } }
+    public Vector3 LocalPosition { get { return transform.localPosition; } set { transform.localPosition = value; } }
+    public float Radius { set { (collider2D as CircleCollider2D).radius = value; } }
 
-	public float Radius { get { return (collider2D as CircleCollider2D).radius; } } 
+    public Action<CircleVisual> OnClick;
+
+    public Transform VisualTransform { get; set; }
+   
+    private List<SpriteRenderer> SpriteRenderers { get; set; }
+    private List<TextMesh> TextMeshes { get; set; }
+	
 
 	private CircleCollider2D cCollider;
 	
@@ -61,35 +43,24 @@ public class CircleVisual : MonoBehaviour
 
 	private float Timer { get; set; }
 
-	private SpecialAttribute attribute;
 
-	private Transform VisualTransform { get; set; }
+    public void OnPositionChanged(Vector3 pos)
+    {
+        Position = pos;
+    }
 
-	public SpecialAttribute Attribute 
-	{ 
-		get { return attribute; }
+    public void OnLocalPositionChanged(Vector3 locPos)
+    {
+        LocalPosition = locPos;
+    }
 
-		set
-		{
-			if (value == SpecialAttribute.Joker)
-			{
-				TxtMesh.renderer.enabled = false;
-			}
-			else if (value == SpecialAttribute.None)
-			{
-				TxtMesh.renderer.enabled = true;
-			}
-
-			visualSpriteRenderer.sprite = attributesConfig.Find(x=>x.Attribute == value).Visual;
-			attribute = value;
-		}
-	}
+    public void OnRadiusChanged(float radius)
+    {
+        Radius = radius;
+    }
 
     public void AddSpeciality(Speciality spec)
     {
-        Specialities.Add(spec);
-
-        // TODO to view
         if ((spec as MinusOneSpeciality) != null)
         {
             minusTransform.gameObject.SetActive(true);
@@ -100,10 +71,8 @@ public class CircleVisual : MonoBehaviour
         }
     }
 
-    public void Removepeciality(Speciality spec)
+    public void RemoveSpeciality(Speciality spec)
     {
-        Specialities.Remove(spec);
-
         if ((spec as MinusOneSpeciality) != null)
         {
             minusTransform.gameObject.SetActive(false);
@@ -114,11 +83,14 @@ public class CircleVisual : MonoBehaviour
         }
     }
 
-
+    public void SetParent(Transform parent)
+    {
+        transform.SetParent(parent);
+    }
 
     public CircleVisual Clone()
     {
-        return (Instantiate(gameObject) as GameObject).GetComponent<CircleVisual>();
+        return (Instantiate(this.gameObject) as GameObject).GetComponent<CircleVisual>();
     }
 
     public void SetForHud()
@@ -136,77 +108,32 @@ public class CircleVisual : MonoBehaviour
 
 	public void SetScale(float scale)
 	{
-		//VisualTransform.localScale = new Vector3 (scale, scale, scale);
 		transform.localScale = new Vector3 (scale, scale, scale);
 	}
 
-	public IEnumerator MoveToCoroutine(Vector3 locPos, float speed)
+
+    public IEnumerator FlipCoroutine(bool away, float time)
+    {
+        float startTime = Time.time;
+        float flipTime = time;
+        float t = 0;
+        
+        while (true)
+        {
+            t = Mathf.Clamp((Time.time - startTime) / flipTime, 0, 1);
+
+            float angle = away ? t * 90 : (1 - t) * 90;
+
+            VisualTransform.localEulerAngles = new Vector3(0, angle, 0);
+            if (t >= 1)
+                break;
+            
+            yield return 0;
+        }
+    }
+
+   private void DoOnClick()
 	{
-		Vector3 dirN = (locPos - transform.localPosition).normalized;
-		Vector3 startLocPos = transform.localPosition;
-		float totDistanceSqr = (locPos - transform.localPosition).sqrMagnitude;
-
-		float t = 0;
-
-		while (true)
-		{
-			transform.localPosition = transform.localPosition + dirN * speed * Time.deltaTime;
-			t = (transform.localPosition - startLocPos).sqrMagnitude / totDistanceSqr;
-			t = Mathf.Clamp01(t);
-		
-			if (t < 1)
-				yield return 0;
-
-			else
-				break;
-		}
-
-		transform.localPosition = locPos;
-	}
-
-	public IEnumerator ChangeValueTo(int value, SpecialAttribute attribute)
-	{
-		float startTime = Time.time;
-		float flipTime = 0.3f;
-
-		float t = 0;
-
-		while (true)
-		{
-			t = Mathf.Clamp((Time.time - startTime) / flipTime, 0, 1);
-
-			transform.localEulerAngles = new Vector3(0, t * 90, 0);
-
-			if (t >= 1)
-				break;
-
-			yield return 0;
-		}
-	
-		// set new value
-		Value = value;
-
-		Attribute = attribute;
-
-		startTime = Time.time;
-		t = 0;
-		while (true)
-		{
-			t = Mathf.Clamp((Time.time - startTime) / flipTime, 0, 1);
-			
-			transform.localEulerAngles = new Vector3(0, ((1 - t) * 90), 0);
-			
-			if (t >= 1)
-				break;
-			
-			yield return 0;
-		}
-	}
-
-	private void DoOnClick()
-	{
-		//Animator.SetTrigger ("click");
-	
 		if (OnClick != null)
 		{
 			OnClick(this);
@@ -215,24 +142,79 @@ public class CircleVisual : MonoBehaviour
 
 	private void Awake()
 	{
-        Specialities = new List<Speciality>();
+        SpriteRenderers = new List<SpriteRenderer>(gameObject.GetComponentsInChildren<SpriteRenderer>());
+        TextMeshes = new List<TextMesh>(gameObject.GetComponentsInChildren<TextMesh>());
 
-		TxtMesh = GetComponent<TextMesh> ();
+        VisualTransform = gameObject.transform.FindChild ("Visual");
+		TxtMesh = VisualTransform.GetComponentInChildren<TextMesh> ();
 		Animator = GetComponent<Animator> ();
-		VisualTransform = gameObject.transform.FindChild ("Visual");
+
+
+        minusTransform.gameObject.SetActive(false);
+        renewTransform.gameObject.SetActive(false);
+        progressBar.gameObject.SetActive(false);
 	}
 
-	private void Start ()
-	{}
-
-	private void Update () 
-	{
-        Specialities.ForEach(x=>x.UpdateMe());
-    }
 
 	private void OnMouseDown()
 	{
 		DoOnClick ();
 	}
+
+    public void SetProgress(float progress)
+    {
+        progressBar.SetCutOff(progress);
+    }
+
+    public void OnValueChanged(int value)
+    {
+        TxtMesh.text = value.ToString();
+    }
+
+    public void SetAlpha(float alpha)
+    {
+  
+        SpriteRenderers.ForEach(delegate(SpriteRenderer obj)
+        {
+            var c = obj.color;
+            c.a = alpha;
+            obj.color = c;
+        });
+
+        TextMeshes.ForEach(delegate(TextMesh obj)
+                                {
+            var c = obj.color;
+            c.a = alpha;
+            obj.color = c;
+        });
+    }
+
+    public void Enable(bool enable, float time)
+    {
+        StartCoroutine(FlipCoroutine(!enable, time));
+    }
+
+    private IEnumerator ShowCoroutine(bool show, float time)
+    {
+        float startTime = Time.time;
+
+        while (true)
+        {
+            float t = Mathf.Clamp01((Time.time - startTime) / time);
+                
+            if (show)
+                SetAlpha(t);
+            else
+                SetAlpha(1 - t);
+
+            if (t == 1)
+                break;
+            else
+                yield return 0;
+        }
+
+
+        yield break;   
+    }
 
 }

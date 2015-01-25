@@ -259,6 +259,9 @@ public class LevelEditorView : EditorWindow
     private bool SyncProbCurve = false;
     private void DrawProbabilityCurve(LevelDb.LevelDef level)
     {
+        if (ProbabilityCurves == null)
+            return;//todo
+
         EditorGUILayout.LabelField("Probablity");
 
       
@@ -297,7 +300,9 @@ public class LevelEditorView : EditorWindow
         var fields = typeof(PatternDef).GetFields();
         List<string> allPatterns = new List<string>();
         Array.ForEach(fields, x => allPatterns.Add(x.GetValue(null).ToString()));
-        allPatterns.RemoveAll(x=>level.Patterns.Find(y=>y ==x) != null); 
+
+        if (level.Patterns != null)
+            allPatterns.RemoveAll(x=>level.Patterns.Find(y=>y ==x) != null); 
 
         PatternIndex = EditorGUILayout.Popup(PatternIndex, allPatterns.ToArray());
         if (GUILayout.Button("Add"))

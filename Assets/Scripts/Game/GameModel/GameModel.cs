@@ -6,17 +6,16 @@ using System;
 
 public class GameModel
 {
+    public GameContext Context { get; set; }
+
     // Current number queue
     public List<int> Numbers { get; set; }
-
-    // List of numbers on playground 
-    public List<CircleVisual> Circles { get; set; }
+      // List of numbers on playground 
+    public List<CircleController> Circles { get; set; }
 
     private List<string> Specialities { get; set; }
    
     private List<NumberPattern> NumberPatterns { get; set; }
-
-    private GameContext Context { get; set; }
 
     public GameModel(GameContext context)
     {
@@ -31,9 +30,9 @@ public class GameModel
         NumberPatterns = new List<NumberPattern>();
 
         context.LevelDef.Patterns.ForEach(x => NumberPatterns.Add(PatternFactory.Create(x)));
-       
 
-        Circles = new List<CircleVisual> ();
+
+        Circles = new List<CircleController>();
         Numbers = new List<int>();
     }
 
@@ -42,7 +41,7 @@ public class GameModel
         public bool FitSequence;
     }
 
-    public ClickResult ProcessPatterns(CircleVisual circle)
+    public ClickResult ProcessPatterns(CircleController circle)
     {
         var result = new ClickResult();
        
@@ -62,12 +61,12 @@ public class GameModel
     {
         public bool Remove;
     }
-    public TapResult ProcessTapHandlers(CircleVisual circle)
+    public TapResult ProcessTapHandlers(CircleController circle)
     {
         var result = new TapResult();
         result.Remove = true;
 
-        circle.Specialities.ForEach(x=>result.Remove = x.Handle(circle, Context));
+        circle.Model.Specialities.ForEach(x=>result.Remove = x.Handle());
 
         return result;
     }

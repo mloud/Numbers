@@ -8,6 +8,8 @@ public class MinusOneSpeciality : Speciality
 {
     private int Counter { get; set; }
 
+    public MinusOneSpeciality(CircleController circle, GameContext context) : base(circle, context)
+    {}
 
     public override void Init(string par)
     {
@@ -20,13 +22,14 @@ public class MinusOneSpeciality : Speciality
         }
     }
 
-    public override bool Handle(CircleVisual circle, GameContext context)
+    public override bool Handle()
     {
         bool remove = true;
 
-        if (circle.Value > context.LevelDef.FromNum)
+        if (Circle.Model.Value > Context.LevelDef.FromNum)
         {
-            circle.Value--;
+            Circle.ChangeValueTo(Circle.Model.Value - 1);
+
             remove = false;
 
             Counter--;
@@ -34,13 +37,13 @@ public class MinusOneSpeciality : Speciality
             if (Counter == 0)
             {
                 //disable
-                circle.Removepeciality(this);
+                Circle.RemoveSpeciality(this);
             }
         }
         else
         {
            // circle.TapBehav = CircleVisual.TapBehaviour.None;
-            circle.Removepeciality(this);
+            Circle.RemoveSpeciality(this);
         }
 
         return remove;

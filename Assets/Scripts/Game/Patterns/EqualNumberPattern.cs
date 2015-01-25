@@ -29,7 +29,10 @@ public class EqualNumberPattern : NumberPattern
 	}
 
 	public override int ComputeScore(List<int> nums)
-	{
+    {   
+        if (nums.Count < 2)
+            return 0;
+
          return nums.Count * nums.Find(x => x != 0);
 	}
 }

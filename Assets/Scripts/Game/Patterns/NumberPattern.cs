@@ -9,21 +9,20 @@ public abstract class NumberPattern
 
 	public abstract int ComputeScore(List<int> nums);
 
-    public bool CanAdd(CircleVisual circle, GameContext context)
+    public bool CanAdd(CircleController circle, GameContext context)
     {
         if (context.Model.Numbers.Count == 0)
             return true;
     
         // special number
-        if (circle.Attribute == CircleVisual.SpecialAttribute.Joker)
-        {
-            circle.Value = 0;
+        if (circle.Model.Value == 0)
+        { 
             return true;
         }
     
         // copy with new number
         List<int> nums = new List<int>(context.Model.Numbers);
-        nums.Add(circle.Value);
+        nums.Add(circle.Model.Value);
     
         return IsPattern(nums);
     }

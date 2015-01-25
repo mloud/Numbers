@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class NumberContainer : MonoBehaviour 
 {
-	private List<CircleVisual> Numbers { get; set; }
+	private List<CircleController> Numbers { get; set; }
 
 	private Vector2 Size { get { return BCollider.size; } }
 
@@ -14,19 +14,19 @@ public class NumberContainer : MonoBehaviour
 	{
 		BCollider = GetComponent<BoxCollider2D> ();
 
-		Numbers = new List<CircleVisual> ();
+        Numbers = new List<CircleController>();
 	}
 
 
-	public void AddNumber(CircleVisual circleSrc)
+	public void AddNumber(CircleController circleSrc)
 	{
         var circle = circleSrc.Clone();
         circle.SetForHud();
 
 		Numbers.Add (circle);
 
-		circle.transform.SetParent (gameObject.transform);
-
+        circle.Visual.SetParent(gameObject.transform);
+		
 		float size = 0.6f;// todo
 
 		var pos = Vector3.zero;
@@ -38,9 +38,8 @@ public class NumberContainer : MonoBehaviour
 		pos.x = -Size.x * 0.5f + modPos;
 		pos.y -= y;
 
-		//circle.transform.localPosition = pos;
-		circle.StartCoroutine(circle.MoveToCoroutine(pos, 30));
 
+        circle.MoveTo(pos, 30);
 		circle.SetScale (0.7f);
 	}
 
@@ -54,7 +53,7 @@ public class NumberContainer : MonoBehaviour
 
     private IEnumerator ClearCoroutine()
     {
-        var numCopy = new List<CircleVisual>(Numbers);
+        var numCopy = new List<CircleController>(Numbers);
         Numbers.Clear();
 
         float time = 0.3f / numCopy.Count;

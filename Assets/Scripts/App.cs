@@ -43,6 +43,8 @@ public class App : MonoBehaviour
 
     public void StartLevel(LevelDb.LevelDef level)
 	{
+        WindowManager.Instance.OpenWindow(WindowDef.Loading, null);
+
 		PersistentData.Push (level);
 		Application.LoadLevel (1);// GameScene
 	}

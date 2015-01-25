@@ -107,7 +107,7 @@ public class Game : MonoBehaviour
 		win.GetComponentInChildren<Button> ().onClick.AddListener (() => { RunLevel();  WindowManager.Instance.CloseWindow(win.Name);});
 	
 	
-		if (!App.Instance.Player.TutorialDone)
+		//if (!App.Instance.Player.TutorialDone)
 		{
             WindowManager.Instance.OpenWindow (WindowDef.Tutorial, new TutorialWindow.Param() {Level = LevelDef});
 			win.GetComponentInChildren<Button> ().onClick.AddListener (() => { App.Instance.Player.TutorialDone = true; });
@@ -121,7 +121,7 @@ public class Game : MonoBehaviour
 		LevelTimer -= Time.deltaTime;
 		FlipTimer -= Time.deltaTime;
 
-		if (LevelTimer <= 0 || Model.Circles.Count == 0)
+        if (LevelTimer <= 0 || Model.Circles.Count == 0 || (Model.Circles.Count == 1 && Model.Numbers.Count == 0))
 		{
 			ProcessNumbers();
 			GameOver();
@@ -135,10 +135,12 @@ public class Game : MonoBehaviour
 		if (FlipTimer < 0 && Model.Circles.Count > 1)
 		{
 			FlipTimer = LevelDef.FlipTime;
-			
-            var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count)];
+		
+            var circlesWithoutSpec = Model.Circles.FindAll(x=>x.Model.Specialities.Find(y=>y.GetType() == typeof(ChangeValueSpeciality)) == null);
+
+            var rndCircle = circlesWithoutSpec[Random.Range(0, circlesWithoutSpec.Count)];
     
-            Flip(rndCircle);
+            rndCircle.AddSpeciality(SpecialityFactory.Create("f", "2", rndCircle, Model.Context));
 		}
 
 		Hud.Instance.SetuTimerProgress (MicroTimer / LevelDef.MicroTime);
@@ -155,17 +157,13 @@ public class Game : MonoBehaviour
         return number;
     }
 
-    private void Flip(CircleVisual circle)
+    private void Flip(CircleController circle)
     {
         var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count - 1)];
 
         int number = GetNextFlipNumber();
-        
-        // special attribute
-        CircleVisual.SpecialAttribute attr = number == 0 ? CircleVisual.SpecialAttribute.Joker : CircleVisual.SpecialAttribute.None;
 
-
-        rndCircle.StartCoroutine(rndCircle.ChangeValueTo(number, attr));
+        rndCircle.ChangeValueTo(number);
     }
 
 	void Update ()
@@ -192,7 +190,7 @@ public class Game : MonoBehaviour
 	
 		GameObject circlePrefab = Resources.Load ("Prefabs/Circle") as GameObject;
 
-		float circleSize = circlePrefab.GetComponent<CircleVisual> ().Radius * 2 * 1.1f;
+        float circleSize = 0.8f;
 
 		List<int> numbers = new List<int> (LevelDef.Numbers);
 
@@ -209,19 +207,19 @@ public class Game : MonoBehaviour
 
 			for (int x = 0; x < LevelDef.Cols; ++x)
 			{
-				var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<CircleVisual>();
+				var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<CircleController>();
 
-				circle.transform.position = new Vector3(xPos, yPos, 0);
-
+                circle.Model.Position = new Vector3(xPos, yPos, 0);
+               
 				Model.Circles.Add(circle);
 
 				//circle.Value = Random.Range(LevelDef.FromNum, LevelDef.ToNum);
-				circle.Value = numbers[index];
+				circle.SetValue(numbers[index]);
 
 
                 // add specialities
                 List<LevelDb.SpecialityDef> specs = DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
-                specs.ForEach(spec => circle.AddSpeciality(SpecialityFactory.Create(spec.Name, spec.Param)));
+                specs.ForEach(spec => circle.AddSpeciality(SpecialityFactory.Create(spec.Name, spec.Param, circle, Model.Context)));
 
 				circle.Run();
 
@@ -384,7 +382,7 @@ public class Game : MonoBehaviour
 		}
 	}
 
-	private void OnCircleClick(CircleVisual circle)
+	private void OnCircleClick(CircleController circle)
 	{
 		if (CurrState == State.Running)
 		{
@@ -393,7 +391,7 @@ public class Game : MonoBehaviour
 
             if (patternResult.FitSequence)
             {
-                Model.Numbers.Add(circle.Value);
+                Model.Numbers.Add(circle.Model.Value);
 
                 if (Model.Numbers.Count > 1)
                 {
@@ -404,7 +402,7 @@ public class Game : MonoBehaviour
             else
             {
                 ProcessNumbers();
-                Model.Numbers.Add(circle.Value);
+                Model.Numbers.Add(circle.Model.Value);
             }
 
             Hud.Instance.AddNumber(circle);

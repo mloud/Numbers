@@ -67,7 +67,7 @@ public class Hud : MonoBehaviour
 	}
 
 
-	public void AddNumber(CircleVisual circle)
+	public void AddNumber(CircleController circle)
 	{
 		numberContainer.AddNumber (circle);
 	}
