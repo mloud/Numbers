@@ -18,10 +18,23 @@ public class CircleVisual : MonoBehaviour
     private Transform renewTransform;
 
     [SerializeField]
+    private Transform specialityTransform;
+
+    [SerializeField]
+    private Transform smallFragmentTransform;
+
+    [SerializeField]
     private Transform outerTransform;
 
     [SerializeField]
     public AlphaCutOff progressBar;
+
+    [SerializeField]
+    public List<SpriteRenderer> CircleColoredFragments;
+
+    [SerializeField]
+    private Color color;
+
 
     public Vector3 Position { set { transform.position = value; } }
     public Vector3 LocalPosition { get { return transform.localPosition; } set { transform.localPosition = value; } }
@@ -43,6 +56,17 @@ public class CircleVisual : MonoBehaviour
 
 	private float Timer { get; set; }
 
+    public CircleModel Model { get; set; }
+
+    private void Update()
+    {
+        SetColor(color);
+
+        bool showSpecContainer = Model.Specialities.FindAll(x => x.HasIcon).Count > 0;
+
+        specialityTransform.gameObject.SetActive(showSpecContainer);
+        smallFragmentTransform.gameObject.SetActive(!showSpecContainer);
+    }
 
     public void OnPositionChanged(Vector3 pos)
     {
@@ -69,6 +93,8 @@ public class CircleVisual : MonoBehaviour
         {
             renewTransform.gameObject.SetActive(true);
         }
+
+        
     }
 
     public void RemoveSpeciality(Speciality spec)
@@ -110,6 +136,14 @@ public class CircleVisual : MonoBehaviour
 	{
 		transform.localScale = new Vector3 (scale, scale, scale);
 	}
+
+    public void SetColor(Color color)
+    {
+        foreach (var sprR in CircleColoredFragments)
+        {
+            sprR.color = color;
+        }
+    }
 
 
     public IEnumerator FlipCoroutine(bool away, float time)

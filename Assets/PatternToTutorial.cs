@@ -8,7 +8,7 @@ public class PatternToTutorial : MonoBehaviour
     public class Link
     {
         public string PatternName;
-        public GameObject TutorialPrefab;
+        public List<int> Example;
     }
 
     public List<Link> Links;

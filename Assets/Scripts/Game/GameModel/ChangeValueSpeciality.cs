@@ -15,6 +15,8 @@ public class ChangeValueSpeciality : Speciality
 
     public override void Init(string par)
     {
+        HasIcon = false;
+
         Time = 0;
         Timer = -1;
 

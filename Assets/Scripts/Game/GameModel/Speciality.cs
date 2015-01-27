@@ -9,6 +9,8 @@ public abstract class Speciality
     protected CircleController Circle { get; set; }
     protected GameContext Context { get; set; }
 
+    public bool HasIcon { get; protected set; }
+
     public Speciality(CircleController circle, GameContext context)
     {
         Circle = circle;

@@ -15,6 +15,8 @@ public class ReappearSpeciality : Speciality
 
     public override void Init(string par)
     {
+        HasIcon = true;
+
         Time = 0;
         Timer = -1;
 

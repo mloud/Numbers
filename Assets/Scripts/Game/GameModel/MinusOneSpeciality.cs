@@ -13,6 +13,8 @@ public class MinusOneSpeciality : Speciality
 
     public override void Init(string par)
     {
+        HasIcon = true;
+
         Counter = 1;
 
         int c;

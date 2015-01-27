@@ -9,6 +9,7 @@ public abstract class NumberPattern
 
 	public abstract int ComputeScore(List<int> nums);
 
+    
     public bool CanAdd(CircleController circle, GameContext context)
     {
         if (context.Model.Numbers.Count == 0)

@@ -40,7 +40,7 @@ public class NumberContainer : MonoBehaviour
 
 
         circle.MoveTo(pos, 30);
-		circle.SetScale (0.7f);
+		circle.SetScale (0.6f);
 	}
 
 	public void Clear()

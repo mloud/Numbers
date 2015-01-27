@@ -31,9 +31,6 @@ public class CircleController : MonoBehaviour
     public CircleController Clone()
     {
         CircleController copy = (GameObject.Instantiate(this.gameObject) as GameObject).GetComponent<CircleController>();
-        //copy.Model = this.Model.Clone();
-        //copy.Visual = this.Visual.Clone();
-
         return copy;
     }
 
@@ -149,15 +146,18 @@ public class CircleController : MonoBehaviour
         Model = GetComponent<CircleModel>();
 
         // Radius
-        Model.Radius = 0.4f;
+        Model.Radius = 0.46f;
 
         Model.PositionChanged += Visual.OnPositionChanged;
         Model.LocalPositionChanged += Visual.OnLocalPositionChanged;
         Model.RadiusChanged += Visual.OnRadiusChanged;
         Model.ValueChanged += Visual.OnValueChanged;
 
+        
+
         // Clicks
         Visual.OnClick = OnClickInternal;
+        Visual.Model = Model;
     }
 
 

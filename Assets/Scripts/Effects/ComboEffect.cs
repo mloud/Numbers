@@ -22,7 +22,7 @@ public class ComboEffect : MonoBehaviour
 	float durationOut = 2.0f;
 
 	[SerializeField]
-	float durationIn = 0.4f;
+	float durationIn = 0.46f;
 
 	private float Timer { get; set; }
 

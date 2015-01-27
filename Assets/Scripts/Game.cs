@@ -24,7 +24,8 @@ public class Game : MonoBehaviour
 	private BonusGenerator BonusGenerator { get; set; }
     private GameModel Model { get; set; }
 
- 
+
+    private List<Slot> Slots { get; set;  }
 
 	private enum State
 	{
@@ -47,7 +48,9 @@ public class Game : MonoBehaviour
 	{
 
 		//App.Instance.GoogleAnalytics.LogScreen ("Game");
-	
+
+        Slots = new List<Slot>();
+
 		// Bonus generator
 		BonusGenerator = new BonusGenerator ();
 		BonusGenerator.OnBonusReleased += OnBonusReleased;
@@ -87,6 +90,10 @@ public class Game : MonoBehaviour
             Model.Circles.ForEach (x => Destroy (x.gameObject));
             Model.Circles.Clear ();
         }
+
+
+        Slots.ForEach(x => Destroy(x.gameObject));
+        Slots.Clear();
 
         // Tap manager
         Model = new GameModel(new GameContext() { LevelDef = level, Controller = this });
@@ -157,15 +164,7 @@ public class Game : MonoBehaviour
         return number;
     }
 
-    private void Flip(CircleController circle)
-    {
-        var rndCircle = Model.Circles[Random.Range(0, Model.Circles.Count - 1)];
-
-        int number = GetNextFlipNumber();
-
-        rndCircle.ChangeValueTo(number);
-    }
-
+   
 	void Update ()
 	{
 		switch (CurrState)
@@ -188,32 +187,39 @@ public class Game : MonoBehaviour
 	void InitPlayground()
 	{
 	
-		GameObject circlePrefab = Resources.Load ("Prefabs/Circle") as GameObject;
+		GameObject circlePrefab = Resources.Load<GameObject> ("Prefabs/Circle");
+        GameObject slotPrefab = Resources.Load<GameObject>("Prefabs/Slot");
 
-        float circleSize = 0.8f;
+        float slotSize = slotPrefab.GetComponent<BoxCollider2D>().size.x;
 
 		List<int> numbers = new List<int> (LevelDef.Numbers);
 
 		numbers = Utils.Randomizer.RandomizeList<int> (numbers);
 
 
-		float yPos = Playground.Position.y + LevelDef.Rows * circleSize * 0.5f - circleSize * 0.5f;
+		float yPos = Playground.Position.y + LevelDef.Rows * slotSize * 0.5f - slotSize * 0.5f;
 
 		int index = 0;
 
+
+
 		for (int y = 0; y < LevelDef.Rows; ++y)
 		{
-			float xPos = Playground.Position.x - LevelDef.Cols * circleSize * 0.5f + circleSize * 0.5f;
+			float xPos = Playground.Position.x - LevelDef.Cols * slotSize * 0.5f + slotSize * 0.5f;
 
 			for (int x = 0; x < LevelDef.Cols; ++x)
 			{
-				var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<CircleController>();
+                var slot = (Instantiate(slotPrefab) as GameObject).GetComponent<Slot>();
+                var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<CircleController>();
 
+                slot.SetColor(App.Instance.ColorManager.GetColor((y * LevelDef.Rows + x) % 2 == 0 ? ColorDef.ColorType.SlotLight : ColorDef.ColorType.SlotDark));
+                Destroy(slot.GetComponent<Collider2D>());
                 circle.Model.Position = new Vector3(xPos, yPos, 0);
+                slot.transform.position = new Vector3(xPos, yPos, 0);
                
 				Model.Circles.Add(circle);
+                Slots.Add(slot);
 
-				//circle.Value = Random.Range(LevelDef.FromNum, LevelDef.ToNum);
 				circle.SetValue(numbers[index]);
 
 
@@ -225,12 +231,12 @@ public class Game : MonoBehaviour
 
 				circle.OnClick += OnCircleClick;
 
-				xPos += circleSize;
+				xPos += slotSize;
 
 				++index;
 			}
 
-			yPos -= circleSize;
+			yPos -= slotSize;
 		}
 
 	
@@ -253,6 +259,7 @@ public class Game : MonoBehaviour
 		
 		AddScore (score);
 	}
+
 
 	private void AddScore(int score)
 	{

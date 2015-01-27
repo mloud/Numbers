@@ -12,6 +12,8 @@ public class App : MonoBehaviour
 
 	public Player Player { get; private set; }
 
+    public ColorManager ColorManager{ get; private set; }
+
 	public PersistentData PersistentData { get; private set; }
 
 
@@ -62,13 +64,19 @@ public class App : MonoBehaviour
 	
 	void Init()
 	{
+        //ColorManager
+        ColorManager = (Instantiate(Resources.Load<GameObject>("Prefabs/__ColorManager__")) as GameObject).GetComponent<ColorManager>();
+
+        // DB
 		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Db> ();
 		Db.transform.SetParent (transform);
 
+        // Persistent data
 		var persDataGo = new GameObject ("PersistentData");
 		persDataGo.transform.SetParent (transform);
 		PersistentData = persDataGo.AddComponent<PersistentData> ();
 
+        // Player
 		var PlayerGo = new GameObject ("Player");
 		DontDestroyOnLoad (PlayerGo);
 		PlayerGo.transform.SetParent (transform);

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class OddNumberPattern : NumberPattern
 {
+
 	public override bool IsPattern(List<int> nums)
 	{
 		bool sequence = true;

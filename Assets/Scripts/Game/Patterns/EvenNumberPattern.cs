@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class EvenNumberPattern : NumberPattern
 {
-	public override bool IsPattern(List<int> nums)
+    public override bool IsPattern(List<int> nums)
 	{
 		bool sequence = true;
 
