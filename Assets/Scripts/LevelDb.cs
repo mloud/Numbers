@@ -24,7 +24,8 @@ public class LevelDb : MonoBehaviour
 		public int Cols;
 		public int Score;
         public int FlipNumbersCount;
-      	public float TotalTime;
+        public int Colors;
+        public float TotalTime;
 		public float MicroTime;
 		public float FlipTime;
 		public string Name;
@@ -34,7 +35,6 @@ public class LevelDb : MonoBehaviour
         public List<string> SpecialitiesForNumbers;
         public List<float> Probabilities;
         public List<string> Patterns;
-
     }
 
 	[SerializeField]

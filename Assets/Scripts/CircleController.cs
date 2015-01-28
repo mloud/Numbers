@@ -90,14 +90,19 @@ public class CircleController : MonoBehaviour
         //Model.LocalPosition = locPos;
     }
 
-    public void Flip(bool away, float time)
+    public void Flip(bool away, float time, float delay)
     {
-        Visual.StartCoroutine(Visual.FlipCoroutine(away, time));
+        Visual.StartCoroutine(Visual.FlipCoroutine(away, time, delay));
     }
 
     public void SetValue(int value)
     {
         Model.Value = value;
+    }
+
+    public void SetColor(int color)
+    {
+        Model.Color = color;
     }
 
     public void ChangeValueTo(int value)
@@ -118,11 +123,11 @@ public class CircleController : MonoBehaviour
 
     private IEnumerator ChangeValueToCoroutine(int value)
     {
-        yield return Visual.StartCoroutine(Visual.FlipCoroutine(true, 0.3f));
+        yield return Visual.StartCoroutine(Visual.FlipCoroutine(true, 0.3f, 0));
 
         Model.Value = value;
 
-        yield return Visual.StartCoroutine(Visual.FlipCoroutine(false, 0.3f));
+        yield return Visual.StartCoroutine(Visual.FlipCoroutine(false, 0.3f, 0));
     }
 
 
@@ -152,6 +157,7 @@ public class CircleController : MonoBehaviour
         Model.LocalPositionChanged += Visual.OnLocalPositionChanged;
         Model.RadiusChanged += Visual.OnRadiusChanged;
         Model.ValueChanged += Visual.OnValueChanged;
+        Model.ColorChanged += Visual.OnColorChanged;
 
         
 
@@ -168,7 +174,7 @@ public class CircleController : MonoBehaviour
 
     public void Enable(bool enable, float time)
     {
-        Visual.StartCoroutine(Visual.FlipCoroutine(!enable, time));
+        Visual.StartCoroutine(Visual.FlipCoroutine(!enable, time, 0));
     }
 
 

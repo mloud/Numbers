@@ -14,7 +14,7 @@ public class ColorDef : MonoBehaviour
         PogGreen
     }
 
-
+   
     [System.Serializable]
     public class ColorRec
     {

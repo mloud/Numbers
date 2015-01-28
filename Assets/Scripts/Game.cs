@@ -31,7 +31,8 @@ public class Game : MonoBehaviour
 	{
 		Stopped = 0,
 		Running,
-		GameOver
+		GameOver,
+        Paused
 	}
 
 	private State CurrState;
@@ -67,15 +68,59 @@ public class Game : MonoBehaviour
         if (levelToRun == null)
             levelToRun = App.Instance.Db.LevelDb.Levels.Find(x => x.Order == App.Instance.Db.LevelDb.DefaultLevel);
 
+
+        GameUi.Instance.btnPause.onClick.AddListener(() => PauseGame());
+
+
         Init (levelToRun);
 	}
+
+    private void PauseGame()
+    {
+        CurrState = State.Paused;
+
+        UnityEngine.Time.timeScale = 0;
+
+        var win = App.Instance.WindowManager.OpenWindow(WindowDef.Pause, null) as PauseWindow;
+
+        win.BtnContinue.onClick.AddListener(() => { 
+            RunTimer();
+            App.Instance.WindowManager.CloseWindow(win.Name);
+        });
+
+        win.BtnMenu.onClick.AddListener(() => {
+            RunTimer(); 
+            App.Instance.GoToLevelSelection();
+            App.Instance.WindowManager.CloseWindow(win.Name);
+        });
+        
+        win.BtnRestart.onClick.AddListener(() => { 
+            RunTimer(); Restart(); 
+            App.Instance.WindowManager.CloseWindow(win.Name); 
+        });
+
+        GameUi.Instance.btnPause.gameObject.SetActive(false);
+    }
+
+    private void RunTimer()
+    {
+        CurrState = State.Running;
+        UnityEngine.Time.timeScale = 1.0f;
+        GameUi.Instance.btnPause.gameObject.SetActive(true);
+    }
 
 	private void RunLevel()
 	{
 		CurrState = State.Running;	
 
-		Sound.Instance.PlayMusic ("ingame");
-	}
+		App.Instance.Sound.PlayMusic ("ingame");
+
+
+        PlaygroundFlipper.FlipRandom(LevelDef, Model.Circles);
+
+
+        GameUi.Instance.btnPause.gameObject.SetActive(true);
+   }
 
 	private void Restart()
 	{
@@ -110,14 +155,22 @@ public class Game : MonoBehaviour
 
 		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
-		var win = WindowManager.Instance.OpenWindow (WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level});
-		win.GetComponentInChildren<Button> ().onClick.AddListener (() => { RunLevel();  WindowManager.Instance.CloseWindow(win.Name);});
-	
-	
+        var winStartLevel = App.Instance.WindowManager.OpenWindow(WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level });
+        winStartLevel.GetComponentInChildren<Button>().onClick.AddListener(() =>
+        { 
+            RunLevel();
+            App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
+        });
+
+        GameUi.Instance.btnPause.gameObject.SetActive(false);
+
 		//if (!App.Instance.Player.TutorialDone)
 		{
-            WindowManager.Instance.OpenWindow (WindowDef.Tutorial, new TutorialWindow.Param() {Level = LevelDef});
-			win.GetComponentInChildren<Button> ().onClick.AddListener (() => { App.Instance.Player.TutorialDone = true; });
+            var win = App.Instance.WindowManager.OpenWindow(WindowDef.Tutorial, new TutorialWindow.Param() { Level = LevelDef });
+			win.GetComponentInChildren<Button> ().onClick.AddListener (() => {
+                App.Instance.WindowManager.CloseWindow(win.Name);
+                App.Instance.Player.TutorialDone = true;
+            });
 		}
 	}
 
@@ -221,7 +274,7 @@ public class Game : MonoBehaviour
                 Slots.Add(slot);
 
 				circle.SetValue(numbers[index]);
-
+                circle.SetColor(Random.Range(2, 2 + LevelDef.Colors));
 
                 // add specialities
                 List<LevelDb.SpecialityDef> specs = DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
@@ -234,42 +287,45 @@ public class Game : MonoBehaviour
 				xPos += slotSize;
 
 				++index;
+
+                circle.Flip(true, 0, 0);
+
 			}
 
 			yPos -= slotSize;
 		}
-
-	
 	}
 
 	private void ProcessNumbers()
 	{
-		int score = 0;
+        NumberResult res = null;
 
-		if (Model.Numbers.Count == 1)
-			score = 0;
-		else
-		{
-			score = Model.ComputeScore(Model.Numbers);
-		}
+        if (Model.Numbers.Count == 1)
+        {
+            res = new NumberResult() { TotalScore = 0, ColorBonusMultiplier = 0.0f };
+        }
+        else
+        {
+            res = Model.ComputeScore(Model.Numbers);
+        }
 
 		Model.Numbers.Clear ();
 
 		Hud.Instance.ClearNumbers ();
 		
-		AddScore (score);
+		ApplyNumbersResult (res);
 	}
 
 
-	private void AddScore(int score)
+	private void ApplyNumbersResult(NumberResult res)
 	{
-		if (score > 0)
+		if (res.TotalScore > 0)
 		{
 			//if (score > 0)
 			//	Sound.Instance.Play ("score");
 
-			Hud.Instance.AddScore (Score, score, ScoreAdded);
-			Score += score;
+			Hud.Instance.AddScore (Score, res.TotalScore, ScoreAdded);
+			Score += res.TotalScore;
 
 			if (Score >= LevelDef.Score)
 			{
@@ -280,6 +336,11 @@ public class Game : MonoBehaviour
 					OverScoreEffect.Show(overScore);
 				}
 			}
+
+            //if (res.ColorBonusMultiplier > 0.0f)
+            //{
+            //    BonusEffect.Show("Color bonus " + res.ColorBonusMultiplier);
+            //}
 		}
 	}
 
@@ -300,14 +361,14 @@ public class Game : MonoBehaviour
 			
 			if (gameFinished)
 			{
-				WindowManager.Instance.OpenWindow (WindowDef.GameFinished, new GameFinishedWindow.Param() 
+                App.Instance.WindowManager.OpenWindow(WindowDef.GameFinished, new GameFinishedWindow.Param() 
 				{
 					OnMenuClick = OnMenu
 				});
 			}
 
-			
-			WindowManager.Instance.OpenWindow (WindowDef.GameOver, new GameOverWindow.Param() 
+
+            App.Instance.WindowManager.OpenWindow(WindowDef.GameOver, new GameOverWindow.Param() 
 			{ 	
 				Score = this.Score,
 				BestScore = levelStats == null ? 0 : levelStats.Score,
@@ -321,7 +382,7 @@ public class Game : MonoBehaviour
 		}
 		else
 		{
-			WindowManager.Instance.OpenWindow (WindowDef.LevelFailed, new LevelFailedWindow.Param() 
+            App.Instance.WindowManager.OpenWindow(WindowDef.LevelFailed, new LevelFailedWindow.Param() 
 			                                   { 	
 				Score = this.Score,
 				RequiredScore = LevelDef.Score,
@@ -334,7 +395,7 @@ public class Game : MonoBehaviour
 		CurrState = State.GameOver;
 
 
-		Sound.Instance.StopMusic ();
+		App.Instance.Sound.StopMusic ();
 	}
 
 
@@ -344,7 +405,7 @@ public class Game : MonoBehaviour
 	
 		if ( scoreBonus != null )
 		{
-			AddScore(scoreBonus.Score);
+            ApplyNumbersResult(new NumberResult() { TotalScore = scoreBonus.Score, ColorBonusMultiplier = 0.0f});
 		}
 
 		
@@ -376,7 +437,7 @@ public class Game : MonoBehaviour
 
 	private void ScoreAdded()
 	{
-		Sound.Instance.StopEffects ();
+        App.Instance.Sound.StopEffects();
 	}
 
 
@@ -389,6 +450,12 @@ public class Game : MonoBehaviour
 		}
 	}
 
+    public Number CircleToNumber(CircleController circle)
+    {
+        return new Number() { Value = circle.Model.Value, Color = circle.Model.Color };
+    }
+        
+
 	private void OnCircleClick(CircleController circle)
 	{
 		if (CurrState == State.Running)
@@ -398,18 +465,20 @@ public class Game : MonoBehaviour
 
             if (patternResult.FitSequence)
             {
-                Model.Numbers.Add(circle.Model.Value);
+                var numbers = CircleToNumber(circle);
+                Model.Numbers.Add(numbers);
 
                 if (Model.Numbers.Count > 1)
                 {
-                    ComboEffect.Show(Model.Numbers.Count);
-                    Sound.Instance.PlayEffect("combo" + Model.Numbers.Count);
+                    string specialText = patternResult.Pattern.IsSameColor(Model.Numbers) ? "in color" : null;
+                    ComboEffect.Show(Model.Numbers.Count, specialText);
+                    App.Instance.Sound.PlayEffect("combo" + Model.Numbers.Count);
                 }
             }
             else
             {
                 ProcessNumbers();
-                Model.Numbers.Add(circle.Model.Value);
+                Model.Numbers.Add(CircleToNumber(circle));
             }
 
             Hud.Instance.AddNumber(circle);

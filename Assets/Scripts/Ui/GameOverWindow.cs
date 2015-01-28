@@ -57,28 +57,28 @@ public class GameOverWindow : Window
 
 	public void OnNextClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+        App.Instance.WindowManager.CloseWindow(Name);	
 
 		Parameters.OnNextClick ();
 	}
 
 	public void OnMenuClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+        App.Instance.WindowManager.CloseWindow(Name);	
 		
 		Parameters.OnMenuClick ();
 	}
 
 	public void OnRestartClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+        App.Instance.WindowManager.CloseWindow(Name);	
 		
 		Parameters.OnRestartClick ();
 	}
 
     public void OnOkClick()
     {
-        WindowManager.Instance.CloseWindow (Name);  
+        App.Instance.WindowManager.CloseWindow(Name);  
     }
 
 }

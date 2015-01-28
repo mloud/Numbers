@@ -33,7 +33,7 @@ public class CircleVisual : MonoBehaviour
     public List<SpriteRenderer> CircleColoredFragments;
 
     [SerializeField]
-    private Color color;
+    public ColorDef.ColorType color;
 
 
     public Vector3 Position { set { transform.position = value; } }
@@ -60,7 +60,8 @@ public class CircleVisual : MonoBehaviour
 
     private void Update()
     {
-        SetColor(color);
+        OnColorChanged((int)color);
+        //SetColor(color);
 
         bool showSpecContainer = Model.Specialities.FindAll(x => x.HasIcon).Count > 0;
 
@@ -81,6 +82,17 @@ public class CircleVisual : MonoBehaviour
     public void OnRadiusChanged(float radius)
     {
         Radius = radius;
+    }
+
+    public void OnColorChanged(int colorType)
+    {
+        Color c = App.Instance.ColorManager.GetColor((ColorDef.ColorType)colorType);
+        foreach (var sprRen in CircleColoredFragments)
+        {
+            sprRen.color = c;
+        }
+
+        color = (ColorDef.ColorType)colorType;
     }
 
     public void AddSpeciality(Speciality spec)
@@ -146,23 +158,32 @@ public class CircleVisual : MonoBehaviour
     }
 
 
-    public IEnumerator FlipCoroutine(bool away, float time)
+    public IEnumerator FlipCoroutine(bool away, float time, float delay)
     {
+        yield return new WaitForSeconds(delay);
+
         float startTime = Time.time;
         float flipTime = time;
         float t = 0;
-        
-        while (true)
+
+        if (time == 0)
         {
-            t = Mathf.Clamp((Time.time - startTime) / flipTime, 0, 1);
+            VisualTransform.localEulerAngles = new Vector3(0, away ? 90 : 0, 0);
+        }
+        else
+        {
+            while (true)
+            {
+                t = Mathf.Clamp((Time.time - startTime) / flipTime, 0, 1);
 
-            float angle = away ? t * 90 : (1 - t) * 90;
+                float angle = away ? t * 90 : (1 - t) * 90;
 
-            VisualTransform.localEulerAngles = new Vector3(0, angle, 0);
-            if (t >= 1)
-                break;
-            
-            yield return 0;
+                VisualTransform.localEulerAngles = new Vector3(0, angle, 0);
+                if (t >= 1)
+                    break;
+
+                yield return 0;
+            }
         }
     }
 
@@ -225,7 +246,7 @@ public class CircleVisual : MonoBehaviour
 
     public void Enable(bool enable, float time)
     {
-        StartCoroutine(FlipCoroutine(!enable, time));
+        StartCoroutine(FlipCoroutine(!enable, time, 0));
     }
 
     private IEnumerator ShowCoroutine(bool show, float time)

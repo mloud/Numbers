@@ -5,10 +5,25 @@ using System.Collections.Generic;
 
 public abstract class NumberPattern 
 {
-	public abstract bool IsPattern(List<int> nums);
+	public abstract bool IsPattern(List<Number> nums);
 
-	public abstract int ComputeScore(List<int> nums);
+	public abstract NumberResult ComputeScore(List<Number> nums);
 
+    public bool IsSameColor(List<Number> numbers)
+    {
+        if (numbers.Count < 2)
+            return false;
+
+        int firstColor = numbers[0].Color;
+
+        for (int i = 1; i < numbers.Count; ++i)
+        {
+            if (numbers[i].Color != firstColor)
+                return false;
+        }
+
+        return true;
+    }
     
     public bool CanAdd(CircleController circle, GameContext context)
     {
@@ -22,8 +37,8 @@ public abstract class NumberPattern
         }
     
         // copy with new number
-        List<int> nums = new List<int>(context.Model.Numbers);
-        nums.Add(circle.Model.Value);
+        var nums = new List<Number>(context.Model.Numbers);
+        nums.Add(context.Controller.CircleToNumber(circle));
     
         return IsPattern(nums);
     }

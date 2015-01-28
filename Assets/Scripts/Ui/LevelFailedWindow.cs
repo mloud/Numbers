@@ -42,14 +42,14 @@ public class LevelFailedWindow : Window
 	}
 	public void OnMenuClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+        App.Instance.WindowManager.CloseWindow(Name);	
 		
 		Parameters.OnMenuClick ();
 	}
 
 	public void OnRestartClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+        App.Instance.WindowManager.CloseWindow(Name);	
 		
 		Parameters.OnRestartClick ();
 	}

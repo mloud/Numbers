@@ -51,6 +51,6 @@ public class TutorialWindow : Window
 
 	public void OnPlayClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+     	
 	}
 }

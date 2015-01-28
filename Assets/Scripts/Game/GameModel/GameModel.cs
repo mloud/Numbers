@@ -6,10 +6,11 @@ using System;
 
 public class GameModel
 {
+    
     public GameContext Context { get; set; }
 
     // Current number queue
-    public List<int> Numbers { get; set; }
+    public List<Number> Numbers { get; set; }
       // List of numbers on playground 
     public List<CircleController> Circles { get; set; }
 
@@ -33,12 +34,13 @@ public class GameModel
 
 
         Circles = new List<CircleController>();
-        Numbers = new List<int>();
+        Numbers = new List<Number>();
     }
 
     public struct ClickResult
     {
         public bool FitSequence;
+        public NumberPattern Pattern;
     }
 
     public ClickResult ProcessPatterns(CircleController circle)
@@ -50,6 +52,7 @@ public class GameModel
             if (pattern.CanAdd(circle, Context))
             {
                 result.FitSequence = true;
+                result.Pattern = pattern;
                 break;
             }
         }
@@ -72,7 +75,7 @@ public class GameModel
     }
 
 
-    public int ComputeScore(List<int> nums)
+    public NumberResult ComputeScore(List<Number> nums)
     {
         var numPattern = NumberPatterns.Find(x=>x.IsPattern(nums));
         
@@ -80,8 +83,8 @@ public class GameModel
         {
             return numPattern.ComputeScore(nums);
         }
-        
-        return 0;
+
+        return new NumberResult();
     }
 
 

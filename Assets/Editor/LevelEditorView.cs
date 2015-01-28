@@ -152,6 +152,13 @@ public class LevelEditorView : EditorWindow
                 level.FlipTime = EditorGUILayout.FloatField(level.FlipTime);
                 GUILayout.EndHorizontal();
 
+                // Colors
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Colors");
+                level.Colors = EditorGUILayout.IntField(level.Colors);
+                GUILayout.EndHorizontal();
+
+
                 GUILayout.Space(30);
 
                 // Initial numbers

@@ -11,16 +11,22 @@ public class CircleModel : MonoBehaviour
     public Action<Vector3> LocalPositionChanged;
     public Action<float> RadiusChanged;
     public Action<int> ValueChanged;
+    public Action<int> ColorChanged;
 
     public List<Speciality> Specialities { get; private set; }
 
     public int Value { get { return value; } set { this.value = value; if (ValueChanged != null) ValueChanged(value);  } }
 
+    public int Color { get { return color; } set { this.color = value; if (ColorChanged != null) ColorChanged(value); } }
+
     public float Radius { get { return radius; } set { radius = value; if (RadiusChanged != null) RadiusChanged(value); } }
 
     public Vector3 Position { get { return position; } set { position = value; if (PositionChanged != null) PositionChanged(position);  } }
 
-    public Vector3 LocalPosition { get { return locPosition; }  set { locPosition = value;  if (LocalPositionChanged != null) LocalPositionChanged(position); } } 
+    public Vector3 LocalPosition { get { return locPosition; }  set { locPosition = value;  if (LocalPositionChanged != null) LocalPositionChanged(position); } }
+
+
+    private int color;
 
 	private int value;
 

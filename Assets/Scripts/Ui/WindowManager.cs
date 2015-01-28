@@ -5,14 +5,10 @@ using System.Collections.Generic;
 
 public class WindowManager : MonoBehaviour 
 {
-	public static WindowManager Instance { get; set; }
-
 	private List<Window> Windows { get; set; }
 
 	private void Awake()
 	{
-		Instance = this;
-
 		Windows = new List<Window>();
 
 		DontDestroyOnLoad (gameObject);
@@ -66,4 +62,10 @@ public class WindowManager : MonoBehaviour
 		return win;
 
 	}
+
+
+    private void OnLevelWasLoaded(int level)
+    {
+        Windows.Clear();
+    }
 }

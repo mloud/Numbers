@@ -10,4 +10,5 @@ public static class WindowDef
 	public static string StartLevel = "StartLevel";
     public static string Tutorial = "Tutorial";
     public static string Loading = "Loading";
+    public static string Pause = "Pause";
 }

@@ -28,8 +28,6 @@ public class Sound : MonoBehaviour
 	private List<Song> Songs;
 
 
-	public static Sound Instance { get; private set; }
-
 	private AudioSource ASource { get; set; }
 
 	private AudioSource ASourceMusic { get; set; }
@@ -37,7 +35,6 @@ public class Sound : MonoBehaviour
 
 	private void Awake()
 	{
-		Instance = this;
 		var aSources = GetComponents<AudioSource> ();
 
 		ASource = aSources [0];

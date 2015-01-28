@@ -5,14 +5,14 @@ using System.Collections.Generic;
 
 public class EqualNumberPattern : NumberPattern
 {
-	public override bool IsPattern(List<int> nums)
+	public override bool IsPattern(List<Number> nums)
 	{
 		int lastNum = -1;
 		bool sameValue = true;
 		
 		for (int i = 0; i < nums.Count; ++i)
 		{
-			bool isSameValue = lastNum == -1 || (nums[i] == lastNum) || nums[i] == 0;
+			bool isSameValue = lastNum == -1 || (nums[i].Value == lastNum) || nums[i].Value == 0;
 			
 			if (!isSameValue)
 			{
@@ -20,19 +20,24 @@ public class EqualNumberPattern : NumberPattern
 				break;
 			}
 			
-			if (lastNum != nums[i] && nums[i] != 0)
+			if (lastNum != nums[i].Value && nums[i].Value != 0)
 			{
-				lastNum = nums[i];
+				lastNum = nums[i].Value;
 			}
 		}
 		return sameValue;
 	}
 
-	public override int ComputeScore(List<int> nums)
-    {   
-        if (nums.Count < 2)
-            return 0;
+	public override NumberResult ComputeScore(List<Number> nums)
+    {
+        var res = new NumberResult();
 
-         return nums.Count * nums.Find(x => x != 0);
-	}
+        if (nums.Count < 2)
+            return res;
+
+        res.ColorBonusMultiplier = IsSameColor(nums) ? 1.5f : 1;
+        res.TotalScore = (int)(nums.Count * nums.Find(x => x.Value != 0).Value * res.ColorBonusMultiplier);
+
+        return res;
+    }
 }

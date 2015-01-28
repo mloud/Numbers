@@ -6,8 +6,15 @@ public class ComboEffect : MonoBehaviour
 	[SerializeField]
 	TextMesh comboValue;
 
-	[SerializeField]
-	TextMesh comboText;
+    [SerializeField]
+    TextMesh comboText;
+
+    [SerializeField]
+    TextMesh specialText;
+
+    [SerializeField]
+    Animator animator;
+
 
 	private enum State
 	{
@@ -26,13 +33,21 @@ public class ComboEffect : MonoBehaviour
 
 	private float Timer { get; set; }
 
-	public void Show(int number)
+	public void Show(int score, string special)
 	{
 		CurrentState = State.FadingIn;
 
 		Timer = durationIn;
 
-		comboValue.text = number.ToString ();
+        comboValue.text = score.ToString();
+
+        bool isSpecialtext = !string.IsNullOrEmpty(special);
+       // specialText.gameObject.SetActive(isSpecialtext);
+        if (isSpecialtext)
+        {
+            specialText.text = special;
+            animator.SetTrigger("Special");
+        }
 	}
 
 	void Update () 

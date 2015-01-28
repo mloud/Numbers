@@ -22,7 +22,7 @@ public class GameFinishedWindow : Window
 
 	public void OnMenuClick()
 	{
-		WindowManager.Instance.CloseWindow (Name);	
+		App.Instance.WindowManager.CloseWindow (Name);	
 		
 		Parameters.OnMenuClick ();
 	}

@@ -16,7 +16,9 @@ public class App : MonoBehaviour
 
 	public PersistentData PersistentData { get; private set; }
 
+    public WindowManager WindowManager { get; private set; }
 
+    public Sound Sound { get; private set;  }
 
 #if UNITY_EDITOR
     private int StartLevelOrder = -1;
@@ -45,7 +47,7 @@ public class App : MonoBehaviour
 
     public void StartLevel(LevelDb.LevelDef level)
 	{
-        WindowManager.Instance.OpenWindow(WindowDef.Loading, null);
+        WindowManager.OpenWindow(WindowDef.Loading, null);
 
 		PersistentData.Push (level);
 		Application.LoadLevel (1);// GameScene
@@ -66,6 +68,8 @@ public class App : MonoBehaviour
 	{
         //ColorManager
         ColorManager = (Instantiate(Resources.Load<GameObject>("Prefabs/__ColorManager__")) as GameObject).GetComponent<ColorManager>();
+        ColorManager.transform.SetParent(transform);
+
 
         // DB
 		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Db> ();
@@ -82,7 +86,17 @@ public class App : MonoBehaviour
 		PlayerGo.transform.SetParent (transform);
 		Player = PlayerGo.AddComponent<Player> ();
 		Player.Load ();
-	}
+	
+        // Window Manager
+        var windowManGo = new GameObject("__WindowManager__");
+        WindowManager = windowManGo.AddComponent<WindowManager>();
+
+        // Sound
+        Sound = (Instantiate(Resources.Load<GameObject>("Prefabs/__Sound__")) as GameObject).GetComponent<Sound>();
+        DontDestroyOnLoad(Sound.gameObject);
+        Sound.transform.SetParent(transform);
+
+    }
 
 
 	void OnDestroy()

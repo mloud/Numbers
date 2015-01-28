@@ -158,6 +158,13 @@ public class LevelEditorController
 
     }
 
+
+    public void SetNumbers(LevelDb.LevelDef level, int colors)
+    {
+        level.Colors = colors;
+    }
+    
+
     private int[] GetRandomNumbers(int count, int from, int to)
     {
         int[] rnds = new int[count];
@@ -171,5 +178,5 @@ public class LevelEditorController
     }
 
 
-
+   
 }
