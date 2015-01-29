@@ -79,6 +79,8 @@ public class Game : MonoBehaviour
     {
         CurrState = State.Paused;
 
+        App.Instance.Sound.PauseMusic();
+
         UnityEngine.Time.timeScale = 0;
 
         var win = App.Instance.WindowManager.OpenWindow(WindowDef.Pause, null) as PauseWindow;
@@ -107,6 +109,8 @@ public class Game : MonoBehaviour
         CurrState = State.Running;
         UnityEngine.Time.timeScale = 1.0f;
         GameUi.Instance.btnPause.gameObject.SetActive(true);
+
+        App.Instance.Sound.ResumeMusic();
     }
 
 	private void RunLevel()
@@ -155,13 +159,6 @@ public class Game : MonoBehaviour
 
 		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
-        var winStartLevel = App.Instance.WindowManager.OpenWindow(WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level });
-        winStartLevel.GetComponentInChildren<Button>().onClick.AddListener(() =>
-        { 
-            RunLevel();
-            App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
-        });
-
         GameUi.Instance.btnPause.gameObject.SetActive(false);
 
 		//if (!App.Instance.Player.TutorialDone)
@@ -170,6 +167,14 @@ public class Game : MonoBehaviour
 			win.GetComponentInChildren<Button> ().onClick.AddListener (() => {
                 App.Instance.WindowManager.CloseWindow(win.Name);
                 App.Instance.Player.TutorialDone = true;
+
+                // how start 
+                var winStartLevel = App.Instance.WindowManager.OpenWindow(WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level });
+                winStartLevel.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                {
+                    RunLevel();
+                    App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
+                });
             });
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class Sound : MonoBehaviour
 {
@@ -33,13 +34,17 @@ public class Sound : MonoBehaviour
 	private AudioSource ASourceMusic { get; set; }
 
 
+    private float MaxMusicVolume { get; set; }
+
 	private void Awake()
 	{
 		var aSources = GetComponents<AudioSource> ();
 
 		ASource = aSources [0];
 		ASourceMusic = aSources [1];
-	}
+
+        MaxMusicVolume = ASourceMusic.volume;
+    }
 
 	public void PlayEffect(string name)
 	{
@@ -66,30 +71,60 @@ public class Sound : MonoBehaviour
 		Debug.Log ("Sound.StopEffects() " + Time.time);
 	}
 
+    public void PauseMusic()
+    {
+        StartCoroutine(FadeMusicCoroutine(true, 1.0f, delegate { ASourceMusic.Pause(); }));
+        Debug.Log("Sound.Pause() " + Time.time);
+    }
+
+    public void ResumeMusic()
+    {
+        StartCoroutine(FadeMusicCoroutine(false, 1.0f, delegate { ASourceMusic.Play(); }));
+        Debug.Log("Sound.Resume() " + Time.time);
+    }
+
 	public void StopMusic()
 	{
-		StartCoroutine(StopMusicCoroutine(1.0f));
+        StartCoroutine(FadeMusicCoroutine(true, 1.0f, delegate { ASourceMusic.Stop(); }));
 		Debug.Log ("Sound.StopMusic() " + Time.time);
 	}
 
-
-	private IEnumerator StopMusicCoroutine(float fadeOutTime)
+   private IEnumerator FadeMusicCoroutine(bool fadeOut, float time, Action action)
 	{
-		float volume = ASourceMusic.volume;
-		float startTime = Time.time;
+		
+		float startTime = Time.realtimeSinceStartup;
+        float volume = ASourceMusic.volume;
+
+        if (!fadeOut)
+        {
+            action();
+        }
+
 		while (true)
 		{
-			ASourceMusic.volume = (1 - Mathf.Clamp01((Time.time - startTime) / fadeOutTime)) * volume;
+            float t = Mathf.Clamp01((Time.realtimeSinceStartup - startTime) / time);
 
-			if (ASourceMusic.volume == 0)
-			{
-				ASourceMusic.Stop();
-				break;
-			}
-			else
-			{
-				yield return 0;
-			}
+
+            if (fadeOut)
+            {
+                ASourceMusic.volume = (1 - t) * volume;
+                 if (ASourceMusic.volume == 0)
+                 {
+                    action();
+                    break;
+                 }
+            }
+            else
+            {
+                 ASourceMusic.volume = t;
+                 if (ASourceMusic.volume >= MaxMusicVolume)
+                 {
+                     ASourceMusic.volume = MaxMusicVolume;
+                     break;
+                 }
+            }
+            
+		    yield return 0;
 		}
 	
 	}
