@@ -160,7 +160,8 @@ public class CircleVisual : MonoBehaviour
 
     public IEnumerator FlipCoroutine(bool away, float time, float delay)
     {
-        yield return new WaitForSeconds(delay);
+        if (delay > 0)
+            yield return new WaitForSeconds(delay);
 
         float startTime = Time.time;
         float flipTime = time;

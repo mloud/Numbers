@@ -152,6 +152,12 @@ public class LevelEditorView : EditorWindow
                 level.FlipTime = EditorGUILayout.FloatField(level.FlipTime);
                 GUILayout.EndHorizontal();
 
+                // RefillTime
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Refill time (sec)");
+                level.RefillTime = EditorGUILayout.FloatField(level.RefillTime);
+                GUILayout.EndHorizontal();
+
                 // Colors
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Colors");

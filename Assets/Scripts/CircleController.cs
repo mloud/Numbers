@@ -6,11 +6,12 @@ using System;
 
 public class CircleController : MonoBehaviour
 {
+
     public CircleModel Model { get; private set; }
     public CircleVisual Visual { get; private set; }
 
     public Action<CircleController> OnClick;
-
+    public Action<CircleController> OnRemove;
 
     private float Timer { get; set; }
 
@@ -144,6 +145,11 @@ public class CircleController : MonoBehaviour
         Model.Update();
     }
 
+    private void OnDestroy()
+    {
+        if (OnRemove != null)
+            OnRemove(this);
+    }
 
     private void Init()
     {

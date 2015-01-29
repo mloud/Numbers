@@ -28,7 +28,8 @@ public class LevelDb : MonoBehaviour
         public float TotalTime;
 		public float MicroTime;
 		public float FlipTime;
-		public string Name;
+        public float RefillTime;
+        public string Name;
 		public List<int> Numbers;
 		public List<int> FlipNumbers;
 		public List<float> BonusTime;

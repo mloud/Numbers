@@ -163,7 +163,11 @@ public class LevelEditorController
     {
         level.Colors = colors;
     }
-    
+
+    public void SetRefillTime(LevelDb.LevelDef level, int time)
+    {
+        level.RefillTime = time;
+    }
 
     private int[] GetRandomNumbers(int count, int from, int to)
     {

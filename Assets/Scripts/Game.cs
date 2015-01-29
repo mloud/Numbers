@@ -15,6 +15,7 @@ public class Game : MonoBehaviour
 	private float MicroTimer { get; set; }
 	private float LevelTimer { get; set; }
 	private float FlipTimer { get; set; }
+    private float RefillTimer { get; set; }
 	private int FlipNumberIndex { get; set; }
 
     private ComboEffect ComboEffect;
@@ -87,6 +88,7 @@ public class Game : MonoBehaviour
 
         win.BtnContinue.onClick.AddListener(() => { 
             RunTimer();
+            App.Instance.Sound.ResumeMusic();
             App.Instance.WindowManager.CloseWindow(win.Name);
         });
 
@@ -101,16 +103,13 @@ public class Game : MonoBehaviour
             App.Instance.WindowManager.CloseWindow(win.Name); 
         });
 
-        GameUi.Instance.btnPause.gameObject.SetActive(false);
+       
     }
 
     private void RunTimer()
     {
         CurrState = State.Running;
         UnityEngine.Time.timeScale = 1.0f;
-        GameUi.Instance.btnPause.gameObject.SetActive(true);
-
-        App.Instance.Sound.ResumeMusic();
     }
 
 	private void RunLevel()
@@ -133,6 +132,9 @@ public class Game : MonoBehaviour
 
 	public void Init(LevelDb.LevelDef level)
 	{
+
+        CurrState = State.Stopped;
+
         if (Model != null)
         {
             Model.Numbers.Clear ();
@@ -156,6 +158,7 @@ public class Game : MonoBehaviour
 		MicroTimer = LevelDef.MicroTime;
 		LevelTimer = LevelDef.TotalTime;
 		FlipTimer = LevelDef.FlipTime;
+        RefillTimer = LevelDef.RefillTime;
 
 		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
@@ -185,6 +188,8 @@ public class Game : MonoBehaviour
 		MicroTimer -= Time.deltaTime;
 		LevelTimer -= Time.deltaTime;
 		FlipTimer -= Time.deltaTime;
+        RefillTimer -= Time.deltaTime;
+        
 
         if (LevelTimer <= 0 || Model.Circles.Count == 0 || (Model.Circles.Count == 1 && Model.Numbers.Count == 0))
 		{
@@ -207,6 +212,28 @@ public class Game : MonoBehaviour
     
             rndCircle.AddSpeciality(SpecialityFactory.Create("f", "2", rndCircle, Model.Context));
 		}
+        else if (RefillTimer < 0)
+        {
+            RefillTimer = LevelDef.RefillTime;
+
+            var emptySlots = Slots.FindAll(x => x.Circle == null);
+
+            if (emptySlots.Count > 0)
+            {
+                var rndSlot = emptySlots[Random.Range(0,emptySlots.Count - 1)];
+
+                var circle = CreateCircle(Resources.Load<GameObject>("Prefabs/Circle"), rndSlot);
+
+                circle.Flip(true, 0, 0);
+                circle.Flip(false, 0.3f, 0);
+
+                circle.SetValue(GetNextFlipNumber());
+                circle.SetColor(GetNextColor());
+
+
+                Model.Circles.Add(circle);
+            }
+        }
 
 		Hud.Instance.SetuTimerProgress (MicroTimer / LevelDef.MicroTime);
 		Hud.Instance.SetLevelTimerProgress (LevelTimer / LevelDef.TotalTime, LevelDef.TotalTime);
@@ -220,6 +247,11 @@ public class Game : MonoBehaviour
         FlipNumberIndex = (FlipNumberIndex + 1) >= LevelDef.FlipNumbers.Count ? 0 : FlipNumberIndex + 1;
 
         return number;
+    }
+
+    public int GetNextColor()
+    {
+        return Random.Range(2, 2 + LevelDef.Colors);
     }
 
    
@@ -240,7 +272,20 @@ public class Game : MonoBehaviour
 
 			break;
 		}
+
+        GameUi.Instance.btnPause.gameObject.SetActive(CurrState == State.Running);
 	}
+
+    CircleController CreateCircle(GameObject prefab, Slot slot)
+    {
+        var circle = (Instantiate(prefab) as GameObject).GetComponent<CircleController>();
+        
+        slot.Circle = circle;
+        circle.OnRemove += slot.OnCircleRemove;
+        circle.Model.Position = new Vector3(slot.transform.position.x, slot.transform.position.y, 0);
+        circle.OnClick += OnCircleClick;
+        return circle;
+    }
 
 	void InitPlayground()
 	{
@@ -268,18 +313,17 @@ public class Game : MonoBehaviour
 			for (int x = 0; x < LevelDef.Cols; ++x)
 			{
                 var slot = (Instantiate(slotPrefab) as GameObject).GetComponent<Slot>();
-                var circle = (Instantiate(circlePrefab) as GameObject).GetComponent<CircleController>();
-
                 slot.SetColor(App.Instance.ColorManager.GetColor((y * LevelDef.Rows + x) % 2 == 0 ? ColorDef.ColorType.SlotLight : ColorDef.ColorType.SlotDark));
-                Destroy(slot.GetComponent<Collider2D>());
-                circle.Model.Position = new Vector3(xPos, yPos, 0);
                 slot.transform.position = new Vector3(xPos, yPos, 0);
-               
-				Model.Circles.Add(circle);
+                Destroy(slot.GetComponent<Collider2D>());
+
+                var circle = CreateCircle(circlePrefab, slot);
+                
+                Model.Circles.Add(circle);
                 Slots.Add(slot);
 
 				circle.SetValue(numbers[index]);
-                circle.SetColor(Random.Range(2, 2 + LevelDef.Colors));
+                circle.SetColor(GetNextColor());
 
                 // add specialities
                 List<LevelDb.SpecialityDef> specs = DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
@@ -287,14 +331,11 @@ public class Game : MonoBehaviour
 
 				circle.Run();
 
-				circle.OnClick += OnCircleClick;
-
 				xPos += slotSize;
 
 				++index;
 
                 circle.Flip(true, 0, 0);
-
 			}
 
 			yPos -= slotSize;
