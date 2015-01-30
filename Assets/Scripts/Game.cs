@@ -112,15 +112,17 @@ public class Game : MonoBehaviour
         UnityEngine.Time.timeScale = 1.0f;
     }
 
-	private void RunLevel()
+	private IEnumerator RunLevelCoroutine()
 	{
-		CurrState = State.Running;	
+        // asseble slots
+	    yield return StartCoroutine(PlaygroundAssembler.AssembleRandomCoroutine(this, Slots));
 
-		App.Instance.Sound.PlayMusic ("ingame");
+        // flip pogs
+        yield return StartCoroutine(PlaygroundFlipper.FlipRandomCoroutine(this, LevelDef, Model.Circles));
 
+        CurrState = State.Running;
 
-        PlaygroundFlipper.FlipRandom(LevelDef, Model.Circles);
-
+        App.Instance.Sound.PlayMusic("ingame");
 
         GameUi.Instance.btnPause.gameObject.SetActive(true);
    }
@@ -175,8 +177,10 @@ public class Game : MonoBehaviour
                 var winStartLevel = App.Instance.WindowManager.OpenWindow(WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level });
                 winStartLevel.GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
-                    RunLevel();
                     App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
+
+                    StartCoroutine(RunLevelCoroutine());
+                  
                 });
             });
 		}
@@ -316,6 +320,7 @@ public class Game : MonoBehaviour
                 slot.SetColor(App.Instance.ColorManager.GetColor((y * LevelDef.Rows + x) % 2 == 0 ? ColorDef.ColorType.SlotLight : ColorDef.ColorType.SlotDark));
                 slot.transform.position = new Vector3(xPos, yPos, 0);
                 Destroy(slot.GetComponent<Collider2D>());
+                slot.gameObject.SetActive(false);
 
                 var circle = CreateCircle(circlePrefab, slot);
                 
