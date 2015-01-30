@@ -134,6 +134,13 @@ public class LevelEditorView : EditorWindow
                 level.Score = EditorGUILayout.IntField(level.Score);
                 GUILayout.EndHorizontal();
 
+
+				// LeaderboardId
+				GUILayout.BeginHorizontal();
+				EditorGUILayout.LabelField("LeaderboardId");
+				level.LeaderboardId = EditorGUILayout.TextField(level.LeaderboardId);
+				GUILayout.EndHorizontal();
+
                 //Level duration
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Level duration (sec)");

@@ -8,9 +8,11 @@ public class App : MonoBehaviour
 
 	public GoogleAnalyticsV3 GoogleAnalytics;
 
+	public SocialService SocialService { get; private set; }
+
 	public Db Db { get; private set; }
 
-	public Player Player { get; private set; }
+	public Num.NPlayer Player { get; private set; }
 
     public ColorManager ColorManager{ get; private set; }
 
@@ -19,6 +21,8 @@ public class App : MonoBehaviour
     public WindowManager WindowManager { get; private set; }
 
     public Sound Sound { get; private set;  }
+
+	public Console Console { get; private set; }
 
 #if UNITY_EDITOR
     private int StartLevelOrder = -1;
@@ -66,6 +70,19 @@ public class App : MonoBehaviour
 	
 	void Init()
 	{
+		// Console
+		Console = (Instantiate(Resources.Load<GameObject>("Prefabs/__Console__")) as GameObject).GetComponent<Console>();
+		Console.transform.SetParent(transform);
+		Console.Show(true);
+		DontDestroyOnLoad(Console.gameObject);
+
+		// Social Service
+		SocialService = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialService__")) as GameObject).GetComponent<SocialService>();
+		SocialService.transform.SetParent(transform);
+		SocialService.Activate();
+		SocialService.Login(null);
+
+
         //ColorManager
         ColorManager = (Instantiate(Resources.Load<GameObject>("Prefabs/__ColorManager__")) as GameObject).GetComponent<ColorManager>();
         ColorManager.transform.SetParent(transform);
@@ -84,7 +101,7 @@ public class App : MonoBehaviour
 		var PlayerGo = new GameObject ("Player");
 		DontDestroyOnLoad (PlayerGo);
 		PlayerGo.transform.SetParent (transform);
-		Player = PlayerGo.AddComponent<Player> ();
+		Player = PlayerGo.AddComponent<Num.NPlayer> ();
 		Player.Load ();
 	
         // Window Manager

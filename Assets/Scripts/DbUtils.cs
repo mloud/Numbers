@@ -33,7 +33,7 @@ public static class DbUtils
 		return App.Instance.Player.CompletedLevels.ContainsKey (level.Name);
 	}
 
-	public static Player.LevelStatistic GetLevelStatistic(LevelDb.LevelDef level)
+	public static Num.NPlayer.LevelStatistic GetLevelStatistic(LevelDb.LevelDef level)
 	{
 		if (App.Instance.Player.CompletedLevels.ContainsKey (level.Name))
 		{

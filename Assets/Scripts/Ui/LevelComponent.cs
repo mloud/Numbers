@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class LevelComponent : MonoBehaviour
 {
@@ -16,6 +17,16 @@ public class LevelComponent : MonoBehaviour
 
 	[SerializeField]
 	private Text txtScore;
+
+	[SerializeField]
+	private Transform rankTransform;
+
+	[SerializeField]
+	private Text txtRanking;
+
+	[SerializeField]
+	private Text txtRankingFrom;
+
 
 
 	public Button Button { get; private set; }
@@ -39,13 +50,22 @@ public class LevelComponent : MonoBehaviour
 		Debug.Log ("LevelComponent.OnClick() " + LevelDef.Order);
 	}
 
+	private void SetRanking(int pos, int from, bool visible)
+	{
+		rankTransform.gameObject.SetActive(visible);
+
+		txtRanking.text = pos.ToString();
+
+		txtRankingFrom.text = pos.ToString();
+	}
+
 	private void Refresh()
 	{
 		bool isUncloked = DbUtils.IsLevelUnlocked (LevelDef);
 
 		txtLevel.text = (LevelDef.Order + 1).ToString ();
 
-		Player.LevelStatistic lStats = DbUtils.GetLevelStatistic (LevelDef);
+		Num.NPlayer.LevelStatistic lStats = DbUtils.GetLevelStatistic (LevelDef);
 
 		alreadyPlayerIcon.gameObject.SetActive (lStats != null);
 		txtScore.gameObject.SetActive (lStats != null);
@@ -57,7 +77,30 @@ public class LevelComponent : MonoBehaviour
 		{
 			txtScore.text = lStats.Score.ToString();
 		}
+
+
+		bool scoreRecExist = false;
+		int rank = 0;
+		int from = 0;
+
+		if (App.Instance.SocialService.IsLogged())
+		{
+			App.Instance.SocialService.LoadScores(LevelDef.LeaderboardId, (UnityEngine.SocialPlatforms.IScore[] scores) =>
+			{
+				var scoreRec = Array.Find(scores, x => x.userID == App.Instance.SocialService.UserId);
+
+				if (scoreRec != null)
+				{
+					rank = scoreRec.rank;
+					from = scores.Length;
+					scoreRecExist = true;
+				}
+			});
+		}
+
+		SetRanking(rank, from, scoreRecExist);
 	}
+
 
 	void Start ()
 	{}

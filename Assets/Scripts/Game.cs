@@ -403,9 +403,13 @@ public class Game : MonoBehaviour
 	
 		bool levelFinished = Score >= LevelDef.Score;
 
+	
+	
 		if (levelFinished)
 		{
 			App.Instance.Player.LevelFinished (LevelDef, Score);
+
+			App.Instance.SocialService.ReportScore(Score, LevelDef.LeaderboardId, null);
 
 			bool gameFinished = DbUtils.IsGameFinished ();
 
