@@ -27,6 +27,10 @@ public class GameOverWindow : Window
 	[SerializeField]
 	Button btnRepeat;
 
+	[SerializeField]
+	Button btnLeaderboard;
+
+
 	private Param Parameters { get; set; }
 
 	public class Param
@@ -38,6 +42,7 @@ public class GameOverWindow : Window
 		public Action OnRestartClick;
 		public Action OnMenuClick;
 		public bool IsNextLevel;
+		public LevelDb.LevelDef LevelDef;
 	}
 
 	protected override void OnInit(object param)
@@ -53,6 +58,13 @@ public class GameOverWindow : Window
         btnMenu.gameObject.SetActive(Parameters.IsNextLevel);
 
         btnOk.gameObject.SetActive(!Parameters.IsNextLevel);
+
+		btnLeaderboard.gameObject.SetActive(App.Instance.SocialService.IsLogged());
+		btnLeaderboard.onClick.AddListener( () => 
+		{
+			App.Instance.SocialService.ShowSpecificLeaderBoard(Parameters.LevelDef.LeaderboardId);
+		});
+
 	}
 
 	public void OnNextClick()

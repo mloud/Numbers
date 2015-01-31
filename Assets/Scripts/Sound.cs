@@ -49,7 +49,7 @@ public class Sound : MonoBehaviour
 	public void PlayEffect(string name)
 	{
 		ASource.PlayOneShot (Clips.Find (x => x.Name == name).AClip);			
-		Debug.Log ("Sound.PlayEffect() " + name + " " + Time.time);
+		Core.Dbg.Log ("Sound.PlayEffect() " + name + " " + Time.time);
 	}
 
 	public void PlayMusic(string name)
@@ -60,7 +60,7 @@ public class Sound : MonoBehaviour
 		ASourceMusic.volume = song.Volume;
 		ASourceMusic.Play ();
 
-		Debug.Log ("Sound.PlayMusic() " + name + " " + Time.time);
+		Core.Dbg.Log ("Sound.PlayMusic() " + name + " " + Time.time);
 	}
 
 
@@ -68,25 +68,25 @@ public class Sound : MonoBehaviour
 	public void StopEffects()
 	{
 		ASource.Stop ();
-		Debug.Log ("Sound.StopEffects() " + Time.time);
+		Core.Dbg.Log ("Sound.StopEffects() " + Time.time);
 	}
 
     public void PauseMusic()
     {
         StartCoroutine(FadeMusicCoroutine(true, 1.0f, delegate { ASourceMusic.Pause(); }));
-        Debug.Log("Sound.Pause() " + Time.time);
+        Core.Dbg.Log("Sound.Pause() " + Time.time);
     }
 
     public void ResumeMusic()
     {
         StartCoroutine(FadeMusicCoroutine(false, 1.0f, delegate { ASourceMusic.Play(); }));
-        Debug.Log("Sound.Resume() " + Time.time);
+        Core.Dbg.Log("Sound.Resume() " + Time.time);
     }
 
 	public void StopMusic()
 	{
         StartCoroutine(FadeMusicCoroutine(true, 1.0f, delegate { ASourceMusic.Stop(); }));
-		Debug.Log ("Sound.StopMusic() " + Time.time);
+		Core.Dbg.Log ("Sound.StopMusic() " + Time.time);
 	}
 
    private IEnumerator FadeMusicCoroutine(bool fadeOut, float time, Action action)

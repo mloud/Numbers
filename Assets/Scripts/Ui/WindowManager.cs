@@ -108,5 +108,7 @@ public class WindowManager : MonoBehaviour
     private void OnLevelWasLoaded(int level)
     {
         Windows.Clear();
+		ClosingWindows.Clear();
+		WindowsToOpen.Clear();
     }
 }

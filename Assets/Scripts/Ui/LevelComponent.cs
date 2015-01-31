@@ -27,16 +27,23 @@ public class LevelComponent : MonoBehaviour
 	[SerializeField]
 	private Text txtRankingFrom;
 
+	[SerializeField]
+	private Transform leaderboardTransform;
 
 
-	public Button Button { get; private set; }
+	[SerializeField]
+	private Button levelButton;
+
+	[SerializeField]
+	private Button leaderboardButton;
+
+	public Button LevelButton { get { return levelButton; } }
+
+	public Button LeaderboardButton { get { return leaderboardButton; } }
+
 
 	private LevelDb.LevelDef LevelDef { get; set; }
 
-	private void Awake()
-	{
-		Button = GetComponent<Button> ();
-	}
 
 	public void Set(LevelDb.LevelDef levelDef)
 	{
@@ -47,13 +54,12 @@ public class LevelComponent : MonoBehaviour
 
 	public void OnClick()
 	{
-		Debug.Log ("LevelComponent.OnClick() " + LevelDef.Order);
+		Core.Dbg.Log ("LevelComponent.OnClick() " + LevelDef.Order);
 	}
 
 	private void SetRanking(int pos, int from, bool visible)
 	{
 		rankTransform.gameObject.SetActive(visible);
-
 		txtRanking.text = pos.ToString();
 
 		txtRankingFrom.text = pos.ToString();
@@ -83,6 +89,7 @@ public class LevelComponent : MonoBehaviour
 		int rank = 0;
 		int from = 0;
 
+	
 		if (App.Instance.SocialService.IsLogged())
 		{
 			App.Instance.SocialService.LoadScores(LevelDef.LeaderboardId, (UnityEngine.SocialPlatforms.IScore[] scores) =>
@@ -99,6 +106,10 @@ public class LevelComponent : MonoBehaviour
 		}
 
 		SetRanking(rank, from, scoreRecExist);
+
+		leaderboardTransform.gameObject.SetActive(App.Instance.SocialService.IsLogged());
+		
+
 	}
 
 

@@ -324,25 +324,34 @@ public class LevelEditorView : EditorWindow
         if (level.Patterns != null)
             allPatterns.RemoveAll(x=>level.Patterns.Find(y=>y ==x) != null); 
 
-        PatternIndex = EditorGUILayout.Popup(PatternIndex, allPatterns.ToArray());
-        if (GUILayout.Button("Add"))
-        {
-            Controller.AddPattern(level, allPatterns[PatternIndex]);
-        }
+		if (GUILayout.Button("Create Patterns"))
+		{
+			Controller.CreatePatterns(level);
+		}
+
+		if (level.Patterns != null)
+		{
+
+	        PatternIndex = EditorGUILayout.Popup(PatternIndex, allPatterns.ToArray());
+	        if (GUILayout.Button("Add"))
+	        {
+	            Controller.AddPattern(level, allPatterns[PatternIndex]);
+	        }
 
 
-        for (int i = 0; i < level.Patterns.Count; ++i)
-        {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(level.Patterns[i]);
-            
-            if (GUILayout.Button("Remove"))
-            {
-                Controller.RemovePattern(level, level.Patterns[i]);
-            }
+	        for (int i = 0; i < level.Patterns.Count; ++i)
+	        {
+	            EditorGUILayout.BeginHorizontal();
+	            EditorGUILayout.LabelField(level.Patterns[i]);
+	            
+	            if (GUILayout.Button("Remove"))
+	            {
+	                Controller.RemovePattern(level, level.Patterns[i]);
+	            }
 
-            EditorGUILayout.EndHorizontal();
-        }
+	            EditorGUILayout.EndHorizontal();
+	        }
+		}
 
     }
 
@@ -367,7 +376,8 @@ public class LevelEditorView : EditorWindow
 
         if (!onlyIfNull || isNull)
         {
-            Debug.Log("Syncing curve from LevelDef.Probability");
+		
+            Core.Dbg.Log("Syncing curve from LevelDef.Probability");
             for (int i = 0; i < level.Probabilities.Count; ++i)
             {
                 var keyFrame = keys [i];
@@ -402,7 +412,7 @@ public class LevelEditorView : EditorWindow
 
         String str = "Updating LevelDef.Probability -> ";
         level.Probabilities.ForEach(x => str += x.ToString() + " " );
-        Debug.Log(str);
+		Core.Dbg.Log(str);
 
     }
 

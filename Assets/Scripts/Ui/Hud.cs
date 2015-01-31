@@ -19,6 +19,10 @@ public class Hud : MonoBehaviour
 	TextMesh scoreRequired;
 
 	[SerializeField]
+	TextMesh scoreSlash;
+
+
+	[SerializeField]
 	ProgressBar barFilluTimer;
 
 	[SerializeField]
@@ -40,6 +44,10 @@ public class Hud : MonoBehaviour
 	{
 		scoreRequired.text = requiredScore.ToString ();
 		score.text = actualScore.ToString ();
+
+		scoreRequired.gameObject.SetActive(requiredScore > 0);
+		scoreSlash.gameObject.SetActive(requiredScore > 0);
+
 
 		SetLevelTimerProgress (1, levelDuration);
 		SetuTimerProgress (1);

@@ -4,11 +4,23 @@ using System.Collections;
 
 public class App : MonoBehaviour
 {
-	public static App Instance { get; private set; }
+	public static App Instance 
+	{ 
+		get 
+		{
+			if (instance == null)
+			{
+				GameObject go = new GameObject("__App__");
+				instance = go.AddComponent<App>();
+			}
+
+			return instance;
+		}
+	}
 
 	public GoogleAnalyticsV3 GoogleAnalytics;
 
-	public SocialService SocialService { get; private set; }
+	public Core.SocialService SocialService { get; private set; }
 
 	public Db Db { get; private set; }
 
@@ -22,7 +34,13 @@ public class App : MonoBehaviour
 
     public Sound Sound { get; private set;  }
 
-	public Console Console { get; private set; }
+	public RootConsole RootConsole { get; private set; }
+
+	public LogConsole Console { get; private set; }
+
+	public SocialServiceConsole SocialConsole { get; private set; }
+
+	private static App instance;
 
 #if UNITY_EDITOR
     private int StartLevelOrder = -1;
@@ -30,8 +48,6 @@ public class App : MonoBehaviour
 	void Awake()
 	{
         Application.targetFrameRate = 30;
-
-		Instance = this;
 
 		DontDestroyOnLoad (gameObject);
 
@@ -54,12 +70,23 @@ public class App : MonoBehaviour
         WindowManager.OpenWindow(WindowDef.Loading, null);
 
 		PersistentData.Push (level);
-		Application.LoadLevel (1);// GameScene
+		App.Instance.LoadScene(SceneDef.GameScene);
 	}
 
-	public void GoToLevelSelection()
+	public void StartSurvival()
 	{
-		Application.LoadLevel (0);
+		var level = Db.LevelDb.Levels.Find(x=>x.Name == "Survival");
+
+		Core.Dbg.Assert(level != null, "App.StartLevel() Survival level not found");
+
+		StartLevel(level);
+		
+	}
+
+	public void LoadScene(string scene)
+	{
+		WindowManager.OpenWindow(WindowDef.Loading, null);
+		Application.LoadLevel (scene);
 	}
 
 	public void ResetProgress()
@@ -70,18 +97,28 @@ public class App : MonoBehaviour
 	
 	void Init()
 	{
-		// Console
-		Console = (Instantiate(Resources.Load<GameObject>("Prefabs/__Console__")) as GameObject).GetComponent<Console>();
+		// RootConsole
+		RootConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__RootConsole__")) as GameObject).GetComponent<RootConsole>();
+		RootConsole.transform.SetParent(transform);
+		DontDestroyOnLoad(RootConsole.gameObject);
+
+		// SocialConsole
+		SocialConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialServiceConsole__")) as GameObject).GetComponent<SocialServiceConsole>();
+		SocialConsole.transform.SetParent(transform);
+		DontDestroyOnLoad(SocialConsole.gameObject);
+
+
+		// LogConsole
+		Console = (Instantiate(Resources.Load<GameObject>("Prefabs/__LogConsole__")) as GameObject).GetComponent<LogConsole>();
 		Console.transform.SetParent(transform);
-		Console.Show(true);
+		Console.Show(false);
 		DontDestroyOnLoad(Console.gameObject);
 
 		// Social Service
-		SocialService = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialService__")) as GameObject).GetComponent<SocialService>();
+		SocialService = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialService__")) as GameObject).GetComponent<Core.SocialService>();
 		SocialService.transform.SetParent(transform);
 		SocialService.Activate();
-		SocialService.Login(null);
-
+	
 
         //ColorManager
         ColorManager = (Instantiate(Resources.Load<GameObject>("Prefabs/__ColorManager__")) as GameObject).GetComponent<ColorManager>();

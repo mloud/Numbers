@@ -1,6 +1,8 @@
 ﻿
 
-public class NumSocialService : SocialService
+
+
+public class NumSocialService : Core.SocialService
 {
 
 	

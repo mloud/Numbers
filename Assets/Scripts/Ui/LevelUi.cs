@@ -11,9 +11,19 @@ public class LevelUi : MonoBehaviour
 	[SerializeField]
 	private Text Titles; 
 
+	[SerializeField]
+	private Button resetButton;
+
+	[SerializeField]
+	private Button backButton;
+
+
 
 	void Start ()
 	{
+		resetButton.onClick.AddListener( () => { OnReset(); });
+		backButton.onClick.AddListener( () => { OnBack(); });
+
 		Init ();
 	}
 
@@ -38,7 +48,9 @@ public class LevelUi : MonoBehaviour
 #if !UNLOCK_LEVELS
 			if (DbUtils.IsLevelUnlocked(levelDef))
 #endif
-				level.Button.onClick.AddListener ( () => OnLevelClick(levelDef));
+			level.LevelButton.onClick.AddListener ( () => OnLevelClick(levelDef));
+
+			level.LeaderboardButton.onClick.AddListener( () => OnLeaderboardClick(levelDef));
 		}
 	}
 
@@ -48,7 +60,12 @@ public class LevelUi : MonoBehaviour
 	public void OnReset()
 	{
 		App.Instance.ResetProgress ();
-		App.Instance.GoToLevelSelection ();
+		App.Instance.LoadScene (SceneDef.LevelSelection);
+	}
+
+	public void OnBack()
+	{
+		App.Instance.LoadScene(SceneDef.MenuScene);
 	}
 
 	private void OnLevelClick(LevelDb.LevelDef level)
@@ -56,5 +73,9 @@ public class LevelUi : MonoBehaviour
 		App.Instance.StartLevel (level);
 	}
 
+	private void OnLeaderboardClick(LevelDb.LevelDef level)
+	{
+		App.Instance.SocialService.ShowSpecificLeaderBoard(level.LeaderboardId);
+	}
 
 }

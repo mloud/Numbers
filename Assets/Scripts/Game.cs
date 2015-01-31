@@ -94,7 +94,7 @@ public class Game : MonoBehaviour
 
         win.BtnMenu.onClick.AddListener(() => {
             RunTimer(); 
-            App.Instance.GoToLevelSelection();
+            App.Instance.LoadScene(SceneDef.LevelSelection);
             App.Instance.WindowManager.CloseWindow(win.Name);
         });
         
@@ -317,8 +317,11 @@ public class Game : MonoBehaviour
 			for (int x = 0; x < LevelDef.Cols; ++x)
 			{
                 var slot = (Instantiate(slotPrefab) as GameObject).GetComponent<Slot>();
-                slot.SetColor(App.Instance.ColorManager.GetColor((y * LevelDef.Rows + x) % 2 == 0 ? ColorDef.ColorType.SlotLight : ColorDef.ColorType.SlotDark));
-                slot.transform.position = new Vector3(xPos, yPos, 0);
+                
+
+				slot.SetColor(App.Instance.ColorManager.GetColor((y * LevelDef.Cols + x) % 2 == 0 ? ColorDef.ColorType.SlotLight : ColorDef.ColorType.SlotDark));
+                
+				slot.transform.position = new Vector3(xPos, yPos, 0);
                 Destroy(slot.GetComponent<Collider2D>());
                 slot.gameObject.SetActive(false);
 
@@ -431,7 +434,8 @@ public class Game : MonoBehaviour
 				OnRestartClick = OnRestart,
 				OnNextClick = OnNextLevel,
 				OnMenuClick = OnMenu,
-				IsNextLevel = !gameFinished
+				IsNextLevel = !gameFinished,
+				LevelDef = this.LevelDef
 			});
 
 		}
@@ -482,7 +486,7 @@ public class Game : MonoBehaviour
 
 	private void OnMenu()
 	{
-		App.Instance.GoToLevelSelection ();
+		App.Instance.LoadScene(SceneDef.LevelSelection);
 	}
 
 	private void OnNextLevel()
