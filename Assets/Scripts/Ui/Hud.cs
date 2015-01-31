@@ -31,7 +31,8 @@ public class Hud : MonoBehaviour
 	[SerializeField]
 	NumberContainer numberContainer;
 
-
+    [SerializeField]
+    Animator animator;
 
 	public static Hud Instance { get; private set; }
 
@@ -42,6 +43,8 @@ public class Hud : MonoBehaviour
 
 	public void Init(int actualScore, int requiredScore, float levelDuration)
 	{
+        Stop();
+
 		scoreRequired.text = requiredScore.ToString ();
 		score.text = actualScore.ToString ();
 
@@ -53,13 +56,29 @@ public class Hud : MonoBehaviour
 		SetuTimerProgress (1);
 	}
 
+    public void Play()
+    {
+        animator.SetTrigger("Start");
+    }
+
+    public void Stop()
+    {
+        animator.SetTrigger("Stop");
+    }
+
 	public void SetuTimerProgress(float value)
 	{
 		barFilluTimer.Set (value);
 	}
 
+
 	public void SetLevelTimerProgress(float value, float levelDuration)
 	{
+        float maxSpeed = 10;
+        float minSpeed = 1;
+        animator.speed = minSpeed + (maxSpeed - minSpeed) * (1 - value);
+
+
 		barFillLevelTimer.Set (value);
 
 

@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using System.Collections.Generic;
+
 
 public class LevelUi : MonoBehaviour
 {
@@ -18,6 +20,11 @@ public class LevelUi : MonoBehaviour
 	private Button backButton;
 
 
+    private List<LevelComponent> Levels { get; set; }
+
+    private float AnimDuration { get; set; }
+    private int AnimIdex { get; set; }
+    private float AnimTimer { get; set;  }
 
 	void Start ()
 	{
@@ -33,6 +40,15 @@ public class LevelUi : MonoBehaviour
 	
 		GameObject levelPrefab = Resources.Load ("Prefabs/Ui/Level") as GameObject;
 
+        AnimDuration = 0.5f;
+        AnimTimer = Time.time + AnimDuration;
+        AnimIdex = 0;
+
+        if (Levels != null)
+            Levels.ForEach(x => Destroy(x.gameObject));
+        
+
+        Levels = new List<LevelComponent>();
 	
 		for (int i = 0; i < App.Instance.Db.LevelDb.Levels.Count; ++i)
 		{
@@ -51,11 +67,23 @@ public class LevelUi : MonoBehaviour
 			level.LevelButton.onClick.AddListener ( () => OnLevelClick(levelDef));
 
 			level.LeaderboardButton.onClick.AddListener( () => OnLeaderboardClick(levelDef));
-		}
+
+            Levels.Add(level);
+        }
 	}
 
 	void Update () 
-	{}
+	{
+        if (Time.time > AnimTimer)
+        {
+            AnimTimer = Time.time + AnimDuration;
+
+            Levels[AnimIdex].GetComponent<Animation>().Play();
+
+            AnimIdex = (AnimIdex + 1) < Levels.Count ? AnimIdex + 1 : 0; 
+        }
+
+    }
 
 	public void OnReset()
 	{

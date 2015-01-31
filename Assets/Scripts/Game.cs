@@ -103,6 +103,8 @@ public class Game : MonoBehaviour
             App.Instance.WindowManager.CloseWindow(win.Name); 
         });
 
+
+        Hud.Instance.Stop();
        
     }
 
@@ -110,6 +112,8 @@ public class Game : MonoBehaviour
     {
         CurrState = State.Running;
         UnityEngine.Time.timeScale = 1.0f;
+
+        Hud.Instance.Play();
     }
 
 	private IEnumerator RunLevelCoroutine()
@@ -125,6 +129,8 @@ public class Game : MonoBehaviour
         App.Instance.Sound.PlayMusic("ingame");
 
         GameUi.Instance.btnPause.gameObject.SetActive(true);
+
+        Hud.Instance.Play();
    }
 
 	private void Restart()
