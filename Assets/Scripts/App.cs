@@ -67,7 +67,7 @@ public class App : MonoBehaviour
 
     public void StartLevel(LevelDb.LevelDef level)
 	{
-        WindowManager.OpenWindow(WindowDef.Loading, null);
+        //WindowManager.OpenWindow(WindowDef.Loading, null);
 
 		PersistentData.Push (level);
 		App.Instance.LoadScene(SceneDef.GameScene);
@@ -85,8 +85,17 @@ public class App : MonoBehaviour
 
 	public void LoadScene(string scene)
 	{
-		WindowManager.OpenWindow(WindowDef.Loading, null);
+		StartCoroutine(LoadSceneCoroutine(scene));
+	}
+
+	private IEnumerator LoadSceneCoroutine(string scene)
+	{
+		yield return StartCoroutine(WindowManager.ShowFadeCoroutine(false, 0.1f));
+		//WindowManager.OpenWindow(WindowDef.Loading, null);
 		Application.LoadLevel (scene);
+
+		//yield return StartCoroutine(WindowManager.ShowFadeCoroutine(true, 2.0f));
+
 	}
 
 	public void ResetProgress()
@@ -144,6 +153,8 @@ public class App : MonoBehaviour
         // Window Manager
         var windowManGo = new GameObject("__WindowManager__");
         WindowManager = windowManGo.AddComponent<WindowManager>();
+		DontDestroyOnLoad(windowManGo);
+		windowManGo.transform.SetParent(transform);
 
         // Sound
         Sound = (Instantiate(Resources.Load<GameObject>("Prefabs/__Sound__")) as GameObject).GetComponent<Sound>();

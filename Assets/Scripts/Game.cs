@@ -7,6 +7,7 @@ public class Game : MonoBehaviour
 {
 
 	private Playground Playground { get; set; }
+	private GameSoundSystem SoundSystem { get; set; }
 
 	private LevelDb.LevelDef LevelDef { get; set; }
 
@@ -44,7 +45,11 @@ public class Game : MonoBehaviour
         {
             var appGo = Instantiate(Resources.Load("Prefabs/__App__"));
         }
-    }
+
+		SoundSystem = (Instantiate(Resources.Load<GameObject>("Prefabs/__GameSoundSystem__")) as GameObject).GetComponent<GameSoundSystem>();
+    
+		SoundSystem.transform.SetParent(transform);
+	}
 
 	void Start () 
 	{
@@ -138,8 +143,15 @@ public class Game : MonoBehaviour
 		Init (LevelDef);
 	}
 
+	public float GetProgress()
+	{
+		return 1 - Mathf.Clamp01(LevelTimer / LevelDef.TotalTime);
+	}
+
 	public void Init(LevelDb.LevelDef level)
 	{
+
+		App.Instance.Sound.StopMusic();
 
         CurrState = State.Stopped;
 
@@ -155,7 +167,11 @@ public class Game : MonoBehaviour
         Slots.Clear();
 
         // Tap manager
-        Model = new GameModel(new GameContext() { LevelDef = level, Controller = this });
+        
+		Model = new GameModel(new GameContext() { LevelDef = level, Controller = this });
+
+		SoundSystem.Init(new GameContext() { LevelDef = level, Controller = this });
+
 
         Score = 0;
 

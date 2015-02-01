@@ -54,4 +54,10 @@ public class LevelFailedWindow : Window
 		Parameters.OnRestartClick ();
 	}
 
+
+	protected override void OnOpen()
+	{
+		App.Instance.Sound.PlayEffect("levelFailed");
+	}
+
 }

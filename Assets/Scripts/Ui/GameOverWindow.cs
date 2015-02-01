@@ -67,6 +67,11 @@ public class GameOverWindow : Window
 
 	}
 
+	protected override void OnOpen()
+	{
+		App.Instance.Sound.PlayEffect("levelFinished");
+	}
+
 	public void OnNextClick()
 	{
         App.Instance.WindowManager.CloseWindow(Name);	

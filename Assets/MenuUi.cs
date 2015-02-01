@@ -16,6 +16,7 @@ public class MenuUi : MonoBehaviour
 		playLevelsButton.onClick.AddListener( () => { App.Instance.LoadScene(SceneDef.LevelSelection); } );
 		survivalButton.onClick.AddListener( () => { App.Instance.StartSurvival(); } );
 
+		App.Instance.Sound.PlayMusic("menu");
 	}
 	
 	void Update () {

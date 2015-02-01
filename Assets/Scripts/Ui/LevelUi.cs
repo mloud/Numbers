@@ -31,6 +31,9 @@ public class LevelUi : MonoBehaviour
 		resetButton.onClick.AddListener( () => { OnReset(); });
 		backButton.onClick.AddListener( () => { OnBack(); });
 
+		App.Instance.Sound.PlayMusic("menu");
+
+
 		Init ();
 	}
 

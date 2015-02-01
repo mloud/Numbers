@@ -56,13 +56,21 @@ public class Sound : MonoBehaviour
 	{
 		Song song = Songs.Find (x => x.Name == name);
 
-		ASourceMusic.clip = song.AClip;	
-		ASourceMusic.volume = song.Volume;
-		ASourceMusic.Play ();
 
-		Core.Dbg.Log ("Sound.PlayMusic() " + name + " " + Time.time);
+		if (ASourceMusic.clip == null || !ASourceMusic.isPlaying || ASourceMusic.clip.name != song.AClip.name)
+		{
+			ASourceMusic.clip = song.AClip;	
+			ASourceMusic.volume = song.Volume;
+			ASourceMusic.Play ();
+
+			Core.Dbg.Log ("Sound.PlayMusic() " + name + " " + Time.time);
+		}
 	}
 
+	public void SetMusicPitch(float pitch)
+	{
+		ASourceMusic.pitch = pitch;
+	}
 
 
 	public void StopEffects()
@@ -73,19 +81,21 @@ public class Sound : MonoBehaviour
 
     public void PauseMusic()
     {
-        StartCoroutine(FadeMusicCoroutine(true, 1.0f, delegate { ASourceMusic.Pause(); }));
+        StartCoroutine(FadeMusicCoroutine(true, 0.5f, delegate { ASourceMusic.Pause(); }));
         Core.Dbg.Log("Sound.Pause() " + Time.time);
     }
 
     public void ResumeMusic()
     {
-        StartCoroutine(FadeMusicCoroutine(false, 1.0f, delegate { ASourceMusic.Play(); }));
+        StartCoroutine(FadeMusicCoroutine(false, 0.5f, delegate { ASourceMusic.Play(); }));
         Core.Dbg.Log("Sound.Resume() " + Time.time);
     }
 
+
+
 	public void StopMusic()
 	{
-        StartCoroutine(FadeMusicCoroutine(true, 1.0f, delegate { ASourceMusic.Stop(); }));
+        StartCoroutine(FadeMusicCoroutine(true, 0.2f, delegate { ASourceMusic.Stop(); }));
 		Core.Dbg.Log ("Sound.StopMusic() " + Time.time);
 	}
 

@@ -63,6 +63,17 @@ public class WindowManager : MonoBehaviour
 		}
 	}
 
+	public IEnumerator ShowFadeCoroutine(bool fadeOut, float time)
+	{
+		var fade = (Instantiate(Resources.Load<GameObject>("Prefabs/Ui/Fade")) as GameObject).GetComponent<FadeOverlay>();
+		fade.transform.SetParent(GameObject.FindObjectOfType<Canvas>().transform);
+		fade.transform.localScale = Vector3.one;
+		(fade.transform as RectTransform).offsetMin = Vector2.zero;
+		(fade.transform as RectTransform).offsetMax = Vector2.zero;
+
+		yield return StartCoroutine(fade.FadeCoroutine(fadeOut, time));
+	}
+
 	public bool IsOpen(string name)
 	{
 		return Windows.Find (x => x.Name == name) != null;
@@ -102,7 +113,7 @@ public class WindowManager : MonoBehaviour
 
     private void OnWindowOpen(Window window)
     {
-    
+    	
     }
 
     private void OnLevelWasLoaded(int level)

@@ -5,6 +5,7 @@ using System;
 
 public class Window : MonoBehaviour 
 {
+	public Action<Window> OpenStart;
     public Action<Window> CloseFinished;
     public Action<Window> OpenFinished;
 
@@ -41,6 +42,9 @@ public class Window : MonoBehaviour
 	{
         if (Animator != null)
             Animator.SetTrigger("Open");
+
+		if ( OpenStart != null)
+			OpenStart(this);
 
 		OnOpen ();
 
