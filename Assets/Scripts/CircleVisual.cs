@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 
-[ExecuteInEditMode]
+
 public class CircleVisual : MonoBehaviour
 {
    
@@ -189,8 +189,11 @@ public class CircleVisual : MonoBehaviour
     }
 
    private void DoOnClick()
-	{
-		if (OnClick != null)
+    {
+
+       // GetComponent<Animator>().SetTrigger("click");
+       
+       if (OnClick != null)
 		{
 			OnClick(this);
 		}

@@ -9,12 +9,13 @@ public class Game : MonoBehaviour
 	private Playground Playground { get; set; }
 	private GameSoundSystem SoundSystem { get; set; }
 
+
 	private LevelDb.LevelDef LevelDef { get; set; }
 
 	private int Score { get; set; }
 
-	private float MicroTimer { get; set; }
-	private float LevelTimer { get; set; }
+	public float MicroTimer { get; set; }
+	public float LevelTimer { get; set; }
 	private float FlipTimer { get; set; }
     private float RefillTimer { get; set; }
 	private int FlipNumberIndex { get; set; }
@@ -23,11 +24,13 @@ public class Game : MonoBehaviour
 	private OverScoreEffect OverScoreEffect;
 	private BonusEffect BonusEffect;
 
-	private BonusGenerator BonusGenerator { get; set; }
+    private SpecialAbilityManager SpecialAbilityManager { get; set; }
+    private BonusGenerator BonusGenerator { get; set; }
     private GameModel Model { get; set; }
 
 
     private List<Slot> Slots { get; set;  }
+    private List<SpecialSlot> SpecialSlots { get; set; }
 
 	private enum State
 	{
@@ -62,6 +65,7 @@ public class Game : MonoBehaviour
 		BonusGenerator = new BonusGenerator ();
 		BonusGenerator.OnBonusReleased += OnBonusReleased;
 
+       
 
 		Playground = GameObject.FindObjectOfType<Playground> ();
 		ComboEffect = GameObject.FindObjectOfType<ComboEffect> ();
@@ -129,6 +133,10 @@ public class Game : MonoBehaviour
         // flip pogs
         yield return StartCoroutine(PlaygroundFlipper.FlipRandomCoroutine(this, LevelDef, Model.Circles));
 
+
+        // assemble special abilities
+        yield return StartCoroutine(SpecialAbilityAssembler.AssembleCoroutine(SpecialSlots, 0.5f));
+
         CurrState = State.Running;
 
         App.Instance.Sound.PlayMusic("ingame");
@@ -165,12 +173,14 @@ public class Game : MonoBehaviour
 
         Slots.ForEach(x => Destroy(x.gameObject));
         Slots.Clear();
-
-        // Tap manager
         
 		Model = new GameModel(new GameContext() { LevelDef = level, Controller = this });
 
 		SoundSystem.Init(new GameContext() { LevelDef = level, Controller = this });
+
+         // SpecialAbilityManager
+        SpecialAbilityManager = new SpecialAbilityManager(new GameContext() { LevelDef = level, Controller = this });
+
 
 
         Score = 0;
@@ -265,7 +275,8 @@ public class Game : MonoBehaviour
 		Hud.Instance.SetLevelTimerProgress (LevelTimer / LevelDef.TotalTime, LevelDef.TotalTime);
 
 		BonusGenerator.Update ();
-	}
+        SpecialAbilityManager.Update();
+    }
 
     public int GetNextFlipNumber()
     {
@@ -300,6 +311,7 @@ public class Game : MonoBehaviour
 		}
 
         GameUi.Instance.btnPause.gameObject.SetActive(CurrState == State.Running);
+
 	}
 
     CircleController CreateCircle(GameObject prefab, Slot slot)
@@ -313,7 +325,7 @@ public class Game : MonoBehaviour
         return circle;
     }
 
-	void InitPlayground()
+    void InitPlayground()
 	{
 	
 		GameObject circlePrefab = Resources.Load<GameObject> ("Prefabs/Circle");
@@ -370,7 +382,45 @@ public class Game : MonoBehaviour
 
 			yPos -= slotSize;
 		}
+
+        InitSpecialAbilities();
+
 	}
+
+    private void InitSpecialAbilities()
+    {
+        // Init special abilities;
+        if (SpecialSlots != null)
+            SpecialSlots.ForEach(x => Destroy(x.gameObject));
+        SpecialSlots = new List<SpecialSlot>();
+
+        GameObject specialSlot = Resources.Load<GameObject>("Prefabs/SpecialAbilities/Slot");
+        var specialSlotSize = specialSlot.GetComponent<BoxCollider2D>().size;
+        float gap = 0.1f;
+
+        var container = GameObject.Find("SpecialAbilities");
+        float slotX = -((Model.SpecialAbilities.Count * (gap + specialSlotSize.x)) * 0.5f) + specialSlotSize.x * 0.5f;
+        foreach (var sa in Model.SpecialAbilities)
+        {
+            var slot = (Instantiate(specialSlot) as GameObject).GetComponent<SpecialSlot>();
+            slot.OnClick += OnSpecialSlotClick;
+            slot.transform.SetParent(container.transform);
+            slot.SpecialAbility = LevelDef.SpecialAbilities.Find(x => x.Name == sa);
+            slot.SetToMax();
+            var pos = new Vector3(slotX, 0, 0);
+            slot.transform.localPosition = pos;
+
+            var icon = SpecialAbilityFactory.CreateIcon(sa);
+            slot.SetIcon(icon);
+           
+
+            slotX += (gap + specialSlotSize.x);
+
+            slot.gameObject.SetActive(false);
+
+            SpecialSlots.Add(slot);
+        }
+    }
 
 	private void ProcessNumbers()
 	{
@@ -496,6 +546,17 @@ public class Game : MonoBehaviour
 
 	}
 
+    private void OnSpecialSlotClick(SpecialSlot slot)
+    {
+
+        if (slot.CanBeUsed())
+        {
+            var ability = SpecialAbilityFactory.Create(slot.SpecialAbility.Name);
+            SpecialAbilityManager.Run(ability);
+            slot.SetToMax();
+        }
+    }
+
 	private void OnBonusReleased(Bubble bubble)
 	{
 		bubble.OnClick += OnBonusClick;
@@ -535,45 +596,55 @@ public class Game : MonoBehaviour
     {
         return new Number() { Value = circle.Model.Value, Color = circle.Model.Color };
     }
-        
+
+
+    private void ApplyPattern(CircleController circle)
+    {
+        // Number patterns
+        var patternResult = Model.ProcessPatterns(circle);
+
+        if (patternResult.FitSequence)
+        {
+            var numbers = CircleToNumber(circle);
+            Model.Numbers.Add(numbers);
+
+            if (Model.Numbers.Count > 1)
+            {
+                string specialText = patternResult.Pattern.IsSameColor(Model.Numbers) ? "in color" : null;
+                ComboEffect.Show(Model.Numbers.Count, specialText);
+                App.Instance.Sound.PlayEffect("combo" + Model.Numbers.Count);
+            }
+        }
+        else
+        {
+            ProcessNumbers();
+            Model.Numbers.Add(CircleToNumber(circle));
+        }
+
+        Hud.Instance.AddNumber(circle);
+
+        // Tap handlers
+        var tapResult = Model.ProcessTapHandlers(circle);
+
+        if (tapResult.Remove)
+        {
+            Model.Circles.Remove(circle);
+
+            Destroy(circle.gameObject);
+        }
+    }
+
 
 	private void OnCircleClick(CircleController circle)
 	{
 		if (CurrState == State.Running)
 		{
-            // Number patterns
-            var patternResult = Model.ProcessPatterns(circle);
 
-            if (patternResult.FitSequence)
-            {
-                var numbers = CircleToNumber(circle);
-                Model.Numbers.Add(numbers);
+            //bool specialAbilityApplied = ApplySpecialAbility(circle);
+            bool specialAbilityApplied = false; // TODO
 
-                if (Model.Numbers.Count > 1)
-                {
-                    string specialText = patternResult.Pattern.IsSameColor(Model.Numbers) ? "in color" : null;
-                    ComboEffect.Show(Model.Numbers.Count, specialText);
-                    App.Instance.Sound.PlayEffect("combo" + Model.Numbers.Count);
-                }
-            }
-            else
-            {
-                ProcessNumbers();
-                Model.Numbers.Add(CircleToNumber(circle));
-            }
-
-            Hud.Instance.AddNumber(circle);
-
-            // Tap handlers
-            var tapResult = Model.ProcessTapHandlers(circle);            
-
-            if (tapResult.Remove)
-            {
-		    	Model.Circles.Remove (circle);
-
-                Destroy(circle.gameObject);
-            }
-
+            if (!specialAbilityApplied)
+                ApplyPattern(circle);
 
 
             MicroTimer = LevelDef.MicroTime;

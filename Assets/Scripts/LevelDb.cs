@@ -37,6 +37,15 @@ public class LevelDb : MonoBehaviour
         public List<string> SpecialitiesForNumbers;
         public List<float> Probabilities;
         public List<string> Patterns;
+
+        [System.Serializable]
+        public class SpecialAbility
+        {
+            public float RechargeTime;
+            public string Name;
+        }
+
+        public List<SpecialAbility> SpecialAbilities;
     }
 
 	[SerializeField]

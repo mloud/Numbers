@@ -7,19 +7,25 @@ public class MenuUi : MonoBehaviour
 	[SerializeField]
 	private Button playLevelsButton;
 
-	[SerializeField]
-	private Button survivalButton;
+    [SerializeField]
+    private Button survivalButton;
+
+    [SerializeField]
+    private Button leaderboardButton;
 
 
 	void Start ()
 	{
 		playLevelsButton.onClick.AddListener( () => { App.Instance.LoadScene(SceneDef.LevelSelection); } );
 		survivalButton.onClick.AddListener( () => { App.Instance.StartSurvival(); } );
+        leaderboardButton.onClick.AddListener(() => { App.Instance.SocialService.ShowLeaderBoard(); });
+
 
 		App.Instance.Sound.PlayMusic("menu");
 	}
 	
-	void Update () {
-	
+	void Update () 
+    {
+       leaderboardButton.gameObject.SetActive(App.Instance.SocialService.IsLogged());
 	}
 }

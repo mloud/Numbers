@@ -64,6 +64,29 @@ public class LevelEditorController
             OnProbabilityChange(level);
     }
 
+
+    public void CreateSpecialAbilities(LevelDb.LevelDef level)
+    {
+        level.SpecialAbilities = new List<LevelDb.LevelDef.SpecialAbility>();
+    }
+
+    public void AddSpecialAbility(LevelDb.LevelDef level, string ability, float rechargeTime)
+    {
+        
+        Core.Dbg.Assert(level != null && level.SpecialAbilities.Find(x=>x.Name == ability) == null, "LevelEditorController.AddSpecialAbility() " + ability + "  null or already exists");
+
+        if (level.SpecialAbilities.Find(x => x.Name == ability) == null)
+        {
+            level.SpecialAbilities.Add(new LevelDb.LevelDef.SpecialAbility() { Name = ability, RechargeTime = rechargeTime });
+        }
+    }
+
+    public void RemoveSpecialAbility(LevelDb.LevelDef level, string ability)
+    {
+        level.SpecialAbilities.Remove(level.SpecialAbilities.Find(x => x.Name == ability));
+    }
+
+
     public void CreateFlipNumbers(LevelDb.LevelDef level)
     {
         level.FlipNumbers = new List<int>(level.FlipNumbersCount);

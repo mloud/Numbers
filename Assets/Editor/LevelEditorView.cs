@@ -190,6 +190,9 @@ public class LevelEditorView : EditorWindow
                 // Patterns
                 DrawPatternsUsed(level);
 
+                // Special Abilities
+                DrawSpecialAbilities(level);
+
                 EditorGUILayout.Space();
             }
         }
@@ -198,6 +201,55 @@ public class LevelEditorView : EditorWindow
 
         GUILayout.EndScrollView();
     }
+
+    private int SpecialAbilityIndex = 0;
+    private void DrawSpecialAbilities(LevelDb.LevelDef level)
+    {
+        GUILayout.BeginVertical();
+
+        EditorGUILayout.LabelField("SpecialAbilities");
+
+        
+        if (level.SpecialAbilities != null)
+        {
+            var fields = typeof(SpecialAbilityDef).GetFields();
+            List<string> allAbilities = new List<string>();
+            Array.ForEach(fields, x => allAbilities.Add(x.GetValue(null).ToString()));
+
+            allAbilities.RemoveAll(x=>level.SpecialAbilities.Find(y => y.Name == x) != null);
+
+            SpecialAbilityIndex = EditorGUILayout.Popup(PatternIndex, allAbilities.ToArray());
+	        if (GUILayout.Button("Add"))
+	        {
+                Controller.AddSpecialAbility(level, allAbilities[SpecialAbilityIndex], 0);
+	        }
+
+    
+            for (int i = 0; i < level.SpecialAbilities.Count; ++i)
+            {
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(level.SpecialAbilities[i].Name, GUILayout.Width(35));
+                level.SpecialAbilities[i].RechargeTime = EditorGUILayout.FloatField(level.SpecialAbilities[i].RechargeTime, GUILayout.Width(35));
+
+                if (GUILayout.Button("Remove"))
+                {
+                    Controller.RemoveSpecialAbility(level, level.SpecialAbilities[i].Name);
+                }
+        
+                GUILayout.EndHorizontal();
+            }
+        }
+
+
+        if (GUILayout.Button("Create SpecialAbilities"))
+        {
+            Controller.CreateSpecialAbilities(level);
+        }
+        
+
+        GUILayout.EndVertical();
+    }
+    
 
     private void DrawFlipNumbers(LevelDb.LevelDef level)
     {

@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatchNumbers", "MatchNumbers\MatchNumbers.csproj", "{6EA0968A-1347-2445-B40D-DF12124A985D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|x86 = Debug|x86
+		Master|ARM = Master|ARM
+		Master|x86 = Master|x86
+		Release|ARM = Release|ARM
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Debug|ARM.ActiveCfg = Debug|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Debug|ARM.Build.0 = Debug|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Debug|ARM.Deploy.0 = Debug|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Debug|x86.ActiveCfg = Debug|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Debug|x86.Build.0 = Debug|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Debug|x86.Deploy.0 = Debug|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Master|ARM.ActiveCfg = Master|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Master|ARM.Build.0 = Master|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Master|ARM.Deploy.0 = Master|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Master|x86.ActiveCfg = Master|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Master|x86.Build.0 = Master|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Master|x86.Deploy.0 = Master|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Release|ARM.ActiveCfg = Release|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Release|ARM.Build.0 = Release|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Release|ARM.Deploy.0 = Release|ARM
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Release|x86.ActiveCfg = Release|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Release|x86.Build.0 = Release|x86
+		{6EA0968A-1347-2445-B40D-DF12124A985D}.Release|x86.Deploy.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

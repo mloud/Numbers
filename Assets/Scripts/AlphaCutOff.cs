@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 public class AlphaCutOff : MonoBehaviour
 {
 	[SerializeField]
