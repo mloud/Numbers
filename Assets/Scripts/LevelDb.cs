@@ -42,6 +42,7 @@ public class LevelDb : MonoBehaviour
         public class SpecialAbility
         {
             public float RechargeTime;
+            public float Duration;
             public string Name;
         }
 

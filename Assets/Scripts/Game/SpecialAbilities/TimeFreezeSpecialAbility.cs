@@ -3,18 +3,26 @@ using UnityEngine;
 
  public class TimeFreezeSpecialAbility : SpecialAbility
  {
-     private float Duration { get; set; }
-
+   
      private float Timer { get; set; }
+
+
+     public TimeFreezeSpecialAbility(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
+         : base(def, visual)
+     { }
 
      protected override bool OnApply()
      {
-         Timer = Time.time + Duration;
+         Timer = Def.Duration;
 
          return false;
      }
 
-
+     public float GetProgress()
+     {
+         return Timer / Def.Duration;
+     }
+     
      public override bool Update()
      {
          Timer -= Time.deltaTime;

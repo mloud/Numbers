@@ -227,7 +227,10 @@ public class CircleVisual : MonoBehaviour
 
     public void OnValueChanged(int value)
     {
-        TxtMesh.text = value.ToString();
+        if (value == 0)
+            TxtMesh.text = "X";
+        else
+            TxtMesh.text = value.ToString();
     }
 
     public void SetAlpha(float alpha)

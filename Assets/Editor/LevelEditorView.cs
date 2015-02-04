@@ -41,7 +41,7 @@ public class LevelEditorView : EditorWindow
 
     private static class Config
     {
-        public static int ButtonWidth = 50;
+        public static int ButtonWidth = 200;
     }
 
     public void Setup()
@@ -60,12 +60,12 @@ public class LevelEditorView : EditorWindow
         GUILayout.BeginVertical();
 
         
-        if (GUILayout.Button("Save"))
+        if (GUILayout.Button("Save", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.Save();
         }
 
-        if (GUILayout.Button("Add new"))
+        if (GUILayout.Button("Add new", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.AddNewLevel();
             Setup();
@@ -81,13 +81,13 @@ public class LevelEditorView : EditorWindow
 
 
             if (FoldOut[i])
-            {   
-                if (GUILayout.Button("Play"))
+            {
+                if (GUILayout.Button("Play", GUILayout.Width(Config.ButtonWidth)))
                 {
                     Controller.PlayLevel(level);
                 }
 
-                if (GUILayout.Button("Delete"))
+                if (GUILayout.Button("Delete", GUILayout.Width(Config.ButtonWidth)))
                 {
                     Controller.DeleteLevel(level);
                 }
@@ -219,7 +219,7 @@ public class LevelEditorView : EditorWindow
             allAbilities.RemoveAll(x=>level.SpecialAbilities.Find(y => y.Name == x) != null);
 
             SpecialAbilityIndex = EditorGUILayout.Popup(PatternIndex, allAbilities.ToArray());
-	        if (GUILayout.Button("Add"))
+	        if (GUILayout.Button("Add", GUILayout.Width(Config.ButtonWidth)))
 	        {
                 Controller.AddSpecialAbility(level, allAbilities[SpecialAbilityIndex], 0);
 	        }
@@ -230,8 +230,9 @@ public class LevelEditorView : EditorWindow
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField(level.SpecialAbilities[i].Name, GUILayout.Width(35));
                 level.SpecialAbilities[i].RechargeTime = EditorGUILayout.FloatField(level.SpecialAbilities[i].RechargeTime, GUILayout.Width(35));
+                level.SpecialAbilities[i].Duration = EditorGUILayout.FloatField(level.SpecialAbilities[i].Duration, GUILayout.Width(35));
 
-                if (GUILayout.Button("Remove"))
+                if (GUILayout.Button("Remove", GUILayout.Width(Config.ButtonWidth)))
                 {
                     Controller.RemoveSpecialAbility(level, level.SpecialAbilities[i].Name);
                 }
@@ -241,7 +242,7 @@ public class LevelEditorView : EditorWindow
         }
 
 
-        if (GUILayout.Button("Create SpecialAbilities"))
+        if (GUILayout.Button("Create SpecialAbilities", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.CreateSpecialAbilities(level);
         }
@@ -275,12 +276,12 @@ public class LevelEditorView : EditorWindow
             GUILayout.EndHorizontal();
         }
 
-        if (GUILayout.Button("Create Numbers"))
+        if (GUILayout.Button("Create Numbers", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.CreateFlipNumbers(level);
         }
-        
-        if (GUILayout.Button("Fill Random"))
+
+        if (GUILayout.Button("Fill Random", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.RandomizeFlipNumbers(level);
         }
@@ -314,12 +315,12 @@ public class LevelEditorView : EditorWindow
             }
         }
 
-        if (GUILayout.Button("Create Numbers"))
+        if (GUILayout.Button("Create Numbers", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.CreateNumbers(level);
         }
 
-        if (GUILayout.Button("Fill Random"))
+        if (GUILayout.Button("Fill Random", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.RandomizeInitialLevelNumbers(level);
         }
@@ -348,14 +349,14 @@ public class LevelEditorView : EditorWindow
 
             ProbabilityCurves[level] = EditorGUILayout.CurveField("Number probability", curve);
 
-            if (GUILayout.Button("Update Probability"))
+            if (GUILayout.Button("Update Probability", GUILayout.Width(Config.ButtonWidth)))
             {
                 UpdateProbabilityFromCurve( ProbabilityCurves[level], level);
                 SyncProbCurve = true;
             }
         }
 
-        if (GUILayout.Button("Create Probability"))
+        if (GUILayout.Button("Create Probability", GUILayout.Width(Config.ButtonWidth)))
         {
             Controller.CreateProbability(level);
         }
@@ -374,9 +375,9 @@ public class LevelEditorView : EditorWindow
         Array.ForEach(fields, x => allPatterns.Add(x.GetValue(null).ToString()));
 
         if (level.Patterns != null)
-            allPatterns.RemoveAll(x=>level.Patterns.Find(y=>y ==x) != null); 
+            allPatterns.RemoveAll(x=>level.Patterns.Find(y=>y ==x) != null);
 
-		if (GUILayout.Button("Create Patterns"))
+        if (GUILayout.Button("Create Patterns", GUILayout.Width(Config.ButtonWidth)))
 		{
 			Controller.CreatePatterns(level);
 		}
@@ -385,7 +386,7 @@ public class LevelEditorView : EditorWindow
 		{
 
 	        PatternIndex = EditorGUILayout.Popup(PatternIndex, allPatterns.ToArray());
-	        if (GUILayout.Button("Add"))
+            if (GUILayout.Button("Add", GUILayout.Width(Config.ButtonWidth)))
 	        {
 	            Controller.AddPattern(level, allPatterns[PatternIndex]);
 	        }
@@ -395,8 +396,8 @@ public class LevelEditorView : EditorWindow
 	        {
 	            EditorGUILayout.BeginHorizontal();
 	            EditorGUILayout.LabelField(level.Patterns[i]);
-	            
-	            if (GUILayout.Button("Remove"))
+
+                if (GUILayout.Button("Remove", GUILayout.Width(Config.ButtonWidth)))
 	            {
 	                Controller.RemovePattern(level, level.Patterns[i]);
 	            }

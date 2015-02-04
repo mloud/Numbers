@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
  public class SpecialAbilityManager
  {
@@ -16,16 +17,22 @@ using System.Collections.Generic;
 
      public void Run(SpecialAbility ability)
      {
-         bool oneTimeUsage = ability.Apply(Context);
+         bool oneTimeUsage = ability.Start(Context);
 
          if (!oneTimeUsage)
          {
              Abilities.Add(ability);
          }
+         else
+         {
+             ability.Finish();
+         }
      }
 
      public void Update()
      {
-         Abilities.RemoveAll(x => x.Update());
+         var toRemove = Abilities.FindAll(x => x.Update());
+         toRemove.ForEach(x => x.Finish());
+         Abilities.RemoveAll(x => toRemove.Contains(x));
      }
  }

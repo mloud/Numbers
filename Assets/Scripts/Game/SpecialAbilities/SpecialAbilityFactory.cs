@@ -9,32 +9,52 @@ public static class SpecialAbilityFactory
 {
     private const string path = "Prefabs/SpecialAbilities/";
     private const string TimeFreeze = path + "TimeFreeze";
+    private const string Shuffle = path + "Shuffle";
+    private const string AnyNumber = path + "AnyNumber";
 
-    public static GameObject CreateIcon(string name)
+
+
+    public static SpecialAbilityVisual CreateVisual(string name)
     {
-        GameObject iconGo = null;
+        SpecialAbilityVisual visual = null;
 
         if (name == SpecialAbilityDef.TimeFreeze)
         {
-            iconGo = GameObject.Instantiate(Resources.Load<GameObject>(TimeFreeze)) as GameObject;
+            visual = (GameObject.Instantiate(Resources.Load<GameObject>(TimeFreeze)) as GameObject).GetComponent<SpecialAbilityVisual>();
         }
-     
+        else if (name == SpecialAbilityDef.Shuffle)
+        {
+            visual = (GameObject.Instantiate(Resources.Load<GameObject>(Shuffle)) as GameObject).GetComponent<SpecialAbilityVisual>();
+        }
+        else if (name == SpecialAbilityDef.AnyNumber)
+        {
+            visual = (GameObject.Instantiate(Resources.Load<GameObject>(AnyNumber)) as GameObject).GetComponent<SpecialAbilityVisual>();
+        }
 
-        return iconGo;
+        return visual;
     }
 
     
-    public static SpecialAbility Create(string name)
+    public static SpecialAbility Create(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
     {
         SpecialAbility ability = null;
 
 
-        if (name == SpecialAbilityDef.TimeFreeze)
+        if (def.Name == SpecialAbilityDef.TimeFreeze)
         {
-            ability = new TimeFreezeSpecialAbility();              
+            ability = new TimeFreezeSpecialAbility(def, visual);
         }
-      
-        UnityEngine.Debug.Log(ability == null ? "Cannot create SpecialAbility :" + name : "");
+        else if (def.Name == SpecialAbilityDef.Shuffle)
+        {
+            ability = new ShuffleSpecialAbility(def, visual);
+        }
+        else if (def.Name == SpecialAbilityDef.AnyNumber)
+        {
+            ability = new AnyNumberSpecialAbility(def, visual);
+        }
+        
+
+        UnityEngine.Debug.Log(ability == null ? "Cannot create SpecialAbility :" + def.Name : "");
 
 
         return ability;

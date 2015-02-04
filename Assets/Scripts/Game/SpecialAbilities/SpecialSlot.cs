@@ -10,9 +10,13 @@ public class SpecialSlot : MonoBehaviour
     [SerializeField]
     private Transform diableOverlayTransform;
 
-    public LevelDb.LevelDef.SpecialAbility SpecialAbility { get; set; }
+    // ID of ability
+    public LevelDb.LevelDef.SpecialAbility SpecialAbilityDef { get; set; }
 
     public Action<SpecialSlot> OnClick;
+
+    // SpeciaAbility visual
+    public  SpecialAbilityVisual SpecialAbilityVisual { get; private set; }
 
 
     public float Timer
@@ -23,7 +27,7 @@ public class SpecialSlot : MonoBehaviour
         {
             timer = value;
 
-            float progress = Mathf.Clamp01(timer / SpecialAbility.RechargeTime);
+            float progress = Mathf.Clamp01(timer / SpecialAbilityDef.RechargeTime);
 
             diableOverlayTransform.localScale = new Vector3(1, progress, 1);
         }
@@ -33,7 +37,16 @@ public class SpecialSlot : MonoBehaviour
     { 
         get { return toggled; }
 
-        set { toggled = value; Animator.SetTrigger( value ? "Select" : "Unselect"); }
+        set 
+        { 
+            toggled = value;
+            bool isIdle = Animator.GetCurrentAnimatorStateInfo(0).IsName("idle");
+            // todo  
+            if (value && isIdle)
+                Animator.SetTrigger( "Select");
+            else if (!value && !isIdle)
+                Animator.SetTrigger("Unselect");
+        }
     }
     private Animator Animator { get; set; }
 
@@ -61,19 +74,24 @@ public class SpecialSlot : MonoBehaviour
         return Timer == 0;
     }
 
-    public void SetToMax()
+    public void StartRecharging()
     {
-        Timer = SpecialAbility.RechargeTime;
+        Timer = SpecialAbilityDef.RechargeTime;
         Toggled = false;
     }
     
 
-    public void SetIcon(GameObject icon)
+    public void SetVisual(SpecialAbilityVisual specialAbilityVisual)
     {
-        icon.transform.SetParent(transform);
-        icon.transform.localPosition = Vector3.zero;
+        SpecialAbilityVisual = specialAbilityVisual;
+        specialAbilityVisual.transform.SetParent(transform);
+        specialAbilityVisual.transform.localPosition = Vector3.zero;
     }
 
+    public void OnAbilityFinished(SpecialAbility ability)
+    {
+        StartRecharging();
+    }
 
     void OnMouseUp()
     {

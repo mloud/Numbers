@@ -179,7 +179,7 @@ public class Game : MonoBehaviour
 		SoundSystem.Init(new GameContext() { LevelDef = level, Controller = this });
 
          // SpecialAbilityManager
-        SpecialAbilityManager = new SpecialAbilityManager(new GameContext() { LevelDef = level, Controller = this });
+        SpecialAbilityManager = new SpecialAbilityManager(new GameContext() { LevelDef = level, Controller = this, Model = this.Model });
 
 
 
@@ -405,14 +405,13 @@ public class Game : MonoBehaviour
             var slot = (Instantiate(specialSlot) as GameObject).GetComponent<SpecialSlot>();
             slot.OnClick += OnSpecialSlotClick;
             slot.transform.SetParent(container.transform);
-            slot.SpecialAbility = LevelDef.SpecialAbilities.Find(x => x.Name == sa);
-            slot.SetToMax();
+            slot.SpecialAbilityDef = LevelDef.SpecialAbilities.Find(x => x.Name == sa);
             var pos = new Vector3(slotX, 0, 0);
             slot.transform.localPosition = pos;
 
-            var icon = SpecialAbilityFactory.CreateIcon(sa);
-            slot.SetIcon(icon);
-           
+            var visual = SpecialAbilityFactory.CreateVisual(sa);
+            slot.SetVisual(visual);
+            slot.StartRecharging();
 
             slotX += (gap + specialSlotSize.x);
 
@@ -548,12 +547,15 @@ public class Game : MonoBehaviour
 
     private void OnSpecialSlotClick(SpecialSlot slot)
     {
-
         if (slot.CanBeUsed())
         {
-            var ability = SpecialAbilityFactory.Create(slot.SpecialAbility.Name);
+            // create ability model
+            var ability = SpecialAbilityFactory.Create(slot.SpecialAbilityDef, slot.SpecialAbilityVisual);
+            slot.SpecialAbilityVisual.AbilityStarted(ability);
+            slot.Toggled = false;
+            ability.AbilityFinished += slot.OnAbilityFinished;
+            
             SpecialAbilityManager.Run(ability);
-            slot.SetToMax();
         }
     }
 
@@ -635,17 +637,11 @@ public class Game : MonoBehaviour
     }
 
 
-	private void OnCircleClick(CircleController circle)
+	public void OnCircleClick(CircleController circle)
 	{
 		if (CurrState == State.Running)
 		{
-
-            //bool specialAbilityApplied = ApplySpecialAbility(circle);
-            bool specialAbilityApplied = false; // TODO
-
-            if (!specialAbilityApplied)
-                ApplyPattern(circle);
-
+            ApplyPattern(circle);
 
             MicroTimer = LevelDef.MicroTime;
 		}
