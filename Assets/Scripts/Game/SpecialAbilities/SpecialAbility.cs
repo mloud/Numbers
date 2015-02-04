@@ -31,6 +31,8 @@ using UnityEngine;
 
      public void Finish()
      {
+         OnFinished();
+
          if (AbilityFinished != null)
              AbilityFinished(this);
      }
@@ -39,4 +41,5 @@ using UnityEngine;
      public abstract bool Update();
 
      protected abstract bool OnApply();
+     protected abstract void OnFinished();
  }

@@ -26,4 +26,9 @@ using UnityEngine;
          return true;
      }
 
+     protected override void OnFinished()
+     {
+      //nothing now
+     }
+
  }

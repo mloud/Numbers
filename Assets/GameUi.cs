@@ -9,6 +9,9 @@ public class GameUi : MonoBehaviour
     [SerializeField]
     public Button btnPause;
 
+    [SerializeField]
+    public Button btnHelp;
+
     void Awake()
     {
         Instance = this;

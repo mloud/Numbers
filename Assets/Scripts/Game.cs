@@ -14,6 +14,7 @@ public class Game : MonoBehaviour
 
 	private int Score { get; set; }
 
+    public bool TimersPaused { get; set; }
 	public float MicroTimer { get; set; }
 	public float LevelTimer { get; set; }
 	private float FlipTimer { get; set; }
@@ -31,6 +32,7 @@ public class Game : MonoBehaviour
 
     private List<Slot> Slots { get; set;  }
     private List<SpecialSlot> SpecialSlots { get; set; }
+
 
 	private enum State
 	{
@@ -79,13 +81,13 @@ public class Game : MonoBehaviour
             levelToRun = App.Instance.Db.LevelDb.Levels.Find(x => x.Order == App.Instance.Db.LevelDb.DefaultLevel);
 
 
-        GameUi.Instance.btnPause.onClick.AddListener(() => PauseGame());
-
-
+        GameUi.Instance.btnPause.onClick.AddListener(() => PauseGame(false));
+        GameUi.Instance.btnHelp.onClick.AddListener(() =>  PauseGame(true));
+       
         Init (levelToRun);
 	}
 
-    private void PauseGame()
+    private void PauseGame(bool showHelpWindow)
     {
         CurrState = State.Paused;
 
@@ -95,27 +97,38 @@ public class Game : MonoBehaviour
 
         var win = App.Instance.WindowManager.OpenWindow(WindowDef.Pause, null) as PauseWindow;
 
-        win.BtnContinue.onClick.AddListener(() => { 
+        win.BtnContinue.onClick.AddListener(() =>
+        {
             RunTimer();
             App.Instance.Sound.ResumeMusic();
             App.Instance.WindowManager.CloseWindow(win.Name);
+            App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
         });
 
-        win.BtnMenu.onClick.AddListener(() => {
-            RunTimer(); 
+        win.BtnMenu.onClick.AddListener(() =>
+        {
+            RunTimer();
             App.Instance.LoadScene(SceneDef.LevelSelection);
             App.Instance.WindowManager.CloseWindow(win.Name);
+            App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
         });
-        
-        win.BtnRestart.onClick.AddListener(() => { 
-            RunTimer(); Restart(); 
-            App.Instance.WindowManager.CloseWindow(win.Name); 
+
+        win.BtnRestart.onClick.AddListener(() =>
+        {
+            RunTimer(); Restart();
+            App.Instance.WindowManager.CloseWindow(win.Name);
+            App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
         });
 
 
         Hud.Instance.Stop();
-       
-    }
+
+
+        if (showHelpWindow)
+        {
+            App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = this.LevelDef });
+        }
+     }
 
     private void RunTimer()
     {
@@ -142,6 +155,8 @@ public class Game : MonoBehaviour
         App.Instance.Sound.PlayMusic("ingame");
 
         GameUi.Instance.btnPause.gameObject.SetActive(true);
+        GameUi.Instance.btnHelp.gameObject.SetActive(true);
+
 
         Hud.Instance.Play();
    }
@@ -155,6 +170,37 @@ public class Game : MonoBehaviour
 	{
 		return 1 - Mathf.Clamp01(LevelTimer / LevelDef.TotalTime);
 	}
+
+
+    private void OpenInitialWindow()
+    {
+        {
+            var win = App.Instance.WindowManager.OpenWindow(WindowDef.Prelevel, new PrelevelWindow.Param() { Level = LevelDef });
+            win.GetComponentInChildren<Button>().onClick.AddListener(() =>
+            {
+                App.Instance.WindowManager.CloseWindow(win.Name);
+                App.Instance.Player.TutorialDone = true;
+
+
+                App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
+
+                // how start 
+                var winStartLevel = App.Instance.WindowManager.OpenWindow(WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = this.LevelDef });
+                winStartLevel.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                {
+                    App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
+
+                    StartCoroutine(RunLevelCoroutine());
+
+                });
+
+
+            });
+
+            var patternWin = App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = LevelDef });
+
+        }
+    }
 
 	public void Init(LevelDb.LevelDef level)
 	{
@@ -196,36 +242,26 @@ public class Game : MonoBehaviour
 
 		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
+        
+
         GameUi.Instance.btnPause.gameObject.SetActive(false);
+        GameUi.Instance.btnHelp.gameObject.SetActive(false);
 
-		//if (!App.Instance.Player.TutorialDone)
-		{
-            var win = App.Instance.WindowManager.OpenWindow(WindowDef.Tutorial, new TutorialWindow.Param() { Level = LevelDef });
-			win.GetComponentInChildren<Button> ().onClick.AddListener (() => {
-                App.Instance.WindowManager.CloseWindow(win.Name);
-                App.Instance.Player.TutorialDone = true;
+        Invoke("OpenInitialWindow", 1);
 
-                // how start 
-                var winStartLevel = App.Instance.WindowManager.OpenWindow(WindowDef.StartLevel, new StartLevelWindow.Param() { LevelDef = level });
-                winStartLevel.GetComponentInChildren<Button>().onClick.AddListener(() =>
-                {
-                    App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
-
-                    StartCoroutine(RunLevelCoroutine());
-                  
-                });
-            });
-		}
 	}
 
 
 	void UpdateRunningState()
 	{
-		MicroTimer -= Time.deltaTime;
-		LevelTimer -= Time.deltaTime;
-		FlipTimer -= Time.deltaTime;
-        RefillTimer -= Time.deltaTime;
-        
+
+        if (!TimersPaused)
+        {
+            MicroTimer -= Time.deltaTime;
+            LevelTimer -= Time.deltaTime;
+            FlipTimer -= Time.deltaTime;
+            RefillTimer -= Time.deltaTime;
+        }
 
         if (LevelTimer <= 0 || Model.Circles.Count == 0 || (Model.Circles.Count == 1 && Model.Numbers.Count == 0))
 		{
@@ -311,6 +347,8 @@ public class Game : MonoBehaviour
 		}
 
         GameUi.Instance.btnPause.gameObject.SetActive(CurrState == State.Running);
+        GameUi.Instance.btnHelp.gameObject.SetActive(CurrState == State.Running);
+
 
 	}
 
@@ -647,4 +685,6 @@ public class Game : MonoBehaviour
 		}
 	}
 
+
+  
 }

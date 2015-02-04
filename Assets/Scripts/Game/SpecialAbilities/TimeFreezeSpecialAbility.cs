@@ -15,6 +15,8 @@ using UnityEngine;
      {
          Timer = Def.Duration;
 
+         Context.Controller.TimersPaused = true;
+
          return false;
      }
 
@@ -29,12 +31,12 @@ using UnityEngine;
 
          bool finished = Timer <= 0;
 
-         if (!finished)
-         {
-             Context.Controller.LevelTimer += Time.deltaTime; // stop timer by compensating frame time
-             Context.Controller.MicroTimer += Time.deltaTime; // stop timer by compensating frame time
-         }
-
          return finished;
      }
+
+     protected override void OnFinished()
+     {
+         Context.Controller.TimersPaused = false;
+     }
+
  }

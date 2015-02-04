@@ -6,14 +6,29 @@ using System;
 
 public class GameOverWindow : Window 
 {
-	[SerializeField]
-	Text txtScoreValue;
+    [SerializeField]
+    Text txtCompleted;
+
+    [SerializeField]
+    Text txtLevelName;
+
+
+    [SerializeField]
+    Text txtScoreTitle;
+
+    [SerializeField]
+    ScoreCounter scoreValue;
+
+    [SerializeField]
+    Text txtScoreValue;
+
+
+    [SerializeField]
+    Text txtBestScoreTitle;
 
 	[SerializeField]
 	Text txtBestScoreValue;
 
-	[SerializeField]
-	Text txtLevelName;
 
     [SerializeField]
     Button btnNextLevel;
@@ -50,12 +65,11 @@ public class GameOverWindow : Window
 		Parameters = param as Param;
 
 		txtLevelName.text = Parameters.LevelName;
-		txtScoreValue.text = Parameters.Score.ToString ();
+        scoreValue.Set(Parameters.Score);
 		txtBestScoreValue.text = Parameters.BestScore.ToString ();
 		btnNextLevel.gameObject.SetActive (Parameters.IsNextLevel);
 
         btnRepeat.gameObject.SetActive(Parameters.IsNextLevel);
-        btnMenu.gameObject.SetActive(Parameters.IsNextLevel);
 
         btnOk.gameObject.SetActive(!Parameters.IsNextLevel);
 
@@ -65,11 +79,30 @@ public class GameOverWindow : Window
 			App.Instance.SocialService.ShowSpecificLeaderBoard(Parameters.LevelDef.LeaderboardId);
 		});
 
+
+
 	}
 
 	protected override void OnOpen()
 	{
 		App.Instance.Sound.PlayEffect("levelFinished");
+
+        // start aniamtions
+        txtLevelName.enabled = false;
+        txtCompleted.enabled = false;
+        txtScoreTitle.enabled = false;
+	    txtScoreValue.enabled = false;
+        txtBestScoreTitle.enabled = false;
+        txtBestScoreValue.enabled = false;
+
+        txtLevelName.GetComponent<SimpleAnimationExt>().RunIn(0);
+        txtCompleted.GetComponent<SimpleAnimationExt>().RunIn(0);
+        txtScoreTitle.GetComponent<SimpleAnimationExt>().RunIn(1);
+        txtScoreValue.GetComponent<SimpleAnimationExt>().RunIn(1.5f);
+        txtBestScoreTitle.GetComponent<SimpleAnimationExt>().RunIn(2);
+        txtBestScoreValue.GetComponent<SimpleAnimationExt>().RunIn(2.5f);
+
+        
 	}
 
 	public void OnNextClick()

@@ -92,6 +92,8 @@ public class WindowManager : MonoBehaviour
 
 		winGo.transform.SetParent (GameObject.FindObjectOfType<Canvas> ().transform);
 
+        winGo.name = name;
+
 		return win;
 
 	}
@@ -113,7 +115,11 @@ public class WindowManager : MonoBehaviour
 
     private void OnWindowOpen(Window window)
     {
-    	
+        if (WindowsToOpen.Count > 0)
+        {
+            WindowsToOpen[0].Open();
+            WindowsToOpen.RemoveAt(0);
+        }
     }
 
     private void OnLevelWasLoaded(int level)

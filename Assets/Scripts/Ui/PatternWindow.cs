@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System;
 
-public class TutorialWindow : Window 
+public class PatternWindow : Window 
 {
     [SerializeField]
     private RectTransform PnlPattern;
@@ -12,7 +12,6 @@ public class TutorialWindow : Window
 
 	public class Param
 	{
-		public Action OnPlayClick;
         public LevelDb.LevelDef Level;
 	}
 

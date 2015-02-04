@@ -8,7 +8,7 @@ public class App : MonoBehaviour
 	{ 
 		get 
 		{
-			if (instance == null)
+			if (instance == null && Application.isPlaying)
 			{
 				GameObject go = new GameObject("__App__");
 				instance = go.AddComponent<App>();

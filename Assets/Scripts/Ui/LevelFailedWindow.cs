@@ -6,14 +6,25 @@ using System;
 
 public class LevelFailedWindow : Window 
 {
+    [SerializeField]
+    Text txtScoreTitle;
+
+    [SerializeField]
+    Text txtRequiredScoreTitle;
+
+
 	[SerializeField]
 	Text txtScoreValue;
 
 	[SerializeField]
 	Text txtRequiredScoreValue;
 
-	[SerializeField]
-	Text txtLevelName;
+    [SerializeField]
+    Text txtLevelName;
+
+    [SerializeField]
+    Text txtFailed;
+   
 
 	[SerializeField]
 	Button btnMenu;
@@ -58,6 +69,23 @@ public class LevelFailedWindow : Window
 	protected override void OnOpen()
 	{
 		App.Instance.Sound.PlayEffect("levelFailed");
+
+     
+        txtScoreTitle.enabled = false;
+        txtScoreValue.enabled = false;
+        txtRequiredScoreValue.enabled = false;
+        txtRequiredScoreTitle.enabled = false;
+        txtLevelName.enabled = false;
+        txtFailed.enabled = false;
+
+        txtLevelName.GetComponent<SimpleAnimationExt>().RunIn(0);
+        txtFailed.GetComponent<SimpleAnimationExt>().RunIn(0);
+        txtScoreTitle.GetComponent<SimpleAnimationExt>().RunIn(1);
+        txtScoreValue.GetComponent<SimpleAnimationExt>().RunIn(1.5f);
+
+        txtRequiredScoreTitle.GetComponent<SimpleAnimationExt>().RunIn(2);
+        txtRequiredScoreValue.GetComponent<SimpleAnimationExt>().RunIn(2.5f);
+
 	}
 
 }
