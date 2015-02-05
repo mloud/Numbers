@@ -81,13 +81,13 @@ public class Game : MonoBehaviour
             levelToRun = App.Instance.Db.LevelDb.Levels.Find(x => x.Order == App.Instance.Db.LevelDb.DefaultLevel);
 
 
-        GameUi.Instance.btnPause.onClick.AddListener(() => PauseGame(false));
-        GameUi.Instance.btnHelp.onClick.AddListener(() =>  PauseGame(true));
+        GameUi.Instance.btnPause.onClick.AddListener(() => PauseGame(false, true));
+        GameUi.Instance.btnHelp.onClick.AddListener(() =>  PauseGame(true, false));
        
         Init (levelToRun);
 	}
 
-    private void PauseGame(bool showHelpWindow)
+    private void PauseGame(bool showHelpWindow, bool showPauseWindow)
     {
         CurrState = State.Paused;
 
@@ -95,30 +95,33 @@ public class Game : MonoBehaviour
 
         UnityEngine.Time.timeScale = 0;
 
-        var win = App.Instance.WindowManager.OpenWindow(WindowDef.Pause, null) as PauseWindow;
 
-        win.BtnContinue.onClick.AddListener(() =>
+        if (showPauseWindow)
         {
-            RunTimer();
-            App.Instance.Sound.ResumeMusic();
-            App.Instance.WindowManager.CloseWindow(win.Name);
-            App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
-        });
 
-        win.BtnMenu.onClick.AddListener(() =>
-        {
-            RunTimer();
-            App.Instance.LoadScene(SceneDef.LevelSelection);
-            App.Instance.WindowManager.CloseWindow(win.Name);
-            App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
-        });
+            var win = App.Instance.WindowManager.OpenWindow(WindowDef.Pause, null) as PauseWindow;
 
-        win.BtnRestart.onClick.AddListener(() =>
-        {
-            RunTimer(); Restart();
-            App.Instance.WindowManager.CloseWindow(win.Name);
-            App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
-        });
+            win.BtnContinue.onClick.AddListener(() =>
+            {
+                RunTimer();
+                App.Instance.Sound.ResumeMusic();
+                App.Instance.WindowManager.CloseWindow(win.Name);
+            });
+
+            win.BtnMenu.onClick.AddListener(() =>
+            {
+                RunTimer();
+                App.Instance.LoadScene(SceneDef.LevelSelection);
+                App.Instance.WindowManager.CloseWindow(win.Name);
+            });
+
+            win.BtnRestart.onClick.AddListener(() =>
+            {
+                RunTimer(); 
+                Restart();
+                App.Instance.WindowManager.CloseWindow(win.Name);
+            });
+        }
 
 
         Hud.Instance.Stop();
@@ -126,7 +129,13 @@ public class Game : MonoBehaviour
 
         if (showHelpWindow)
         {
-            App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = this.LevelDef });
+            var helpWin = App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = this.LevelDef, ShowCancelButton = true });
+            (helpWin as PatternWindow).BtnCancel.onClick.AddListener(() =>
+            {
+                App.Instance.WindowManager.CloseWindow(helpWin.Name);
+                App.Instance.Sound.ResumeMusic();
+                RunTimer();
+            });
         }
      }
 
@@ -247,7 +256,7 @@ public class Game : MonoBehaviour
         GameUi.Instance.btnPause.gameObject.SetActive(false);
         GameUi.Instance.btnHelp.gameObject.SetActive(false);
 
-        Invoke("OpenInitialWindow", 1);
+        Invoke("OpenInitialWindow", 0.4f);
 
 	}
 

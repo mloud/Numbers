@@ -5,6 +5,10 @@ using System;
 
 public class PatternWindow : Window 
 {
+
+    [SerializeField]
+    public Button BtnCancel;
+
     [SerializeField]
     private RectTransform PnlPattern;
 
@@ -13,12 +17,17 @@ public class PatternWindow : Window
 	public class Param
 	{
         public LevelDb.LevelDef Level;
-	}
+        public bool ShowCancelButton;
+    }
 
 	protected override void OnInit(object param)
 	{
 		Parameters = param as Param;
-	
+
+        BtnCancel.gameObject.SetActive(Parameters.ShowCancelButton);
+
+     
+
         var linker = (Resources.Load("Prefabs/Ui/Tutorial/PatternLinks") as GameObject).GetComponent<PatternToTutorial>();
 
         var circleMenuPrefab = Resources.Load<GameObject>("Prefabs/Ui/Tutorial/CircleMenu");

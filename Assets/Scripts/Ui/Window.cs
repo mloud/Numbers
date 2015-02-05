@@ -5,6 +5,15 @@ using System;
 
 public class Window : MonoBehaviour 
 {
+
+    public enum CloseAnim { Close_ToBottom, Close_ToTop }
+    public enum OpenAnim { Open_FromBottom, Open_FromTop }
+
+
+    public OpenAnim OpenAnimType = OpenAnim.Open_FromBottom;
+    public CloseAnim CloseAnimType = CloseAnim.Close_ToTop;
+
+
 	public Action<Window> OpenStart;
     public Action<Window> CloseFinished;
     public Action<Window> OpenFinished;
@@ -41,7 +50,7 @@ public class Window : MonoBehaviour
 	public void Open()
 	{
         if (Animator != null)
-            Animator.SetTrigger("Open");
+            Animator.SetTrigger(OpenAnimType.ToString());
 
 		if ( OpenStart != null)
 			OpenStart(this);
@@ -56,7 +65,7 @@ public class Window : MonoBehaviour
 	public void Close()
 	{
         if (Animator != null)
-            Animator.SetTrigger("Close");
+            Animator.SetTrigger(CloseAnimType.ToString());
 
 		OnClose ();
 
