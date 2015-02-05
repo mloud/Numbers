@@ -103,8 +103,7 @@ public class Game : MonoBehaviour
 
             win.BtnContinue.onClick.AddListener(() =>
             {
-                RunTimer();
-                App.Instance.Sound.ResumeMusic();
+                ResumeGame();
                 App.Instance.WindowManager.CloseWindow(win.Name);
             });
 
@@ -129,15 +128,24 @@ public class Game : MonoBehaviour
 
         if (showHelpWindow)
         {
-            var helpWin = App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = this.LevelDef, ShowCancelButton = true });
+            var helpWin = App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = this.LevelDef, ShowCancelButton = true, UseAnimation = false });
             (helpWin as PatternWindow).BtnCancel.onClick.AddListener(() =>
             {
                 App.Instance.WindowManager.CloseWindow(helpWin.Name);
-                App.Instance.Sound.ResumeMusic();
-                RunTimer();
+                ResumeGame();
             });
         }
+
+
+        GameUi.Instance.HideButtons();
      }
+
+    private void ResumeGame()
+    {
+        RunTimer();
+        App.Instance.Sound.ResumeMusic();
+        GameUi.Instance.ShowButtons();
+    }
 
     private void RunTimer()
     {
@@ -163,9 +171,10 @@ public class Game : MonoBehaviour
 
         App.Instance.Sound.PlayMusic("ingame");
 
-        GameUi.Instance.btnPause.gameObject.SetActive(true);
-        GameUi.Instance.btnHelp.gameObject.SetActive(true);
 
+        //GameUi.Instance.btnPause.gameObject.SetActive(true);
+        //GameUi.Instance.btnHelp.gameObject.SetActive(true);
+        GameUi.Instance.ShowButtons();
 
         Hud.Instance.Play();
    }
@@ -206,7 +215,7 @@ public class Game : MonoBehaviour
 
             });
 
-            var patternWin = App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = LevelDef });
+            var patternWin = App.Instance.WindowManager.OpenWindow(WindowDef.Patterns, new PatternWindow.Param() { Level = LevelDef, UseAnimation = true });
 
         }
     }
@@ -253,10 +262,10 @@ public class Game : MonoBehaviour
 
         
 
-        GameUi.Instance.btnPause.gameObject.SetActive(false);
-        GameUi.Instance.btnHelp.gameObject.SetActive(false);
+        //GameUi.Instance.btnPause.gameObject.SetActive(false);
+        //GameUi.Instance.btnHelp.gameObject.SetActive(false);
 
-        Invoke("OpenInitialWindow", 0.4f);
+        Invoke("OpenInitialWindow", 0.2f);
 
 	}
 
@@ -355,8 +364,8 @@ public class Game : MonoBehaviour
 			break;
 		}
 
-        GameUi.Instance.btnPause.gameObject.SetActive(CurrState == State.Running);
-        GameUi.Instance.btnHelp.gameObject.SetActive(CurrState == State.Running);
+        //GameUi.Instance.btnPause.gameObject.SetActive(CurrState == State.Running);
+        //GameUi.Instance.btnHelp.gameObject.SetActive(CurrState == State.Running);
 
 
 	}
@@ -519,6 +528,8 @@ public class Game : MonoBehaviour
 	private void GameOver()
 	{
 		//App.Instance.GoogleAnalytics.LogEvent("LevelFinished", (LevelDef.Order.ToString() + 1).ToString(), LevelDef.Name, Score);
+
+        GameUi.Instance.HideButtons();
 
 		var levelStats = DbUtils.GetLevelStatistic (LevelDef);
 	
