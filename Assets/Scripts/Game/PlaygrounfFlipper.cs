@@ -12,28 +12,28 @@ public class PlaygroundFlipper
 
     public abstract class FlipperBase
     {
-        public abstract IEnumerator FlipCoroutine(LevelDb.LevelDef level,  List<CircleController> circles);
+        public abstract IEnumerator FlipCoroutine(LevelDb.LevelDef level,  List<CircleController> circles, bool away);
     }
 
     public class FlipperAtOnce : FlipperBase
     {
-        public override IEnumerator FlipCoroutine(LevelDb.LevelDef level, List<CircleController> circles)
+        public override IEnumerator FlipCoroutine(LevelDb.LevelDef level, List<CircleController> circles, bool away)
         {
             float duration = 0.3f;
-            circles.ForEach(x => x.Flip(false, duration, 0));
+            circles.ForEach(x => x.Flip(away, duration, 0));
             yield return new WaitForSeconds(duration);
         }
     }
 
     public class FlipperFromTop : FlipperBase
     {
-        public override IEnumerator FlipCoroutine(LevelDb.LevelDef level, List<CircleController> circles)
+        public override IEnumerator FlipCoroutine(LevelDb.LevelDef level, List<CircleController> circles, bool away)
         {
             float duration = 0.3f;
 
             for (int i = 0; i < circles.Count; ++i)
             {
-                circles[i].Flip(false, duration, i * MTime);
+                circles[i].Flip(away, duration, i * MTime);
             }
             yield return new WaitForSeconds(circles.Count * MTime);
         }
@@ -42,7 +42,7 @@ public class PlaygroundFlipper
 
     public class FlipperSnakeX : FlipperBase
     {
-        public override IEnumerator FlipCoroutine(LevelDb.LevelDef level, List<CircleController> circles)
+        public override IEnumerator FlipCoroutine(LevelDb.LevelDef level, List<CircleController> circles, bool away)
         {
             float duration = 0.3f;
 
@@ -53,14 +53,14 @@ public class PlaygroundFlipper
 
                 float delay = y % 2 == 1 ? (y * level.Cols + level.Cols - x) * MTime : i * MTime;
 
-                circles[i].Flip(false, duration, delay);
+                circles[i].Flip(away, duration, delay);
             }
             yield return new WaitForSeconds(circles.Count * MTime);
         }
     }
 
 
-    public static IEnumerator FlipRandomCoroutine(MonoBehaviour owner,  LevelDb.LevelDef level, List<CircleController> circles)
+    public static IEnumerator FlipRandomCoroutine(MonoBehaviour owner,  LevelDb.LevelDef level, List<CircleController> circles, bool away)
     {
         var flippers = new List<FlipperBase>()
         {
@@ -69,7 +69,7 @@ public class PlaygroundFlipper
             new FlipperSnakeX()
         };
 
-        yield return owner.StartCoroutine(flippers[UnityEngine.Random.Range(0, flippers.Count - 1)].FlipCoroutine(level, circles));
+        yield return owner.StartCoroutine(flippers[UnityEngine.Random.Range(0, flippers.Count - 1)].FlipCoroutine(level, circles, away));
     }
 
     

@@ -22,7 +22,7 @@ public class App : MonoBehaviour
 
 	public Core.SocialService SocialService { get; private set; }
 
-	public Db Db { get; private set; }
+	public Db.Db Db { get; private set; }
 
 	public Num.NPlayer Player { get; private set; }
 
@@ -135,7 +135,7 @@ public class App : MonoBehaviour
 
 
         // DB
-		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Db> ();
+		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Db.Db> ();
 		Db.transform.SetParent (transform);
 
         // Persistent data

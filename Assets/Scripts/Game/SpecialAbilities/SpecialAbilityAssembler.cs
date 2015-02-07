@@ -5,18 +5,28 @@ using System.Collections.Generic;
 public static class SpecialAbilityAssembler 
 {
 
-    public static IEnumerator AssembleCoroutine(List<SpecialSlot> slots, float duration)
+    public static IEnumerator AssembleCoroutine(List<SpecialSlot> slots, float duration, bool inside)
     {
         List<Vector3> dstPos = new List<Vector3>(slots.Count);
-        slots.ForEach(x => dstPos.Add(x.transform.position));
+       
+        float y = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).y - 1;
+
+
+        if (inside)
+            slots.ForEach(x => dstPos.Add(x.transform.position));
+        else
+            slots.ForEach(x => dstPos.Add(new Vector3(x.transform.position.x, y, x.transform.position.z)));
 
         List<Vector3> startPos = new List<Vector3>(slots.Count);
 
-        float y = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, 0)).y - 1;
+       
         
         slots.ForEach((SpecialSlot slot) =>
         {
-            startPos.Add(new Vector3(slot.transform.position.x, y, slot.transform.position.z));
+            if (inside)
+                startPos.Add(new Vector3(slot.transform.position.x, y, slot.transform.position.z));
+            else
+                startPos.Add(slot.transform.position);
 
             slot.gameObject.SetActive(true);
         });

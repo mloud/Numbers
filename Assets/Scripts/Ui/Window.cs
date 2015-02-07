@@ -28,7 +28,7 @@ public class Window : MonoBehaviour
     private Animator Animator { get; set; }
 
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Animator = GetComponent<Animator>();
         

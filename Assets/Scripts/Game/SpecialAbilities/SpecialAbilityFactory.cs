@@ -7,35 +7,38 @@ using UnityEngine;
 
 public static class SpecialAbilityFactory
 {
-    private const string path = "Prefabs/SpecialAbilities/";
-    private const string TimeFreeze = path + "TimeFreeze";
-    private const string Shuffle = path + "Shuffle";
-    private const string AnyNumber = path + "AnyNumber";
+    private const string pathVisual = "Prefabs/SpecialAbilities/Visual/";
+    private const string pathUi = "Prefabs/SpecialAbilities/Ui/";
 
 
+    public static Ui.SpecialAbilityItem CreateUiItem(string name)
+    {
+        var prefab = Resources.Load<GameObject>(pathUi + name);
+        
+        Core.Dbg.Assert(prefab != null, "SpecialAbilityFactyCreateUiItem() " + name + " no prefab at: " + pathUi + name + " found");
+
+        var ability = (GameObject.Instantiate(prefab) as GameObject).GetComponent<Ui.SpecialAbilityItem>();
+
+        Core.Dbg.Assert(ability != null, "SpecialAbilityFactyCreateUiItem() no SpecialAbilityItem script found on" + name);
+
+        return ability;
+    }
 
     public static SpecialAbilityVisual CreateVisual(string name)
     {
-        SpecialAbilityVisual visual = null;
+        var prefab = Resources.Load<GameObject>(pathVisual + name);
 
-        if (name == SpecialAbilityDef.TimeFreeze)
-        {
-            visual = (GameObject.Instantiate(Resources.Load<GameObject>(TimeFreeze)) as GameObject).GetComponent<SpecialAbilityVisual>();
-        }
-        else if (name == SpecialAbilityDef.Shuffle)
-        {
-            visual = (GameObject.Instantiate(Resources.Load<GameObject>(Shuffle)) as GameObject).GetComponent<SpecialAbilityVisual>();
-        }
-        else if (name == SpecialAbilityDef.AnyNumber)
-        {
-            visual = (GameObject.Instantiate(Resources.Load<GameObject>(AnyNumber)) as GameObject).GetComponent<SpecialAbilityVisual>();
-        }
+        Core.Dbg.Assert(prefab != null, "SpecialAbilityFacty.CreateVisual() " + name + " no prefab at: " + pathVisual + name + " found");
+
+        var visual = (GameObject.Instantiate(prefab) as GameObject).GetComponent<SpecialAbilityVisual>();
+
+        Core.Dbg.Assert(visual != null, "SpecialAbilityFactory.CreateVisual() no SpecialAbilityVisual script found on" + name);
 
         return visual;
     }
 
     
-    public static SpecialAbility Create(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
+    public static SpecialAbility Create(SpecialAbilityDb.SpecialAbility def, SpecialAbilityVisual visual)
     {
         SpecialAbility ability = null;
 
@@ -52,7 +55,10 @@ public static class SpecialAbilityFactory
         {
             ability = new AnyNumberSpecialAbility(def, visual);
         }
-        
+        else if (def.Name == SpecialAbilityDef.Refill)
+        {
+            ability = new RefillSpecialAbility(def, visual);
+        }
 
         UnityEngine.Debug.Log(ability == null ? "Cannot create SpecialAbility :" + def.Name : "");
 

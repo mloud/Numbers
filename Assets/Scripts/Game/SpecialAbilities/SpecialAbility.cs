@@ -8,10 +8,10 @@ using UnityEngine;
 
      protected GameContext Context { get; private set; }
 
-     protected LevelDb.LevelDef.SpecialAbility Def { get; private set; }
+     protected SpecialAbilityDb.SpecialAbility Def { get; private set; }
      protected SpecialAbilityVisual Visual { get; set; }
 
-     public SpecialAbility(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
+     public SpecialAbility(SpecialAbilityDb.SpecialAbility def, SpecialAbilityVisual visual)
      {
          Def = def;
          Visual = visual;

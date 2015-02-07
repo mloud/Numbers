@@ -4,7 +4,7 @@ using UnityEngine;
  public class ShuffleSpecialAbility : SpecialAbility
  {
 
-     public ShuffleSpecialAbility(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
+     public ShuffleSpecialAbility(SpecialAbilityDb.SpecialAbility def, SpecialAbilityVisual visual)
          : base(def, visual)
      { }
 

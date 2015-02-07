@@ -12,13 +12,13 @@ public class PlaygroundAssembler
 
     public abstract class AssemblerBase
     {
-        public abstract IEnumerator AssembleCoroutine(List<Slot> slots);
+        public abstract IEnumerator AssembleCoroutine(List<Slot> slots, bool inside);
     }
 
     public class AssemblerFromLeft : AssemblerBase
     {
 
-        public override IEnumerator AssembleCoroutine(List<Slot> slots)
+        public override IEnumerator AssembleCoroutine(List<Slot> slots, bool inside)
         {
             var x1 = Camera.main.ViewportToWorldPoint(new Vector2(0, 0)).x;
             var x2 = Camera.main.ViewportToWorldPoint(new Vector2(1,0)).x;
@@ -29,14 +29,20 @@ public class PlaygroundAssembler
             
             slots.ForEach(delegate(Slot slot)
             {
-                dstPositions.Add(slot.transform.position);
+                var posInside = slot.transform.position;
+                var posOutside = posInside - new Vector3(screenWorldWidth, 0, 0);
 
-                var pos = slot.transform.position;
-                pos.x -= screenWorldWidth;
-
-                slot.transform.position = pos;
-
-                startPositions.Add(pos);
+                if (inside)
+                {
+                    dstPositions.Add(slot.transform.position);
+                    startPositions.Add(posOutside);
+                    slot.transform.position = posOutside;
+                }
+                else
+                {
+                    dstPositions.Add(posOutside);
+                    startPositions.Add(posInside);
+                }
 
                 slot.gameObject.SetActive(true);
             });
@@ -72,14 +78,14 @@ public class PlaygroundAssembler
 
 
 
-    public static IEnumerator AssembleRandomCoroutine(MonoBehaviour owner, List<Slot> slots)
+    public static IEnumerator AssembleRandomCoroutine(MonoBehaviour owner, List<Slot> slots, bool inside)
     {
         var assemblers = new List<AssemblerBase>()
         {
             new AssemblerFromLeft()
         };
 
-        yield return owner.StartCoroutine(assemblers[UnityEngine.Random.Range(0, assemblers.Count - 1)].AssembleCoroutine(slots));
+        yield return owner.StartCoroutine(assemblers[UnityEngine.Random.Range(0, assemblers.Count - 1)].AssembleCoroutine(slots, inside));
     }
 
     

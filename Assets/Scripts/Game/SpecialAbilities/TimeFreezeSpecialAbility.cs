@@ -7,7 +7,7 @@ using UnityEngine;
      private float Timer { get; set; }
 
 
-     public TimeFreezeSpecialAbility(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
+     public TimeFreezeSpecialAbility(SpecialAbilityDb.SpecialAbility def, SpecialAbilityVisual visual)
          : base(def, visual)
      { }
 

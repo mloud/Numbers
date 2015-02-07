@@ -4,7 +4,7 @@ using UnityEngine;
  public class AnyNumberSpecialAbility : SpecialAbility
  {
 
-     public AnyNumberSpecialAbility(LevelDb.LevelDef.SpecialAbility def, SpecialAbilityVisual visual)
+     public AnyNumberSpecialAbility(SpecialAbilityDb.SpecialAbility def, SpecialAbilityVisual visual)
          : base(def, visual)
      { }
 

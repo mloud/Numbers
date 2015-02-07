@@ -45,7 +45,7 @@ namespace Num
 
 		public void LevelFinished(LevelDb.LevelDef level, int score)
 		{
-			var nextLevel = DbUtils.GetNextLevel (level);
+			var nextLevel = Db.DbUtils.GetNextLevel (level);
 			if (nextLevel != null) 
 			{
 				LastReachedLevel = nextLevel.Order;

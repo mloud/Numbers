@@ -11,7 +11,7 @@ public class SpecialSlot : MonoBehaviour
     private Transform diableOverlayTransform;
 
     // ID of ability
-    public LevelDb.LevelDef.SpecialAbility SpecialAbilityDef { get; set; }
+    public SpecialAbilityDb.SpecialAbility SpecialAbilityDef { get; set; }
 
     public Action<SpecialSlot> OnClick;
 

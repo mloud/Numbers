@@ -67,11 +67,11 @@ public class LevelComponent : MonoBehaviour
 
 	private void Refresh()
 	{
-		bool isUncloked = DbUtils.IsLevelUnlocked (LevelDef);
+		bool isUncloked = Db.DbUtils.IsLevelUnlocked (LevelDef);
 
 		txtLevel.text = (LevelDef.Order + 1).ToString ();
 
-		Num.NPlayer.LevelStatistic lStats = DbUtils.GetLevelStatistic (LevelDef);
+		Num.NPlayer.LevelStatistic lStats = Db.DbUtils.GetLevelStatistic (LevelDef);
 
 		alreadyPlayerIcon.gameObject.SetActive (lStats != null);
 		txtScore.gameObject.SetActive (lStats != null);

@@ -90,7 +90,7 @@ public class PatternWindow : Window
 
     private void PlaceCircles(Window win)
     {
-        StartCoroutine(PlaceCirclesCoroutine(Parameters.UseAnimation ? 1.0f : 0));
+        StartCoroutine(PlaceCirclesCoroutine(Parameters.UseAnimation ? 0.5f : 0));
     }
 
 	protected override void OnInit(object param)

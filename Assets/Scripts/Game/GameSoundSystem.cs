@@ -26,7 +26,7 @@ public class GameSoundSystem : MonoBehaviour
 	}
 
 
-	private void OnDestroy()
+	public void Leave()
 	{
 		App.Instance.Sound.SetMusicPitch(1.0f);
 	}

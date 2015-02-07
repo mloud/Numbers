@@ -17,7 +17,7 @@ public class LevelDb : MonoBehaviour
 	[System.Serializable]
 	public class LevelDef
 	{
-		public int Order;
+	    public int Order;
 		public int FromNum;
 		public int ToNum;
 		public int Rows;
@@ -25,6 +25,7 @@ public class LevelDb : MonoBehaviour
 		public int Score;
         public int FlipNumbersCount;
         public int Colors;
+        public int MaxAbilities = 3;
         public float TotalTime;
 		public float MicroTime;
 		public float FlipTime;
@@ -37,16 +38,7 @@ public class LevelDb : MonoBehaviour
         public List<string> SpecialitiesForNumbers;
         public List<float> Probabilities;
         public List<string> Patterns;
-
-        [System.Serializable]
-        public class SpecialAbility
-        {
-            public float RechargeTime;
-            public float Duration;
-            public string Name;
-        }
-
-        public List<SpecialAbility> SpecialAbilities;
+        public List<string> SpecialAbilities; // Available special abilities for current level
     }
 
 	[SerializeField]

@@ -216,25 +216,23 @@ public class LevelEditorView : EditorWindow
             List<string> allAbilities = new List<string>();
             Array.ForEach(fields, x => allAbilities.Add(x.GetValue(null).ToString()));
 
-            allAbilities.RemoveAll(x=>level.SpecialAbilities.Find(y => y.Name == x) != null);
+            allAbilities.RemoveAll(x=>level.SpecialAbilities.Find(y => y == x) != null);
 
-            SpecialAbilityIndex = EditorGUILayout.Popup(PatternIndex, allAbilities.ToArray());
+            SpecialAbilityIndex = EditorGUILayout.Popup(SpecialAbilityIndex, allAbilities.ToArray());
 	        if (GUILayout.Button("Add", GUILayout.Width(Config.ButtonWidth)))
 	        {
-                Controller.AddSpecialAbility(level, allAbilities[SpecialAbilityIndex], 0);
+                Controller.AddSpecialAbility(level, allAbilities[SpecialAbilityIndex]);
 	        }
 
     
             for (int i = 0; i < level.SpecialAbilities.Count; ++i)
             {
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(level.SpecialAbilities[i].Name, GUILayout.Width(35));
-                level.SpecialAbilities[i].RechargeTime = EditorGUILayout.FloatField(level.SpecialAbilities[i].RechargeTime, GUILayout.Width(35));
-                level.SpecialAbilities[i].Duration = EditorGUILayout.FloatField(level.SpecialAbilities[i].Duration, GUILayout.Width(35));
-
+                EditorGUILayout.LabelField(level.SpecialAbilities[i], GUILayout.Width(35));
+             
                 if (GUILayout.Button("Remove", GUILayout.Width(Config.ButtonWidth)))
                 {
-                    Controller.RemoveSpecialAbility(level, level.SpecialAbilities[i].Name);
+                    Controller.RemoveSpecialAbility(level, level.SpecialAbilities[i]);
                 }
         
                 GUILayout.EndHorizontal();

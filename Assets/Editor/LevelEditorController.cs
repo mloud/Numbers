@@ -11,13 +11,13 @@ public class LevelEditorController
     public Action<LevelDb.LevelDef> OnProbabilityChange;
 
 
-    private Db Db { get; set; }
+    private Db.Db Db { get; set; }
 
     public List<LevelDb.LevelDef> Levels { get { return Db.LevelDb.Levels; } }
 
     public LevelEditorController()
     {
-        Db = (Resources.Load("Prefabs/Db/Db") as GameObject).GetComponent<Db>();
+        Db = (Resources.Load("Prefabs/Db/Db") as GameObject).GetComponent<Db.Db>();
     }
 
     public LevelDb.LevelDef LevelDef;
@@ -67,23 +67,23 @@ public class LevelEditorController
 
     public void CreateSpecialAbilities(LevelDb.LevelDef level)
     {
-        level.SpecialAbilities = new List<LevelDb.LevelDef.SpecialAbility>();
+        level.SpecialAbilities = new List<string>();
     }
 
-    public void AddSpecialAbility(LevelDb.LevelDef level, string ability, float rechargeTime)
+    public void AddSpecialAbility(LevelDb.LevelDef level, string ability)
     {
         
-        Core.Dbg.Assert(level != null && level.SpecialAbilities.Find(x=>x.Name == ability) == null, "LevelEditorController.AddSpecialAbility() " + ability + "  null or already exists");
+        Core.Dbg.Assert(level != null && level.SpecialAbilities.Find(x => x == ability) == null, "LevelEditorController.AddSpecialAbility() " + ability + "  null or already exists");
 
-        if (level.SpecialAbilities.Find(x => x.Name == ability) == null)
+        if (level.SpecialAbilities.Find(x => x == ability) == null)
         {
-            level.SpecialAbilities.Add(new LevelDb.LevelDef.SpecialAbility() { Name = ability, RechargeTime = rechargeTime });
+            level.SpecialAbilities.Add(ability);
         }
     }
 
     public void RemoveSpecialAbility(LevelDb.LevelDef level, string ability)
     {
-        level.SpecialAbilities.Remove(level.SpecialAbilities.Find(x => x.Name == ability));
+        level.SpecialAbilities.Remove(level.SpecialAbilities.Find(x => x == ability));
     }
 
 

@@ -12,4 +12,6 @@ public static class WindowDef
     public static string Loading = "Loading";
     public static string Pause = "Pause";
     public static string Patterns = "Patterns";
+    public static string Info = "Info";
+    public static string SpecialAbilityUnlocked = "SpecialAbilityUnlocked";
 }

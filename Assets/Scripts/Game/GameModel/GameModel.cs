@@ -19,7 +19,8 @@ public class GameModel
     private List<NumberPattern> NumberPatterns { get; set; }
 
     public List<string> SpecialAbilities { get; set; }
- 
+
+    public List<Slot> Slots { get; set; }
 
     public GameModel(GameContext context)
     {
@@ -33,9 +34,10 @@ public class GameModel
 
         NumberPatterns = new List<NumberPattern>();
         SpecialAbilities = new List<string>();
+        Slots = new List<Slot>();
 
         context.LevelDef.Patterns.ForEach(x => NumberPatterns.Add(PatternFactory.Create(x)));
-        context.LevelDef.SpecialAbilities.ForEach(x => SpecialAbilities.Add(x.Name));
+       
       
         Circles = new List<CircleController>();
         Numbers = new List<Number>();

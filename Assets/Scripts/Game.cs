@@ -30,7 +30,7 @@ public class Game : MonoBehaviour
     private GameModel Model { get; set; }
 
 
-    private List<Slot> Slots { get; set;  }
+  
     private List<SpecialSlot> SpecialSlots { get; set; }
 
 
@@ -60,8 +60,6 @@ public class Game : MonoBehaviour
 	{
 
 		//App.Instance.GoogleAnalytics.LogScreen ("Game");
-
-        Slots = new List<Slot>();
 
 		// Bonus generator
 		BonusGenerator = new BonusGenerator ();
@@ -155,25 +153,26 @@ public class Game : MonoBehaviour
         Hud.Instance.Play();
     }
 
-	private IEnumerator RunLevelCoroutine()
+	private IEnumerator RunLevelCoroutine(List<SpecialAbilityDb.SpecialAbility> specialAbilities)
 	{
+        specialAbilities.ForEach(x => Model.SpecialAbilities.Add(x.Name));
+
+        InitPlayground();
+
         // asseble slots
-	    yield return StartCoroutine(PlaygroundAssembler.AssembleRandomCoroutine(this, Slots));
+	    yield return StartCoroutine(PlaygroundAssembler.AssembleRandomCoroutine(this, Model.Slots, true));
 
         // flip pogs
-        yield return StartCoroutine(PlaygroundFlipper.FlipRandomCoroutine(this, LevelDef, Model.Circles));
-
+        yield return StartCoroutine(PlaygroundFlipper.FlipRandomCoroutine(this, LevelDef, Model.Circles, false));
 
         // assemble special abilities
-        yield return StartCoroutine(SpecialAbilityAssembler.AssembleCoroutine(SpecialSlots, 0.5f));
+        yield return StartCoroutine(SpecialAbilityAssembler.AssembleCoroutine(SpecialSlots, 0.5f, true));
 
         CurrState = State.Running;
 
         App.Instance.Sound.PlayMusic("ingame");
 
 
-        //GameUi.Instance.btnPause.gameObject.SetActive(true);
-        //GameUi.Instance.btnHelp.gameObject.SetActive(true);
         GameUi.Instance.ShowButtons();
 
         Hud.Instance.Play();
@@ -193,8 +192,15 @@ public class Game : MonoBehaviour
     private void OpenInitialWindow()
     {
         {
-            var win = App.Instance.WindowManager.OpenWindow(WindowDef.Prelevel, new PrelevelWindow.Param() { Level = LevelDef });
-            win.GetComponentInChildren<Button>().onClick.AddListener(() =>
+            var win = (App.Instance.WindowManager.OpenWindow(WindowDef.Prelevel, new PrelevelWindow.Param() { Level = LevelDef }) as PrelevelWindow);
+
+
+            win.BtnCancel.onClick.AddListener(() =>
+            {
+                App.Instance.LoadScene(SceneDef.LevelSelection);
+            });
+
+            win.BtnPlay.onClick.AddListener(() =>
             {
                 App.Instance.WindowManager.CloseWindow(win.Name);
                 App.Instance.Player.TutorialDone = true;
@@ -208,7 +214,7 @@ public class Game : MonoBehaviour
                 {
                     App.Instance.WindowManager.CloseWindow(winStartLevel.Name);
 
-                    StartCoroutine(RunLevelCoroutine());
+                    StartCoroutine(RunLevelCoroutine(win.SelectedAbilities));
 
                 });
 
@@ -227,16 +233,17 @@ public class Game : MonoBehaviour
 
         CurrState = State.Stopped;
 
+        // Clear previous model
         if (Model != null)
         {
             Model.Numbers.Clear ();
             Model.Circles.ForEach (x => Destroy (x.gameObject));
             Model.Circles.Clear ();
+
+            Model.Slots.ForEach(x => Destroy(x.gameObject));
+            Model.Slots.Clear();
         }
 
-
-        Slots.ForEach(x => Destroy(x.gameObject));
-        Slots.Clear();
         
 		Model = new GameModel(new GameContext() { LevelDef = level, Controller = this });
 
@@ -246,12 +253,11 @@ public class Game : MonoBehaviour
         SpecialAbilityManager = new SpecialAbilityManager(new GameContext() { LevelDef = level, Controller = this, Model = this.Model });
 
 
-
         Score = 0;
 
 		LevelDef = level;
 
-		InitPlayground ();
+		//InitPlayground ();
 
 		MicroTimer = LevelDef.MicroTime;
 		LevelTimer = LevelDef.TotalTime;
@@ -261,9 +267,6 @@ public class Game : MonoBehaviour
 		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
         
-
-        //GameUi.Instance.btnPause.gameObject.SetActive(false);
-        //GameUi.Instance.btnHelp.gameObject.SetActive(false);
 
         Invoke("OpenInitialWindow", 0.2f);
 
@@ -306,22 +309,13 @@ public class Game : MonoBehaviour
         {
             RefillTimer = LevelDef.RefillTime;
 
-            var emptySlots = Slots.FindAll(x => x.Circle == null);
+            var emptySlots = Model.Slots.FindAll(x => x.Circle == null);
 
             if (emptySlots.Count > 0)
             {
                 var rndSlot = emptySlots[Random.Range(0,emptySlots.Count - 1)];
 
-                var circle = CreateCircle(Resources.Load<GameObject>("Prefabs/Circle"), rndSlot);
-
-                circle.Flip(true, 0, 0);
-                circle.Flip(false, 0.3f, 0);
-
-                circle.SetValue(GetNextFlipNumber());
-                circle.SetColor(GetNextColor());
-
-
-                Model.Circles.Add(circle);
+                CreateCircleOnSlot(rndSlot);
             }
         }
 
@@ -330,6 +324,22 @@ public class Game : MonoBehaviour
 
 		BonusGenerator.Update ();
         SpecialAbilityManager.Update();
+    }
+
+    public void CreateCircleOnSlot(Slot slot)
+    {
+        Core.Dbg.Assert(slot.Circle == null, "Game.CreateCircleOnSlot() - slot must be free!");
+
+        var circle = CreateCircle(Resources.Load<GameObject>("Prefabs/Circle"), slot);
+        
+        circle.Flip(true, 0, 0);
+        circle.Flip(false, 0.3f, 0);
+
+        circle.SetValue(GetNextFlipNumber());
+        circle.SetColor(GetNextColor());
+
+
+        Model.Circles.Add(circle);
     }
 
     public int GetNextFlipNumber()
@@ -418,13 +428,13 @@ public class Game : MonoBehaviour
                 var circle = CreateCircle(circlePrefab, slot);
                 
                 Model.Circles.Add(circle);
-                Slots.Add(slot);
+                Model.Slots.Add(slot);
 
 				circle.SetValue(numbers[index]);
                 circle.SetColor(GetNextColor());
 
                 // add specialities
-                List<LevelDb.SpecialityDef> specs = DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
+                List<LevelDb.SpecialityDef> specs = Db.DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
                 specs.ForEach(spec => circle.AddSpeciality(SpecialityFactory.Create(spec.Name, spec.Param, circle, Model.Context)));
 
 				circle.Run();
@@ -461,7 +471,7 @@ public class Game : MonoBehaviour
             var slot = (Instantiate(specialSlot) as GameObject).GetComponent<SpecialSlot>();
             slot.OnClick += OnSpecialSlotClick;
             slot.transform.SetParent(container.transform);
-            slot.SpecialAbilityDef = LevelDef.SpecialAbilities.Find(x => x.Name == sa);
+            slot.SpecialAbilityDef = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.Name == sa);
             var pos = new Vector3(slotX, 0, 0);
             slot.transform.localPosition = pos;
 
@@ -525,13 +535,32 @@ public class Game : MonoBehaviour
 		}
 	}
 
-	private void GameOver()
+    private void GameOver()
+    {
+        StartCoroutine(GameOverCoroutine());
+    }
+
+	private IEnumerator GameOverCoroutine()
 	{
 		//App.Instance.GoogleAnalytics.LogEvent("LevelFinished", (LevelDef.Order.ToString() + 1).ToString(), LevelDef.Name, Score);
 
+        App.Instance.Sound.StopMusic();
+        SoundSystem.Leave();
+
+        CurrState = State.GameOver;
+
+        // flip away cicles
+        yield return StartCoroutine(PlaygroundFlipper.FlipRandomCoroutine(this, LevelDef, Model.Circles, true));
+
+        // disassemble playground
+        yield return StartCoroutine(PlaygroundAssembler.AssembleRandomCoroutine(this, Model.Slots, false));
+
+        // disassemble special abilities
+        /*yield return*/ StartCoroutine(SpecialAbilityAssembler.AssembleCoroutine(SpecialSlots, 0.5f, false));
+
         GameUi.Instance.HideButtons();
 
-		var levelStats = DbUtils.GetLevelStatistic (LevelDef);
+		var levelStats = Db.DbUtils.GetLevelStatistic (LevelDef);
 	
 		bool levelFinished = Score >= LevelDef.Score;
 
@@ -543,7 +572,7 @@ public class Game : MonoBehaviour
 
 			App.Instance.SocialService.ReportScore(Score, LevelDef.LeaderboardId, null);
 
-			bool gameFinished = DbUtils.IsGameFinished ();
+			bool gameFinished = Db.DbUtils.IsGameFinished ();
 
 			
 			if (gameFinished)
@@ -563,10 +592,20 @@ public class Game : MonoBehaviour
 				OnRestartClick = OnRestart,
 				OnNextClick = OnNextLevel,
 				OnMenuClick = OnMenu,
-				IsNextLevel = !gameFinished,
+                IsNextLevel = !Db.DbUtils.IsLastLevel(LevelDef),
 				LevelDef = this.LevelDef
 			});
 
+            var unlockedAbility = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.AvailableForLevel == App.Instance.Player.LastReachedLevel);
+
+            if (false && unlockedAbility != null)
+            {
+                App.Instance.WindowManager.OpenWindow(WindowDef.SpecialAbilityUnlocked, new SpecialAbilityUnlockedWindow.Param()
+                {
+                    Ability = unlockedAbility
+                });
+            }
+          
 		}
 		else
 		{
@@ -580,10 +619,10 @@ public class Game : MonoBehaviour
 			});
 		}
 
-		CurrState = State.GameOver;
+		
 
 
-		App.Instance.Sound.StopMusic ();
+	
 	}
 
 
@@ -634,7 +673,7 @@ public class Game : MonoBehaviour
 
 	private void OnNextLevel()
 	{
-		Init (DbUtils.GetNextLevel (LevelDef));
+		Init (Db.DbUtils.GetNextLevel (LevelDef));
 	}
 
 	private void ScoreAdded()
