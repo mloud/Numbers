@@ -52,7 +52,8 @@ public class PrelevelWindow : Window
         AbilitiesSelected = 0;
         // todo
         var abilities = App.Instance.Db.SpecialAbilityDb.SpecialAbilities;
-       
+
+
         abilities.Sort( (x,y) =>
         {
             return x.AvailableForLevel < y.AvailableForLevel ? -1 : 1;
@@ -66,15 +67,44 @@ public class PrelevelWindow : Window
             abilityItem.transform.SetParent(specialAbilitiesTransform);
             abilityItem.transform.localScale = Vector3.one;
             abilityItem.Selected = false;
-            abilityItem.OnClickAction += OnAbilityClick;
+            abilityItem.OnClickAction += OnAbilityInfoClick;
 
-            abilityItem.Disabled = App.Instance.Player.LastReachedLevel < ab.AvailableForLevel;
+
+            var abilityStatus = App.Instance.Player.AbilitiesStatus.GetStatus(ab.Name);
+        
+            // locked
+            if (abilityStatus == null)
+            {
+                abilityItem.Disabled = true;
+                abilityItem.SetToLockedMode();
+            }
+            // unlocked
+            else
+            {
+                
+                abilityItem.SetToUnlockMode(abilityStatus.Count > 0);
+                abilityItem.CountText.text = abilityStatus.Count.ToString();
+
+              
+                abilityItem.OnBuyAction += OnAbilityBuyClick;
+                abilityItem.OnUseAction += OnAbilityUseClick;
+            }
         }
 
     }
 
 
-    private void OnAbilityClick(Ui.SpecialAbilityItem item)
+    private void OnAbilityBuyClick(Ui.SpecialAbilityItem item)
+    {
+        App.Instance.WindowManager.OpenWindow(WindowDef.SpecialAbilityPreLevelInfo, new SpecialAbilityPreLevelInfoWindow.Param() { Ability = item.Ability, ShowBuyButton = false });
+    }
+
+    private void OnAbilityInfoClick(Ui.SpecialAbilityItem item)
+    {
+        App.Instance.WindowManager.OpenWindow(WindowDef.SpecialAbilityPreLevelInfo, new SpecialAbilityPreLevelInfoWindow.Param() { Ability = item.Ability, ShowBuyButton = false });
+    }
+
+    private void OnAbilityUseClick(Ui.SpecialAbilityItem item)
     {
         if (item.Selected)
         {

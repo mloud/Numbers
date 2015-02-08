@@ -11,16 +11,29 @@ namespace Ui
     {
         [SerializeField]
         public Text LevelText;
-        
-        [SerializeField]
-        private Button button;
 
+        [SerializeField]
+        public Text CountText;
+
+        [SerializeField]
+        public Button buyButton;
+
+        [SerializeField]
+        public Button useButton;
+
+        [SerializeField]
+        public Transform buttonContainer;
+
+        private Button mainButton;
 
         [SerializeField]
         private Image selectedImage;
- 
-     
+
+
         public Action<SpecialAbilityItem> OnClickAction;
+        public Action<SpecialAbilityItem> OnBuyAction;
+        public Action<SpecialAbilityItem> OnUseAction;
+
 
         public bool Selected 
         {
@@ -38,7 +51,7 @@ namespace Ui
             set
             {
                 disabled = value;
-                button.interactable = !disabled;
+                mainButton.interactable = !disabled;
             }
         }
 
@@ -47,7 +60,58 @@ namespace Ui
 
         private bool disabled;
 
-       public  SpecialAbilityDb.SpecialAbility Ability 
+
+        private void Awake()
+        {
+            buyButton.onClick.AddListener(OnBuyClick);
+            useButton.onClick.AddListener(OnUseClick);
+
+        }
+
+        public void SetToImageOnlyMode()
+        {
+            LevelText.gameObject.SetActive(false);
+            CountText.gameObject.transform.parent.gameObject.SetActive(false);
+            selectedImage.gameObject.SetActive(false);
+            buyButton.gameObject.SetActive(false);
+            useButton.gameObject.SetActive(false);
+            mainButton.onClick.RemoveAllListeners();
+        }
+
+        public void SetToLockedMode()
+        {
+            LevelText.gameObject.SetActive(true);
+            selectedImage.gameObject.SetActive(false);
+            buyButton.gameObject.SetActive(false);
+            useButton.gameObject.SetActive(false);
+            CountText.transform.parent.gameObject.SetActive(false);
+            Disabled = true;
+        }
+
+        public void SetToUnlockMode(bool canUse)
+        {
+            LevelText.gameObject.SetActive(false);
+            buyButton.gameObject.SetActive(!canUse);
+            useButton.gameObject.SetActive(canUse);
+            CountText.transform.parent.gameObject.SetActive(true);
+            Disabled = false;
+        }
+       
+        public void InjectUIVisual(GameObject uiVisual)
+        {
+            uiVisual.transform.SetParent(buttonContainer.transform);
+            uiVisual.transform.localPosition = Vector3.zero;
+            uiVisual.transform.localScale = Vector3.one;
+
+            mainButton = uiVisual.GetComponentInChildren<Button>();
+
+            Core.Dbg.Assert(mainButton != null, "SpecialAbilityItem.InjectVisual - no button found");
+
+
+            mainButton.onClick.AddListener(OnClick);
+        }
+   
+        public  SpecialAbilityDb.SpecialAbility Ability 
         {
             get { return ability;  }
             set
@@ -60,20 +124,25 @@ namespace Ui
 
         SpecialAbilityDb.SpecialAbility ability;
 
-        private void Awake()
-        {
-
-            button.onClick.AddListener(OnClick);
-        }
-
+        
         private void OnClick()
         {
-            Selected = !Selected;
-
             if (OnClickAction != null)
                 OnClickAction(this);
         }
-    
 
+        private void OnBuyClick()
+        {
+            if (OnBuyAction != null)
+                OnBuyAction(this);
+        }
+
+        private void OnUseClick()
+        {
+            Selected = !Selected;
+
+            if (OnUseAction != null)
+                OnUseAction(this);
+        }
     }
 }

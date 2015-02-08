@@ -9,7 +9,14 @@ public class SpecialAbilityUnlockedWindow : Window
     private Text abilityName;
 
     [SerializeField]
+    private Text description;
+
+
+    [SerializeField]
     private Transform containerTransform;
+
+    [SerializeField]
+    private Button cancelButton;
 
     private Param Parameters { get; set; }
 
@@ -24,19 +31,23 @@ public class SpecialAbilityUnlockedWindow : Window
         Parameters = param as Param;
 
         abilityName.text = Parameters.Ability.Name;
+        description.text = Parameters.Ability.Description;
 
+        cancelButton.onClick.AddListener(OnCancelClick);
 
         var abilityItem = SpecialAbilityFactory.CreateUiItem(Parameters.Ability.Name);
         abilityItem.Ability = Parameters.Ability;
         abilityItem.transform.SetParent(containerTransform);
         abilityItem.transform.localScale = Vector3.one;
-        abilityItem.Selected = false;
+        abilityItem.SetToImageOnlyMode();
 
         abilityItem.LevelText.gameObject.SetActive(false);
+
+        
     }
 
 
-    public void OnMenuClick()
+    public void OnCancelClick()
     {
         App.Instance.WindowManager.CloseWindow(Name);
 

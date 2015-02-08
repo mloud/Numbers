@@ -91,23 +91,38 @@ public class SpecialAbilityEditorView : EditorWindow
                 GUILayout.EndHorizontal();
 
                
-                //Unlock on lebel
+                //Unlock on level
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Level");
                 ability.AvailableForLevel = EditorGUILayout.IntField(ability.AvailableForLevel);
                 GUILayout.EndHorizontal();
 
-                //Rechare time
+                //Unlock on level
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Initial count");
+                ability.InitialCount = EditorGUILayout.IntField(ability.InitialCount);
+                GUILayout.EndHorizontal();
+
+                //Recharge time
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Recharge time");
                 ability.RechargeTime = EditorGUILayout.FloatField(ability.RechargeTime);
                 GUILayout.EndHorizontal();
 
-                //Dueation time
+                //Duration time
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Duartion time");
                 ability.Duration = EditorGUILayout.FloatField(ability.Duration);
                 GUILayout.EndHorizontal();
+
+                // Description
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Description");
+                ability.Description = EditorGUILayout.TextField(ability.Description);
+                GUILayout.EndHorizontal();
+
+
+
         
             }
         }

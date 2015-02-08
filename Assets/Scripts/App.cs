@@ -24,7 +24,7 @@ public class App : MonoBehaviour
 
 	public Db.Db Db { get; private set; }
 
-	public Num.NPlayer Player { get; private set; }
+	public Player.PlayerStatus Player { get; private set; }
 
     public ColorManager ColorManager{ get; private set; }
 
@@ -57,6 +57,9 @@ public class App : MonoBehaviour
 	
 		Init ();
 	}
+
+    void Start()
+    {}
 
 #if UNITY_EDITOR
     public void StartLevelFromEditor(LevelDb.LevelDef level)
@@ -139,15 +142,15 @@ public class App : MonoBehaviour
 		Db.transform.SetParent (transform);
 
         // Persistent data
-		var persDataGo = new GameObject ("PersistentData");
+		var persDataGo = new GameObject ("__PersistentData__");
 		persDataGo.transform.SetParent (transform);
 		PersistentData = persDataGo.AddComponent<PersistentData> ();
 
         // Player
-		var PlayerGo = new GameObject ("Player");
+		var PlayerGo = new GameObject ("__PlayerStatus__");
 		DontDestroyOnLoad (PlayerGo);
 		PlayerGo.transform.SetParent (transform);
-		Player = PlayerGo.AddComponent<Num.NPlayer> ();
+		Player = PlayerGo.AddComponent<Player.PlayerStatus> ();
 		Player.Load ();
 	
         // Window Manager
@@ -158,6 +161,7 @@ public class App : MonoBehaviour
 
         // Sound
         Sound = (Instantiate(Resources.Load<GameObject>("Prefabs/__Sound__")) as GameObject).GetComponent<Sound>();
+        Sound.gameObject.name = "__Sound__";
         DontDestroyOnLoad(Sound.gameObject);
         Sound.transform.SetParent(transform);
 

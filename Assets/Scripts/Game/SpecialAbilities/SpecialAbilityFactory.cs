@@ -13,14 +13,19 @@ public static class SpecialAbilityFactory
 
     public static Ui.SpecialAbilityItem CreateUiItem(string name)
     {
+
+        var specialAbilityContainerPrefab = Resources.Load<GameObject>(pathUi + "SpecialAbilityItem");
+
         var prefab = Resources.Load<GameObject>(pathUi + name);
         
         Core.Dbg.Assert(prefab != null, "SpecialAbilityFactyCreateUiItem() " + name + " no prefab at: " + pathUi + name + " found");
 
-        var ability = (GameObject.Instantiate(prefab) as GameObject).GetComponent<Ui.SpecialAbilityItem>();
+        var ability = (GameObject.Instantiate(specialAbilityContainerPrefab) as GameObject).GetComponent<Ui.SpecialAbilityItem>();
 
         Core.Dbg.Assert(ability != null, "SpecialAbilityFactyCreateUiItem() no SpecialAbilityItem script found on" + name);
 
+        ability.InjectUIVisual(GameObject.Instantiate(prefab) as GameObject); 
+      
         return ability;
     }
 

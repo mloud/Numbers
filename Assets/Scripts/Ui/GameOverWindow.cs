@@ -50,6 +50,7 @@ public class GameOverWindow : Window
 
 	public class Param
 	{
+        public Action OnAnimsFinished;
 		public int Score;
 		public int BestScore;
 		public string LevelName;
@@ -102,8 +103,13 @@ public class GameOverWindow : Window
         txtBestScoreTitle.GetComponent<SimpleAnimationExt>().RunIn(2);
         txtBestScoreValue.GetComponent<SimpleAnimationExt>().RunIn(2.5f);
 
-        
+        Invoke("AnimsFinished", 3.0f);
 	}
+
+    private void AnimsFinished()
+    {
+        Parameters.OnAnimsFinished();
+    }
 
 	public void OnNextClick()
 	{

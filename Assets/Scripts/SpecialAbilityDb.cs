@@ -10,10 +10,12 @@ public class SpecialAbilityDb : MonoBehaviour
     [System.Serializable]
     public class SpecialAbility
     {
+        public int AvailableForLevel;
+        public int InitialCount;
         public float RechargeTime;
         public float Duration;
         public string Name;
-        public int AvailableForLevel;
+        public string Description;
     }
 
     public List<SpecialAbility> SpecialAbilities;

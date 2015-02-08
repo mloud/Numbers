@@ -71,17 +71,17 @@ public class LevelComponent : MonoBehaviour
 
 		txtLevel.text = (LevelDef.Order + 1).ToString ();
 
-		Num.NPlayer.LevelStatistic lStats = Db.DbUtils.GetLevelStatistic (LevelDef);
+		Player.LevelsStatus.LevelStatus levelStatus = Db.DbUtils.GetLevelStatus (LevelDef);
 
-		alreadyPlayerIcon.gameObject.SetActive (lStats != null);
-		txtScore.gameObject.SetActive (lStats != null);
+		alreadyPlayerIcon.gameObject.SetActive (levelStatus != null);
+		txtScore.gameObject.SetActive (levelStatus != null);
 
 		txtLevel.gameObject.SetActive (isUncloked);
 		lockIcon.gameObject.SetActive (!isUncloked);
 
-		if (lStats != null)
+		if (levelStatus != null)
 		{
-			txtScore.text = lStats.Score.ToString();
+			txtScore.text = levelStatus.BestScore.ToString();
 		}
 
 

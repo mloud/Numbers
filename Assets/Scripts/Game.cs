@@ -155,7 +155,10 @@ public class Game : MonoBehaviour
 
 	private IEnumerator RunLevelCoroutine(List<SpecialAbilityDb.SpecialAbility> specialAbilities)
 	{
+        
         specialAbilities.ForEach(x => Model.SpecialAbilities.Add(x.Name));
+        App.Instance.Player.AbilitiesStatus.UseAbilities(Model.SpecialAbilities);
+       
 
         InitPlayground();
 
@@ -203,8 +206,7 @@ public class Game : MonoBehaviour
             win.BtnPlay.onClick.AddListener(() =>
             {
                 App.Instance.WindowManager.CloseWindow(win.Name);
-                App.Instance.Player.TutorialDone = true;
-
+            
 
                 App.Instance.WindowManager.CloseWindow(WindowDef.Patterns);
 
@@ -560,7 +562,7 @@ public class Game : MonoBehaviour
 
         GameUi.Instance.HideButtons();
 
-		var levelStats = Db.DbUtils.GetLevelStatistic (LevelDef);
+		var levelStatus = Db.DbUtils.GetLevelStatus (LevelDef);
 	
 		bool levelFinished = Score >= LevelDef.Score;
 
@@ -568,7 +570,12 @@ public class Game : MonoBehaviour
 	
 		if (levelFinished)
 		{
-			App.Instance.Player.LevelFinished (LevelDef, Score);
+			App.Instance.Player.LevelsStatus.Finish (LevelDef.Name, Score);
+            var unlockedAbility = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.AvailableForLevel == App.Instance.Player.LevelsStatus.LastReachedLevel);
+            if (unlockedAbility != null)
+                App.Instance.Player.AbilitiesStatus.Unlock(unlockedAbility.Name);
+          
+
 
 			App.Instance.SocialService.ReportScore(Score, LevelDef.LeaderboardId, null);
 
@@ -587,24 +594,29 @@ public class Game : MonoBehaviour
             App.Instance.WindowManager.OpenWindow(WindowDef.GameOver, new GameOverWindow.Param() 
 			{ 	
 				Score = this.Score,
-				BestScore = levelStats == null ? 0 : levelStats.Score,
+				BestScore = levelStatus == null ? 0 : levelStatus.BestScore,
 				LevelName = "Level " + (LevelDef.Order + 1),
 				OnRestartClick = OnRestart,
 				OnNextClick = OnNextLevel,
 				OnMenuClick = OnMenu,
                 IsNextLevel = !Db.DbUtils.IsLastLevel(LevelDef),
-				LevelDef = this.LevelDef
+				LevelDef = this.LevelDef,
+
+
+                OnAnimsFinished = () =>
+                {
+                    if (unlockedAbility != null)
+                    {
+                        App.Instance.WindowManager.OpenWindow(WindowDef.SpecialAbilityUnlocked, new SpecialAbilityUnlockedWindow.Param()
+                        {
+                            Ability = unlockedAbility
+                        });
+                    }
+                }
+
 			});
 
-            var unlockedAbility = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.AvailableForLevel == App.Instance.Player.LastReachedLevel);
-
-            if (false && unlockedAbility != null)
-            {
-                App.Instance.WindowManager.OpenWindow(WindowDef.SpecialAbilityUnlocked, new SpecialAbilityUnlockedWindow.Param()
-                {
-                    Ability = unlockedAbility
-                });
-            }
+            
           
 		}
 		else
