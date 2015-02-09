@@ -74,10 +74,10 @@ public class GameOverWindow : Window
 
         btnOk.gameObject.SetActive(!Parameters.IsNextLevel);
 
-		btnLeaderboard.gameObject.SetActive(App.Instance.SocialService.IsLogged());
+		btnLeaderboard.gameObject.SetActive(App.Instance.Services.GetService<Srv.SocialService>().IsLogged());
 		btnLeaderboard.onClick.AddListener( () => 
 		{
-			App.Instance.SocialService.ShowSpecificLeaderBoard(Parameters.LevelDef.LeaderboardId);
+			App.Instance.Services.GetService<Srv.SocialService>().ShowSpecificLeaderBoard(Parameters.LevelDef.LeaderboardId);
 		});
 
 

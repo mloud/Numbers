@@ -577,7 +577,7 @@ public class Game : MonoBehaviour
           
 
 
-			App.Instance.SocialService.ReportScore(Score, LevelDef.LeaderboardId, null);
+			App.Instance.Services.GetService<Srv.SocialService>().ReportScore(Score, LevelDef.LeaderboardId, null);
 
 			bool gameFinished = Db.DbUtils.IsGameFinished ();
 

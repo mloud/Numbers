@@ -90,11 +90,11 @@ public class LevelComponent : MonoBehaviour
 		int from = 0;
 
 	
-		if (App.Instance.SocialService.IsLogged())
+		if (App.Instance.Services.GetService<Srv.SocialService>().IsLogged())
 		{
-			App.Instance.SocialService.LoadScores(LevelDef.LeaderboardId, (UnityEngine.SocialPlatforms.IScore[] scores) =>
+			App.Instance.Services.GetService<Srv.SocialService>().LoadScores(LevelDef.LeaderboardId, (UnityEngine.SocialPlatforms.IScore[] scores) =>
 			{
-				var scoreRec = Array.Find(scores, x => x.userID == App.Instance.SocialService.UserId);
+				var scoreRec = Array.Find(scores, x => x.userID == App.Instance.Services.GetService<Srv.SocialService>().UserId);
 
 				if (scoreRec != null)
 				{
@@ -107,7 +107,7 @@ public class LevelComponent : MonoBehaviour
 
 		SetRanking(rank, from, scoreRecExist);
 
-		leaderboardTransform.gameObject.SetActive(App.Instance.SocialService.IsLogged());
+		leaderboardTransform.gameObject.SetActive(App.Instance.Services.GetService<Srv.SocialService>().IsLogged());
 		
 
 	}

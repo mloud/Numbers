@@ -29,20 +29,30 @@ namespace Srv
             if ((modes & Mode.Local) != 0)
             {
                 var impl = new LocalSaveGameImplementation();
-                Implementations.Add(impl);
                 impl.Init((bool succ) =>
                 {
-                    callback(Mode.Local, succ);
+                 	if (succ)
+				   	{
+						Implementations.Add(impl);
+						Core.Dbg.Log("SaveGameService.Init() adding " + impl.GetType().ToString());
+					}
+				   
+					callback(Mode.Local, succ);
                 });
             }
 
             if ((modes & Mode.Cloud) != 0)
             {
                 var impl = new CloudSaveGameImplementation();
-                Implementations.Add(impl);
                 impl.Init((bool succ) =>
                 {
-                    callback(Mode.Cloud, succ);
+					if (succ)
+					{
+						Implementations.Add(impl);
+						Core.Dbg.Log("SaveGameService.Init() adding " + impl.GetType().ToString());
+					}
+                    
+					callback(Mode.Cloud, succ);
                 });
             }
         }
@@ -94,7 +104,7 @@ namespace Srv
             
             string saveGameStr = UnityEngine.PlayerPrefs.GetString("saveGame");
 
-            App.Instance.PlayerStatus.Load(saveGameStr);
+            App.Instance.PlayerStatus.Load(saveGameStr, true);
 
             Core.Dbg.Log("LocalSaveGameImplementation.Load() finished - " + saveGameStr, Core.Dbg.MessageType.Info);
         }
@@ -123,29 +133,68 @@ namespace Srv
 
     class CloudSaveGameImplementation : SaveGameImplementation
     {
+		private ISavedGameMetadata MetaData {get; set;}
+
         public override void Init(Action<bool> result)
         {
             OpenSavedGame("saveGame", (SavedGameRequestStatus status, ISavedGameMetadata metaData) =>
             {
-                Core.Dbg.Log("CloudSaveGameImplementation.Load() - status " + status.ToString());
+                Core.Dbg.Log("CloudSaveGameImplementation.Init() - status " + status.ToString());
+
+				MetaData = metaData;
+
                 result(status == SavedGameRequestStatus.Success);
             });
         }
 
         public override void Load()
         {
-          
+			Core.Dbg.Log("CloudSaveGameImplementation.Load() started");
+
+			LoadGame(MetaData, (SavedGameRequestStatus status, byte[] data) =>
+			{
+			
+				Core.Dbg.Log ("CloudSaveGameImplementation.Load() result " + status.ToString());
+
+				if (status == SavedGameRequestStatus.Success)
+				{
+					string strData = System.Text.Encoding.UTF8.GetString(data);
+					Core.Dbg.Log("CloudSaveGameImplementation.Load() data is : " + strData);
+					App.Instance.PlayerStatus.Load(strData, true);				
+				}
+			});
+			
+			Core.Dbg.Log("CloudSaveGameImplementation.Load() finished");
         }
 
         public override void Save()
         {
-         
+			Core.Dbg.Log("CloudSaveGameImplementation.Save() started");
+
+			bool succWritten = false;
+
+			Init((bool succInit) =>
+			{
+				if (succInit)
+				{
+					var saveGame = App.Instance.PlayerStatus.GetSaveGame();
+					
+					SaveGame(MetaData, System.Text.Encoding.UTF8.GetBytes (saveGame), (bool succ) =>
+					{
+						Core.Dbg.Log ("CloudSaveGameImplementation.Save() result " + succ.ToString());
+
+						succWritten = succ;
+					});
+				}
+			});
+
+			Core.Dbg.Log("CloudSaveGameImplementation.Save() finished with result " + (succWritten ? "Succeeded" : "Failed"), succWritten ? Core.Dbg.MessageType.Info : Core.Dbg.MessageType.Error);
         }
 
 
         public override void Delete()
         {
-        
+        	
         }
 
         private void OpenSavedGame(string filename, Action<SavedGameRequestStatus, ISavedGameMetadata> onOpenCallback)
@@ -156,7 +205,13 @@ namespace Srv
                 ConflictResolutionStrategy.UseLongestPlaytime, onOpenCallback);
         }
 
-        private void SaveGame(ISavedGameMetadata game, byte[] savedData)
+		private void LoadGame (ISavedGameMetadata game, Action<SavedGameRequestStatus, byte[]> result) 
+		{
+			ISavedGameClient savedGameClient = PlayGamesPlatform.Instance.SavedGame;
+			savedGameClient.ReadBinaryData(game, result);
+		}
+
+        private void SaveGame(ISavedGameMetadata game, byte[] savedData, Action<bool> result)
         {
             ISavedGameClient savedGameClient = PlayGamesPlatform.Instance.SavedGame;
 
@@ -165,15 +220,11 @@ namespace Srv
 
             savedGameClient.CommitUpdate(game, updatedMetadata, savedData, (SavedGameRequestStatus status, ISavedGameMetadata metadata) =>
             {
-                if (status == SavedGameRequestStatus.Success)
-                {
-                    // handle reading or writing of saved game.
-                }
-                else
-                {
-                    // handle error
-                }
+				Core.Dbg.Log("CloudSaveGameImplementation.SaveGame() " + status.ToString(), Core.Dbg.MessageType.Info);
+
+				result(status == SavedGameRequestStatus.Success);
             });
         }
+
     }
 }

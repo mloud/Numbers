@@ -129,7 +129,7 @@ namespace GameStatus
             return root;
         }
 
-        public void Load(JSONNode jsonNode)
+        public void Load(JSONNode jsonNode, bool allowMerge)
         {
             if (jsonNode == null)
             {
@@ -137,23 +137,46 @@ namespace GameStatus
                 return; 
             }
             
-            FinishedLevels.Clear();
+
+			if (!allowMerge)
+            	FinishedLevels.Clear();
 
             string version = jsonNode["saveVersion"].Value;
 
-            lastReachedLevel = jsonNode["lastLevelReached"].AsInt;
-
+			if (allowMerge)
+			{
+				lastReachedLevel = Math.Max(lastReachedLevel, jsonNode["lastLevelReached"].AsInt);
+			}
+			else
+			{
+				lastReachedLevel = jsonNode["lastLevelReached"].AsInt;
+			}
+           
             JSONArray levels = jsonNode["finishedLevels"].AsArray;
 
             for (int i = 0; i < levels.Count; ++i )
             {
                 var levelStatus = new LevelStatus();
-
-
-                levelStatus.Name = levels[i]["name"].Value;
+                
+				levelStatus.Name = levels[i]["name"].Value;
                 levelStatus.BestScore = levels[i]["bestScore"].AsInt;
 
-                FinishedLevels.Add(levelStatus);
+				if (allowMerge)
+				{
+					var existingLevelStatus = FinishedLevels.Find(x=>x.Name == levelStatus.Name);
+					if (existingLevelStatus == null)
+					{
+						FinishedLevels.Add(levelStatus);
+					}
+					else
+					{
+						existingLevelStatus.BestScore = Math.Max(existingLevelStatus.BestScore, levelStatus.BestScore);
+					}
+				}
+				else
+				{
+                	FinishedLevels.Add(levelStatus);
+				}
             }
         }
 

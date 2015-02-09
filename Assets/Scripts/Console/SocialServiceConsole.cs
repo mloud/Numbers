@@ -38,22 +38,22 @@ public class SocialServiceConsole : MonoBehaviour
 
 		if (GUILayout.Button("Log In")) 
 		{
-			App.Instance.SocialService.Login(null);
+			App.Instance.Services.GetService<Srv.SocialService>().Login(null);
 		}
 
 		if (GUILayout.Button("Log Out")) 
 		{
-			App.Instance.SocialService.SignOut();
+			App.Instance.Services.GetService<Srv.SocialService>().SignOut();
 		}
 
 		if (GUILayout.Button("Show Leaderboards")) 
 		{
-			App.Instance.SocialService.ShowLeaderBoard();
+			App.Instance.Services.GetService<Srv.SocialService>().ShowLeaderBoard();
 		}
 
 		if (GUILayout.Button("Show Achievements")) 
 		{
-			App.Instance.SocialService.ShowAchievements();
+			App.Instance.Services.GetService<Srv.SocialService>().ShowAchievements();
 		}
 
 

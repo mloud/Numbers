@@ -3,35 +3,50 @@ using System.Collections;
 using GooglePlayGames;
 using UnityEngine.SocialPlatforms;
 using System;
+using GooglePlayGames.BasicApi;
 
 
-namespace Core
+namespace Srv
 {
 
-	public abstract class SocialService : MonoBehaviour
+	public class SocialService : Service
 	{
 		public void Activate () 
 		{
+			PlayGamesClientConfiguration config = new PlayGamesClientConfiguration.Builder().EnableSavedGames().Build();
+			PlayGamesPlatform.InitializeInstance(config);
+			PlayGamesPlatform.DebugLogEnabled = true;
 			PlayGamesPlatform.Activate();
 		}
 
-		public abstract void LoadLeaderboardIds();
+		public virtual void LoadLeaderboardIds()
+		{}
 		
 		public string UserId { get { return Social.localUser.id; } }
 
 		// Login 
 		public void Login(Action<bool> callback)
 		{
-			Social.localUser.Authenticate((bool success) =>
+			if (Social.localUser.authenticated)
 			{
-				if (success)
-					Core.Dbg.Log("SocialService.Login() - succeeded");
-				else
-					Core.Dbg.Log("SocialService.Login() - failed");
+				Core.Dbg.Log("SocialService.Login() - already authentificated");
 				
 				if (callback != null)
-					callback(success);
-			});
+					callback(true);
+			}
+			else
+			{
+				Social.localUser.Authenticate((bool success) =>
+				{
+					if (success)
+						Core.Dbg.Log("SocialService.Login() - succeeded");
+					else
+						Core.Dbg.Log("SocialService.Login() - failed");
+					
+					if (callback != null)
+						callback(success);
+				});
+			}
 		}
 		
 		

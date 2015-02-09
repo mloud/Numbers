@@ -106,7 +106,7 @@ public class LevelUi : MonoBehaviour
 
 	private void OnLeaderboardClick(LevelDb.LevelDef level)
 	{
-		App.Instance.SocialService.ShowSpecificLeaderBoard(level.LeaderboardId);
+		App.Instance.Services.GetService<Srv.SocialService>().ShowSpecificLeaderBoard(level.LeaderboardId);
 	}
 
 }

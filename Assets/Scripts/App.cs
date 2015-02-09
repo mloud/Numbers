@@ -23,8 +23,6 @@ public class App : MonoBehaviour
 
     public Srv.Services Services { get; private set; }
 
-	public Core.SocialService SocialService { get; private set; }
-
 	public Db.Db Db { get; private set; }
 
     public GameStatus.PlayerStatus PlayerStatus { get; private set; }
@@ -112,7 +110,8 @@ public class App : MonoBehaviour
 	{
         // Services
         Services = new Srv.Services();
-        Services.RegisterService(new Srv.SaveGameService());
+		Services.RegisterService(new Srv.SaveGameService());
+        Services.RegisterService(new Srv.SocialService());
 
 		// RootConsole
 		RootConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__RootConsole__")) as GameObject).GetComponent<RootConsole>();
@@ -130,12 +129,6 @@ public class App : MonoBehaviour
 		Console.transform.SetParent(transform);
 		Console.Show(false);
 		DontDestroyOnLoad(Console.gameObject);
-
-		// Social Service
-		SocialService = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialService__")) as GameObject).GetComponent<Core.SocialService>();
-		SocialService.transform.SetParent(transform);
-	
-	
 
         //ColorManager
         ColorManager = (Instantiate(Resources.Load<GameObject>("Prefabs/__ColorManager__")) as GameObject).GetComponent<ColorManager>();
@@ -187,10 +180,10 @@ public class App : MonoBehaviour
         bool saveGameInit = false;
         
         //activate social services
-        SocialService.Activate();
+		Services.GetService<Srv.SocialService>().Activate();
 
         // 1) login
-        SocialService.Login((bool succ) =>
+		Services.GetService<Srv.SocialService>().Login((bool succ) =>
         {
             loggingFinished = true;
         });
@@ -202,7 +195,7 @@ public class App : MonoBehaviour
         // 2) SaveGame service init
 
         var saveModes = Srv.SaveGameService.Mode.Local;
-        if (SocialService.IsLogged())
+		if (Services.GetService<Srv.SocialService>().IsLogged())
             saveModes |= Srv.SaveGameService.Mode.Cloud;
 
         Services.GetService<Srv.SaveGameService>().Init(saveModes, (Srv.SaveGameService.Mode mode, bool result) => 

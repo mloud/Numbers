@@ -38,14 +38,14 @@ namespace GameStatus
             AbilitiesStatus.Reset();
         }
 
-        public void Load(string str)
+        public void Load(string str, bool allowMerge)
         {
             var jsonRoot = SimpleJSON.JSON.Parse(str);
 
             if (jsonRoot != null)
             {
-                LevelsStatus.Load(jsonRoot["levelsStatus"]);
-                AbilitiesStatus.Load(jsonRoot["abilitiesStatus"]);
+                LevelsStatus.Load(jsonRoot["levelsStatus"], allowMerge);
+                AbilitiesStatus.Load(jsonRoot["abilitiesStatus"], allowMerge);
             }
         }
     }

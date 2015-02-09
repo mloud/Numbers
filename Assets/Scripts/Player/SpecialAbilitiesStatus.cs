@@ -35,7 +35,12 @@ namespace GameStatus
                 }
                 
             }
-        
+
+			// Save
+			if (abilities.Count > 0)
+			{
+				App.Instance.Services.GetService<Srv.SaveGameService>().Save();
+			}
         }
 
         public SpecialAbilitiesStatus()
@@ -110,7 +115,7 @@ namespace GameStatus
             return root;
         }
 
-        public void Load(JSONNode jsonNode)
+        public void Load(JSONNode jsonNode, bool allowMerge)
         {
             if (jsonNode == null)
             {
@@ -118,7 +123,8 @@ namespace GameStatus
                 return;
             }
 
-            UnlockAbilities.Clear();
+			if (!allowMerge)
+	            UnlockAbilities.Clear();
 
 
             string version = jsonNode["saveVersion"].Value;
@@ -133,7 +139,24 @@ namespace GameStatus
                 status.Name = abilities[i]["name"].Value;
                 status.Count = abilities[i]["count"].AsInt;
 
-                UnlockAbilities.Add(status);
+                
+				if (allowMerge)
+				{
+					var existingAbility = UnlockAbilities.Find(x=>x.Name == status.Name);
+
+					if (existingAbility == null)
+					{
+						UnlockAbilities.Add(status);
+					}
+					else
+					{
+						existingAbility.Count = Math.Max(existingAbility.Count, status.Count);
+					}
+				}
+				else
+				{
+					UnlockAbilities.Add(status);
+				}
             }
         }
 

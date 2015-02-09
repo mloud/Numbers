@@ -18,7 +18,7 @@ public class MenuUi : MonoBehaviour
 	{
 		playLevelsButton.onClick.AddListener( () => { App.Instance.LoadScene(SceneDef.LevelSelection); } );
 		survivalButton.onClick.AddListener( () => { App.Instance.StartSurvival(); } );
-        leaderboardButton.onClick.AddListener(() => { App.Instance.SocialService.ShowLeaderBoard(); });
+		leaderboardButton.onClick.AddListener(() => { App.Instance.Services.GetService<Srv.SocialService>().ShowLeaderBoard(); });
 
 
 		App.Instance.Sound.PlayMusic("menu");
@@ -26,6 +26,6 @@ public class MenuUi : MonoBehaviour
 	
 	void Update () 
     {
-       leaderboardButton.gameObject.SetActive(App.Instance.SocialService.IsLogged());
+		leaderboardButton.gameObject.SetActive(App.Instance.Services.GetService<Srv.SocialService>().IsLogged());
 	}
 }
