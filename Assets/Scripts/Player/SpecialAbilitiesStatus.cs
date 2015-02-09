@@ -6,7 +6,7 @@ using System.Text;
 
 
 
-namespace Player
+namespace GameStatus
 {
 
     public class SpecialAbilitiesStatus
@@ -75,7 +75,7 @@ namespace Player
                 UnlockAbilities.Add(specialAbilityStatus);
             
                 // Save
-                Save();
+                App.Instance.Services.GetService<Srv.SaveGameService>().Save();
 
                 Core.Dbg.Log("SpecialAbilitiesStatus.Unlock() " + name + " successful");
             }
@@ -84,7 +84,7 @@ namespace Player
 
 
 
-        public void Save()
+        public JSONNode GetAsJSON()
         {
             JSONClass root = new JSONClass();
 
@@ -105,30 +105,26 @@ namespace Player
 
             root["unlockedAbilities"] = array;
 
-            Core.Dbg.Log("Json:" + root.ToString());
+            Core.Dbg.Log("SpecialAbilitiesStatus.GetAsJson() " + root.ToString());
 
-            UnityEngine.PlayerPrefs.SetString("AbilitiesStatus", root.ToString());
+            return root;
         }
 
-        public void Load()
+        public void Load(JSONNode jsonNode)
         {
-            string str = UnityEngine.PlayerPrefs.GetString("AbilitiesStatus");
-
-            if (string.IsNullOrEmpty(str))
+            if (jsonNode == null)
             {
-                Core.Dbg.Log("SpecialAbilitiesStatus.Load() no record found");
+                Core.Dbg.Log("SpecialAbilitiesStatus.LoadFromJSON() jsoNode is null -> no record found", Core.Dbg.MessageType.Warning);
                 return;
             }
 
             UnlockAbilities.Clear();
 
 
-            var root = JSON.Parse(str);
-
-            string version = root["saveVersion"].Value;
+            string version = jsonNode["saveVersion"].Value;
 
 
-            JSONArray abilities = root["unlockedAbilities"].AsArray;
+            JSONArray abilities = jsonNode["unlockedAbilities"].AsArray;
 
             for (int i = 0; i < abilities.Count; ++i)
             {

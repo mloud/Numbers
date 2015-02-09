@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Player
+namespace GameStatus
 {
 
     public class PlayerStatus : MonoBehaviour
@@ -11,32 +11,42 @@ namespace Player
         public LevelsStatus LevelsStatus { get; private set; }
         public SpecialAbilitiesStatus AbilitiesStatus { get; private set; }
 
-        private void Awake()
+      
+        public void Init()
         {
             LevelsStatus = new LevelsStatus();
             AbilitiesStatus = new SpecialAbilitiesStatus();
+        }
+
+        public string GetSaveGame()
+        {
+            SimpleJSON.JSONNode levelsJson = LevelsStatus.GetAsJSON();
+            SimpleJSON.JSONNode abilitiesJson = AbilitiesStatus.GetAsJSON();
+
+            SimpleJSON.JSONClass root = new SimpleJSON.JSONClass();
+
+            root["levelsStatus"] = levelsJson;
+            root["abilitiesStatus"] = abilitiesJson;
+
+
+            return root.ToString();
         }
 
         public void Reset()
         {
             LevelsStatus.Reset();
             AbilitiesStatus.Reset();
-
-            PlayerPrefs.DeleteAll();
         }
 
-   
-
-        public void Load()
+        public void Load(string str)
         {
-            LevelsStatus.Load();
-            AbilitiesStatus.Load();
-        }
+            var jsonRoot = SimpleJSON.JSON.Parse(str);
 
-        private void Save()
-        {
-            LevelsStatus.Save();
-            AbilitiesStatus.Save();
+            if (jsonRoot != null)
+            {
+                LevelsStatus.Load(jsonRoot["levelsStatus"]);
+                AbilitiesStatus.Load(jsonRoot["abilitiesStatus"]);
+            }
         }
     }
 }

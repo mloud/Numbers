@@ -70,7 +70,7 @@ public class PrelevelWindow : Window
             abilityItem.OnClickAction += OnAbilityInfoClick;
 
 
-            var abilityStatus = App.Instance.Player.AbilitiesStatus.GetStatus(ab.Name);
+            var abilityStatus = App.Instance.PlayerStatus.AbilitiesStatus.GetStatus(ab.Name);
         
             // locked
             if (abilityStatus == null)

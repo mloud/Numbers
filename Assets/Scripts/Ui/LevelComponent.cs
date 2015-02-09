@@ -71,7 +71,7 @@ public class LevelComponent : MonoBehaviour
 
 		txtLevel.text = (LevelDef.Order + 1).ToString ();
 
-		Player.LevelsStatus.LevelStatus levelStatus = Db.DbUtils.GetLevelStatus (LevelDef);
+        GameStatus.LevelsStatus.LevelStatus levelStatus = Db.DbUtils.GetLevelStatus(LevelDef);
 
 		alreadyPlayerIcon.gameObject.SetActive (levelStatus != null);
 		txtScore.gameObject.SetActive (levelStatus != null);

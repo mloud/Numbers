@@ -15,4 +15,5 @@ public static class WindowDef
     public static string Info = "Info";
     public static string SpecialAbilityUnlocked = "SpecialAbilityUnlocked";
     public static string SpecialAbilityPreLevelInfo = "SpecialAbiltyPreLevelInfo";
+    public static string Intro = "Intro";
 }

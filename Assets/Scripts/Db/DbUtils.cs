@@ -15,7 +15,7 @@ namespace Db
 
         public static bool IsLevelUnlocked(LevelDb.LevelDef level)
         {
-            return level.Order <= App.Instance.Player.LevelsStatus.LastReachedLevel;
+            return level.Order <= App.Instance.PlayerStatus.LevelsStatus.LastReachedLevel;
         }
 
         public static LevelDb.LevelDef GetLevelByOrder(int order)
@@ -36,19 +36,19 @@ namespace Db
             int maxOrder = 0;
             App.Instance.Db.LevelDb.Levels.ForEach(x => maxOrder = Mathf.Max(maxOrder, x.Order));
 
-            return maxOrder == App.Instance.Player.LevelsStatus.LastReachedLevel && IsLevelFinished(GetLevelByOrder(maxOrder));
+            return maxOrder == App.Instance.PlayerStatus.LevelsStatus.LastReachedLevel && IsLevelFinished(GetLevelByOrder(maxOrder));
         }
 
         public static bool IsLevelFinished(LevelDb.LevelDef level)
         {
-            return App.Instance.Player.LevelsStatus.IsFinished(level.Name);
+            return App.Instance.PlayerStatus.LevelsStatus.IsFinished(level.Name);
         }
 
-        public static Player.LevelsStatus.LevelStatus GetLevelStatus(LevelDb.LevelDef level)
+        public static GameStatus.LevelsStatus.LevelStatus GetLevelStatus(LevelDb.LevelDef level)
         {
-            if (App.Instance.Player.LevelsStatus.IsFinished(level.Name))
+            if (App.Instance.PlayerStatus.LevelsStatus.IsFinished(level.Name))
             {
-                return App.Instance.Player.LevelsStatus.GetStatus(level.Name);
+                return App.Instance.PlayerStatus.LevelsStatus.GetStatus(level.Name);
             }
             return null;
         }

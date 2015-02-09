@@ -20,11 +20,14 @@ public class App : MonoBehaviour
 
 	public GoogleAnalyticsV3 GoogleAnalytics;
 
+
+    public Srv.Services Services { get; private set; }
+
 	public Core.SocialService SocialService { get; private set; }
 
 	public Db.Db Db { get; private set; }
 
-	public Player.PlayerStatus Player { get; private set; }
+    public GameStatus.PlayerStatus PlayerStatus { get; private set; }
 
     public ColorManager ColorManager{ get; private set; }
 
@@ -47,6 +50,8 @@ public class App : MonoBehaviour
 #endif 
 	void Awake()
 	{
+        instance = this;
+
         Application.targetFrameRate = 30;
 
 		DontDestroyOnLoad (gameObject);
@@ -101,14 +106,14 @@ public class App : MonoBehaviour
 
 	}
 
-	public void ResetProgress()
-	{
-		App.Instance.Player.Reset ();
-	}
 
 	
 	void Init()
 	{
+        // Services
+        Services = new Srv.Services();
+        Services.RegisterService(new Srv.SaveGameService());
+
 		// RootConsole
 		RootConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__RootConsole__")) as GameObject).GetComponent<RootConsole>();
 		RootConsole.transform.SetParent(transform);
@@ -129,7 +134,7 @@ public class App : MonoBehaviour
 		// Social Service
 		SocialService = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialService__")) as GameObject).GetComponent<Core.SocialService>();
 		SocialService.transform.SetParent(transform);
-		SocialService.Activate();
+	
 	
 
         //ColorManager
@@ -150,8 +155,8 @@ public class App : MonoBehaviour
 		var PlayerGo = new GameObject ("__PlayerStatus__");
 		DontDestroyOnLoad (PlayerGo);
 		PlayerGo.transform.SetParent (transform);
-		Player = PlayerGo.AddComponent<Player.PlayerStatus> ();
-		Player.Load ();
+        PlayerStatus = PlayerGo.AddComponent<GameStatus.PlayerStatus>();
+        PlayerStatus.Init();
 	
         // Window Manager
         var windowManGo = new GameObject("__WindowManager__");
@@ -165,7 +170,63 @@ public class App : MonoBehaviour
         DontDestroyOnLoad(Sound.gameObject);
         Sound.transform.SetParent(transform);
 
+        StartCoroutine(StartServicesCoroutine());
+        
+
     }
+
+    private IEnumerator StartServicesCoroutine()
+    {
+        float maxLoadingTime = 4.0f;
+
+        float startTime = Time.time;
+
+        WindowManager.OpenWindow(WindowDef.Intro, null);
+
+        bool loggingFinished = false;
+        bool saveGameInit = false;
+        
+        //activate social services
+        SocialService.Activate();
+
+        // 1) login
+        SocialService.Login((bool succ) =>
+        {
+            loggingFinished = true;
+        });
+
+        while (!loggingFinished)
+            yield return 0;
+
+
+        // 2) SaveGame service init
+
+        var saveModes = Srv.SaveGameService.Mode.Local;
+        if (SocialService.IsLogged())
+            saveModes |= Srv.SaveGameService.Mode.Cloud;
+
+        Services.GetService<Srv.SaveGameService>().Init(saveModes, (Srv.SaveGameService.Mode mode, bool result) => 
+        {
+            saveModes ^= mode;
+            saveGameInit = saveModes == 0;
+        });
+
+        while (!saveGameInit)
+            yield return 0;
+
+        // Load SaveGame
+        Services.GetService<Srv.SaveGameService>().Load();
+
+
+        float timeLeft = Mathf.Max(0, maxLoadingTime - (Time.time - startTime));
+        yield return new WaitForSeconds(timeLeft);
+
+        WindowManager.CloseWindow(WindowDef.Intro);
+
+        LoadScene(SceneDef.MenuScene);
+
+    }
+
 
 
 	void OnDestroy()

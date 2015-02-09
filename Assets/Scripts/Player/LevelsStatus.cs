@@ -6,13 +6,24 @@ using SimpleJSON;
 
 
 
-namespace Player
+namespace GameStatus
 {
 
     public class LevelsStatus
     {
 
-        public int LastReachedLevel { get { return lastReachedLevel; } set { lastReachedLevel = value; Save(); } }
+        public int LastReachedLevel 
+        { 
+            get
+            {
+                return lastReachedLevel;
+            } 
+            set 
+            { 
+                lastReachedLevel = value;
+                App.Instance.Services.GetService<Srv.SaveGameService>().Save();
+            }
+        }
         
         public class LevelStatus
         {
@@ -87,11 +98,11 @@ namespace Player
             var leveldef = App.Instance.Db.LevelDb.Levels.Find(x => x.Name == levelName);
             lastReachedLevel = leveldef.Order + 1;
 
-            Save();
+            App.Instance.Services.GetService<Srv.SaveGameService>().Save();
         }
 
 
-        public void Save()
+        public JSONNode GetAsJSON()
         {
             JSONClass root = new JSONClass();
 
@@ -113,31 +124,26 @@ namespace Player
 
             root["finishedLevels"] = array;
 
-            Core.Dbg.Log("Json:" + root.ToString());
+            Core.Dbg.Log("LevelsStatus.GetAsJson() " + root.ToString());
 
-            UnityEngine.PlayerPrefs.SetString("LevelsStatus", root.ToString());
+            return root;
         }
 
-        public void Load()
+        public void Load(JSONNode jsonNode)
         {
-            string str = UnityEngine.PlayerPrefs.GetString("LevelsStatus");
-
-            if (string.IsNullOrEmpty(str))
+            if (jsonNode == null)
             {
-                Core.Dbg.Log("LevelsStatus.Load() no record found");
-                return;
+                Core.Dbg.Log("LevelsStatus.Load() jsoNode is null -> no LevelsStatus found", Core.Dbg.MessageType.Warning);
+                return; 
             }
             
             FinishedLevels.Clear();
 
-         
-            var root = JSON.Parse(str);
+            string version = jsonNode["saveVersion"].Value;
 
-            string version = root["saveVersion"].Value;
-            
-            lastReachedLevel = root["lastLevelReached"].AsInt;
+            lastReachedLevel = jsonNode["lastLevelReached"].AsInt;
 
-            JSONArray levels = root["finishedLevels"].AsArray;
+            JSONArray levels = jsonNode["finishedLevels"].AsArray;
 
             for (int i = 0; i < levels.Count; ++i )
             {

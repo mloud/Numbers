@@ -90,7 +90,7 @@ public class LevelUi : MonoBehaviour
 
 	public void OnReset()
 	{
-		App.Instance.ResetProgress ();
+        App.Instance.Services.GetService<Srv.SaveGameService>().Delete();
 		App.Instance.LoadScene (SceneDef.LevelSelection);
 	}
 

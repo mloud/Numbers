@@ -157,7 +157,7 @@ public class Game : MonoBehaviour
 	{
         
         specialAbilities.ForEach(x => Model.SpecialAbilities.Add(x.Name));
-        App.Instance.Player.AbilitiesStatus.UseAbilities(Model.SpecialAbilities);
+        App.Instance.PlayerStatus.AbilitiesStatus.UseAbilities(Model.SpecialAbilities);
        
 
         InitPlayground();
@@ -570,10 +570,10 @@ public class Game : MonoBehaviour
 	
 		if (levelFinished)
 		{
-			App.Instance.Player.LevelsStatus.Finish (LevelDef.Name, Score);
-            var unlockedAbility = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.AvailableForLevel == App.Instance.Player.LevelsStatus.LastReachedLevel);
+			App.Instance.PlayerStatus.LevelsStatus.Finish (LevelDef.Name, Score);
+            var unlockedAbility = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.AvailableForLevel == App.Instance.PlayerStatus.LevelsStatus.LastReachedLevel);
             if (unlockedAbility != null)
-                App.Instance.Player.AbilitiesStatus.Unlock(unlockedAbility.Name);
+                App.Instance.PlayerStatus.AbilitiesStatus.Unlock(unlockedAbility.Name);
           
 
 
