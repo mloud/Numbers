@@ -32,6 +32,7 @@ public class LevelDb : MonoBehaviour
         public float RefillTime;
         public string Name;
 		public string LeaderboardId;
+        public string Goal;
 		public List<int> Numbers;
 		public List<int> FlipNumbers;
 		public List<float> BonusTime;

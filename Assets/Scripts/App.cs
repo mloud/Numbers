@@ -23,7 +23,7 @@ public class App : MonoBehaviour
 
     public Srv.Services Services { get; private set; }
 
-	public Db.Db Db { get; private set; }
+	public Data.Db Db { get; private set; }
 
     public GameStatus.PlayerStatus PlayerStatus { get; private set; }
 
@@ -136,8 +136,9 @@ public class App : MonoBehaviour
 
 
         // DB
-		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Db.Db> ();
+		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Data.Db> ();
 		Db.transform.SetParent (transform);
+        Data.DbUtils.MergeLevelDb(Db.LevelDb, Resources.Load<TextAsset>("Xls/Levels").ToString());
 
         // Persistent data
 		var persDataGo = new GameObject ("__PersistentData__");

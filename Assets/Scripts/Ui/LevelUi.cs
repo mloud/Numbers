@@ -65,7 +65,7 @@ public class LevelUi : MonoBehaviour
 
 			level.Set(levelDef);
 #if !UNLOCK_LEVELS
-			if (Db.DbUtils.IsLevelUnlocked(levelDef))
+			if (Data.DbUtils.IsLevelUnlocked(levelDef))
 #endif
 			level.LevelButton.onClick.AddListener ( () => OnLevelClick(levelDef));
 

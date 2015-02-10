@@ -32,11 +32,13 @@ public static class Utils
 
         public static int GetRandom(int from, int to)
         {
-            float[] probability = new float[to - from + 1];
-            float len = 1.0f / probability.Length;
-            Array.ForEach<float>(probability, x => x = len);
+            //float[] probability = new float[to - from + 1];
+            //float len = 1.0f / probability.Length;
+            //Array.ForEach<float>(probability, x => x = len);
+            
+            //return GetRandom(from, to, probability);
 
-            return GetRandom(from, to, probability);
+            return UnityEngine.Random.Range(from, to);
         }
 
 

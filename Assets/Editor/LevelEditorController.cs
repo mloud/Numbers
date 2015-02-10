@@ -11,13 +11,13 @@ public class LevelEditorController
     public Action<LevelDb.LevelDef> OnProbabilityChange;
 
 
-    private Db.Db Db { get; set; }
+    private Data.Db Db { get; set; }
 
     public List<LevelDb.LevelDef> Levels { get { return Db.LevelDb.Levels; } }
 
     public LevelEditorController()
     {
-        Db = (Resources.Load("Prefabs/Db/Db") as GameObject).GetComponent<Db.Db>();
+        Db = (Resources.Load("Prefabs/Db/Db") as GameObject).GetComponent<Data.Db>();
     }
 
     public LevelDb.LevelDef LevelDef;

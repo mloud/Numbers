@@ -10,11 +10,11 @@ public class SpecialAbilityEditorController
     public Action<LevelDb.LevelDef> OnNumLimitsChange;
     public Action<LevelDb.LevelDef> OnProbabilityChange;
 
-    private Db.Db Db { get; set; }
+    private Data.Db Db { get; set; }
 
     public SpecialAbilityEditorController()
     {
-        Db = (Resources.Load("Prefabs/Db/Db") as GameObject).GetComponent<Db.Db>();
+        Db = (Resources.Load("Prefabs/Db/Db") as GameObject).GetComponent<Data.Db>();
     }
 
     public SpecialAbilityDb SpecialAbilityDb { get { return Db.SpecialAbilityDb;  } }

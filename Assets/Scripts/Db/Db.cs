@@ -2,13 +2,13 @@
 using System.Collections;
 
 
-namespace Db
+namespace Data
 {
     public class Db : MonoBehaviour
     {
         [SerializeField]
         public LevelDb LevelDb;
-
+       
         [SerializeField]
         public SpecialAbilityDb SpecialAbilityDb;
     }

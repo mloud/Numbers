@@ -118,7 +118,7 @@ namespace Ui
             {
                 ability = value;
 
-                LevelText.text = "Level " + Db.DbUtils.GetLevelByOrder(ability.AvailableForLevel).Name;
+                LevelText.text = "Level " + Data.DbUtils.GetLevelByOrder(ability.AvailableForLevel).Name;
             }
         }
 

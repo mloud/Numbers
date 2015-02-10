@@ -263,8 +263,8 @@ public class Game : MonoBehaviour
 
 		MicroTimer = LevelDef.MicroTime;
 		LevelTimer = LevelDef.TotalTime;
-		FlipTimer = LevelDef.FlipTime;
-        RefillTimer = LevelDef.RefillTime;
+        FlipTimer = LevelDef.FlipTime == 0 ? float.MaxValue : LevelDef.FlipTime;
+        RefillTimer = LevelDef.RefillTime == 0 ? float.MaxValue : LevelDef.RefillTime;
 
 		Hud.Instance.Init (Score, LevelDef.Score, LevelDef.TotalTime);
 
@@ -392,7 +392,6 @@ public class Game : MonoBehaviour
         circle.OnClick += OnCircleClick;
         return circle;
     }
-
     void InitPlayground()
 	{
 	
@@ -436,7 +435,7 @@ public class Game : MonoBehaviour
                 circle.SetColor(GetNextColor());
 
                 // add specialities
-                List<LevelDb.SpecialityDef> specs = Db.DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
+                List<LevelDb.SpecialityDef> specs = Data.DbUtils.SpecialitiesFromString(LevelDef.SpecialitiesForNumbers[index]);
                 specs.ForEach(spec => circle.AddSpeciality(SpecialityFactory.Create(spec.Name, spec.Param, circle, Model.Context)));
 
 				circle.Run();
@@ -562,7 +561,7 @@ public class Game : MonoBehaviour
 
         GameUi.Instance.HideButtons();
 
-		var levelStatus = Db.DbUtils.GetLevelStatus (LevelDef);
+		var levelStatus = Data.DbUtils.GetLevelStatus (LevelDef);
 	
 		bool levelFinished = Score >= LevelDef.Score;
 
@@ -579,7 +578,7 @@ public class Game : MonoBehaviour
 
 			App.Instance.Services.GetService<Srv.SocialService>().ReportScore(Score, LevelDef.LeaderboardId, null);
 
-			bool gameFinished = Db.DbUtils.IsGameFinished ();
+			bool gameFinished = Data.DbUtils.IsGameFinished ();
 
 			
 			if (gameFinished)
@@ -599,7 +598,8 @@ public class Game : MonoBehaviour
 				OnRestartClick = OnRestart,
 				OnNextClick = OnNextLevel,
 				OnMenuClick = OnMenu,
-                IsNextLevel = !Db.DbUtils.IsLastLevel(LevelDef),
+                OnOkClick = OnMenu,
+                IsNextLevel = !Data.DbUtils.IsLastLevel(LevelDef),
 				LevelDef = this.LevelDef,
 
 
@@ -685,7 +685,7 @@ public class Game : MonoBehaviour
 
 	private void OnNextLevel()
 	{
-		Init (Db.DbUtils.GetNextLevel (LevelDef));
+		Init (Data.DbUtils.GetNextLevel (LevelDef));
 	}
 
 	private void ScoreAdded()

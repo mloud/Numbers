@@ -158,7 +158,7 @@ namespace Srv
 
 				if (status == SavedGameRequestStatus.Success)
 				{
-					string strData = System.Text.Encoding.UTF8.GetString(data);
+					string strData = /*System.Text.Encoding.UTF8.*/GetString(data);
 					Core.Dbg.Log("CloudSaveGameImplementation.Load() data is : " + strData);
 					App.Instance.PlayerStatus.Load(strData, true);				
 				}
@@ -166,6 +166,21 @@ namespace Srv
 			
 			Core.Dbg.Log("CloudSaveGameImplementation.Load() finished");
         }
+
+        static byte[] GetBytes(string str)
+        {
+            byte[] bytes = new byte[str.Length * sizeof(char)];
+            System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
+            return bytes;
+        }
+
+        static string GetString(byte[] bytes)
+        {
+            char[] chars = new char[bytes.Length / sizeof(char)];
+            System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+            return new string(chars);
+        }
+
 
         public override void Save()
         {
@@ -179,7 +194,7 @@ namespace Srv
 				{
 					var saveGame = App.Instance.PlayerStatus.GetSaveGame();
 					
-					SaveGame(MetaData, System.Text.Encoding.UTF8.GetBytes (saveGame), (bool succ) =>
+					SaveGame(MetaData, /*System.Text.Encoding.UTF8.*/GetBytes (saveGame), (bool succ) =>
 					{
 						Core.Dbg.Log ("CloudSaveGameImplementation.Save() result " + succ.ToString());
 

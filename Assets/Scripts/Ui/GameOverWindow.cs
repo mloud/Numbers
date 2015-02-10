@@ -57,6 +57,7 @@ public class GameOverWindow : Window
 		public Action OnNextClick;
 		public Action OnRestartClick;
 		public Action OnMenuClick;
+        public Action OnOkClick;
 		public bool IsNextLevel;
 		public LevelDb.LevelDef LevelDef;
 	}
@@ -134,7 +135,9 @@ public class GameOverWindow : Window
 
     public void OnOkClick()
     {
-        App.Instance.WindowManager.CloseWindow(Name);  
+        App.Instance.WindowManager.CloseWindow(Name);
+
+        Parameters.OnOkClick();
     }
 
 }
