@@ -5,6 +5,10 @@ using System.Collections.Generic;
 
 public class EqualNumberPattern : NumberPattern
 {
+    public EqualNumberPattern(GameContext context)
+        : base(context)
+    { }
+
 	public override bool IsPattern(List<Number> nums)
 	{
 		int lastNum = -1;
@@ -35,7 +39,7 @@ public class EqualNumberPattern : NumberPattern
         if (nums.Count < 2)
             return res;
 
-        res.ColorBonusMultiplier = IsSameColor(nums) ? 1.5f : 1;
+        res.ColorBonusMultiplier = (Context.LevelDef.Colors > 0 &&  IsSameColor(nums)) ? 1.5f : 1;
         res.TotalScore = (int)(nums.Count * nums.Find(x => x.Value != 0).Value * res.ColorBonusMultiplier);
 
         return res;

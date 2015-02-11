@@ -78,6 +78,21 @@ namespace Srv
 		}
 
 
+        public void GetScores(string leaderboardId)
+        {
+            App.Instance.CoroutineManager.StartCoroutine(GetScoresCoroutine(leaderboardId));
+        }
+
+        private IEnumerator GetScoresCoroutine(string leaderboardId)
+        {
+            var request = new net.GetScores(UserId, leaderboardId, net.GetScores.TimeSpan.ALL);
+
+            yield return App.Instance.CoroutineManager.StartCoroutine(request.Start());
+
+            //request.WWW.
+
+        }
+
 		
 		// Unlock achievement 
 		public void UnlockAchievement(string achievementId, Action<bool> callback)

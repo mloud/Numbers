@@ -35,6 +35,8 @@ public class App : MonoBehaviour
     
     public CoroutineManager CoroutineManager { get; private set; }
 
+    public Evt.EventManager Events { get; private set; }
+
     public Sound Sound { get; private set;  }
 
 	public RootConsole RootConsole { get; private set; }
@@ -99,11 +101,12 @@ public class App : MonoBehaviour
 	private IEnumerator LoadSceneCoroutine(string scene)
 	{
 		yield return StartCoroutine(WindowManager.ShowFadeCoroutine(false, 0.1f));
-		//WindowManager.OpenWindow(WindowDef.Loading, null);
+		
+        if (scene == SceneDef.MenuScene)
+            yield return StartCoroutine(StartResourceCoroutine());
+
+        //WindowManager.OpenWindow(WindowDef.Loading, null);
 		Application.LoadLevel (scene);
-
-		//yield return StartCoroutine(WindowManager.ShowFadeCoroutine(true, 2.0f));
-
 	}
 
 
@@ -114,6 +117,9 @@ public class App : MonoBehaviour
         Services = new Srv.Services();
 		Services.RegisterService(new Srv.SaveGameService());
         Services.RegisterService(new Srv.SocialService());
+
+        // Event manager
+        Events = new Evt.EventManager();
 
 		// RootConsole
 		RootConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__RootConsole__")) as GameObject).GetComponent<RootConsole>();
@@ -132,11 +138,12 @@ public class App : MonoBehaviour
 
 
 		// LogConsole
+#if DEBUG
 		Console = (Instantiate(Resources.Load<GameObject>("Prefabs/__LogConsole__")) as GameObject).GetComponent<LogConsole>();
 		Console.transform.SetParent(transform);
 		Console.Show(false);
 		DontDestroyOnLoad(Console.gameObject);
-
+#endif
         //ColorManager
         ColorManager = (Instantiate(Resources.Load<GameObject>("Prefabs/__ColorManager__")) as GameObject).GetComponent<ColorManager>();
         ColorManager.transform.SetParent(transform);
@@ -146,6 +153,8 @@ public class App : MonoBehaviour
 		Db = (Instantiate (Resources.Load ("Prefabs/Db/Db") as GameObject) as GameObject).GetComponent<Data.Db> ();
 		Db.transform.SetParent (transform);
         Data.DbUtils.MergeLevelDb(Db.LevelDb, Resources.Load<TextAsset>("Xls/Levels").ToString());
+        Data.DbUtils.MergeAbilitiesDb(Db.SpecialAbilityDb, Resources.Load<TextAsset>("Xls/Abilities").ToString());
+
 
         // Persistent data
 		var persDataGo = new GameObject ("__PersistentData__");
@@ -172,8 +181,53 @@ public class App : MonoBehaviour
         Sound.transform.SetParent(transform);
 
         StartCoroutine(StartServicesCoroutine());
-        
 
+       
+
+
+#if CHEAT
+         App.Instance.PlayerStatus.AbilitiesStatus.Unlock(SpecialAbilityDef.AnyNumber);
+        App.Instance.PlayerStatus.AbilitiesStatus.Unlock(SpecialAbilityDef.Refill);
+        App.Instance.PlayerStatus.AbilitiesStatus.Unlock(SpecialAbilityDef.Shuffle);
+        App.Instance.PlayerStatus.AbilitiesStatus.Unlock(SpecialAbilityDef.TimeFreeze);
+    
+#endif
+
+    }
+
+    public void DownloadResources()
+    {
+        StartCoroutine(StartResourceCoroutine());
+    }
+
+    private IEnumerator StartResourceCoroutine()
+    {
+        Core.Dbg.Log("App.StartResourceCoroutine()");
+        // Levels
+        var request = new net.Request();
+        request.Url = "http://mloud.sweb.cz/Levels.txt";
+        request.Url += "?p=" + Time.time;
+        yield return StartCoroutine(request.Start());
+
+
+        if (request.Result.Succesfull)
+        {
+            Data.DbUtils.MergeLevelDb(Db.LevelDb, request.WWW.text);
+            Core.Dbg.Log("Resources from " + request.WWW.url + " :" + request.WWW.text);
+        }
+
+        // Abilities
+        request = new net.Request();
+        request.Url = "http://mloud.sweb.cz/Abilities.txt";
+        request.Url += "?p=" + Time.time;
+        yield return StartCoroutine(request.Start());
+
+        if (request.Result.Succesfull)
+        {
+            Data.DbUtils.MergeAbilitiesDb(Db.SpecialAbilityDb, request.WWW.text);
+            Core.Dbg.Log("Resources from " + request.WWW.url + " :" + request.WWW.text);
+        }
+     
     }
 
     private IEnumerator StartServicesCoroutine()
@@ -223,6 +277,11 @@ public class App : MonoBehaviour
         yield return new WaitForSeconds(timeLeft);
 
         WindowManager.CloseWindow(WindowDef.Intro);
+
+
+        // test
+        Services.GetService<Srv.SocialService>().GetScores("asaas");
+
 
         LoadScene(SceneDef.MenuScene);
 

@@ -13,10 +13,15 @@ public class RootConsole: MonoBehaviour
 			App.Instance.Console.Show(!App.Instance.Console.Enabled);
 		}
 
-		if (GUILayout.Button("GooglePlay",  GUILayout.Width(100), GUILayout.Height(25))) 
-		{
-			App.Instance.SocialConsole.Show(!App.Instance.SocialConsole.Enabled);
-		}
+        if (GUILayout.Button("GooglePlay", GUILayout.Width(100), GUILayout.Height(25)))
+        {
+            App.Instance.SocialConsole.Show(!App.Instance.SocialConsole.Enabled);
+        }
+
+        if (GUILayout.Button("DownloadResources", GUILayout.Width(100), GUILayout.Height(25)))
+        {
+            App.Instance.DownloadResources();
+        }
 
 
 		GUILayout.EndHorizontal();

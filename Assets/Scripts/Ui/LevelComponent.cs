@@ -69,7 +69,7 @@ public class LevelComponent : MonoBehaviour
 	{
 		bool isUncloked = Data.DbUtils.IsLevelUnlocked (LevelDef);
 
-		txtLevel.text = (LevelDef.Order + 1).ToString ();
+        txtLevel.text = LevelDef.Name;
 
         GameStatus.LevelsStatus.LevelStatus levelStatus = Data.DbUtils.GetLevelStatus(LevelDef);
 

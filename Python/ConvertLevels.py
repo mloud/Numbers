@@ -6,11 +6,14 @@ import sys
 import json
 
 inputFile = sys.argv[1];
-outputFile = sys.argv[2];
+outputFileLevels = sys.argv[2];
+outputFileAbilities = sys.argv[3];
 
-print("Running xls->json export on " + inputFile + "->" + outputFile)
+print("Running xls->json export on " + inputFile + "->" + outputFileLevels)
 
 book = xlrd.open_workbook(inputFile)
+
+#levels
 
 sh = book.sheet_by_name("Levels");
 
@@ -48,5 +51,21 @@ for y in range(1, sh.nrows):
 
     levels.append(level)
 
-with open(outputFile, 'w') as outfile:
+with open(outputFileLevels, 'w') as outfile:
     json.dump(levels, outfile)
+
+
+
+sh = book.sheet_by_name("Abilities")
+abilities = []
+
+for y in range(1, sh.nrows):
+    ability = {}
+
+    for x in range(sh.ncols):
+        ability[sh.cell_value(0, x)] = sh.cell_value(y, x)
+
+    abilities.append(ability)
+
+with open(outputFileAbilities, 'w') as outfile:
+    json.dump(abilities, outfile)

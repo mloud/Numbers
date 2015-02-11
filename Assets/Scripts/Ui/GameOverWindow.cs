@@ -37,9 +37,6 @@ public class GameOverWindow : Window
     Button btnOk;
 
 	[SerializeField]
-	Button btnMenu;
-
-	[SerializeField]
 	Button btnRepeat;
 
 	[SerializeField]
@@ -56,8 +53,7 @@ public class GameOverWindow : Window
 		public string LevelName;
 		public Action OnNextClick;
 		public Action OnRestartClick;
-		public Action OnMenuClick;
-        public Action OnOkClick;
+	    public Action OnOkClick;
 		public bool IsNextLevel;
 		public LevelDb.LevelDef LevelDef;
 	}
@@ -72,8 +68,6 @@ public class GameOverWindow : Window
 		btnNextLevel.gameObject.SetActive (Parameters.IsNextLevel);
 
         btnRepeat.gameObject.SetActive(Parameters.IsNextLevel);
-
-        btnOk.gameObject.SetActive(!Parameters.IsNextLevel);
 
 		btnLeaderboard.gameObject.SetActive(App.Instance.Services.GetService<Srv.SocialService>().IsLogged());
 		btnLeaderboard.onClick.AddListener( () => 
@@ -117,13 +111,6 @@ public class GameOverWindow : Window
         App.Instance.WindowManager.CloseWindow(Name);	
 
 		Parameters.OnNextClick ();
-	}
-
-	public void OnMenuClick()
-	{
-        App.Instance.WindowManager.CloseWindow(Name);	
-		
-		Parameters.OnMenuClick ();
 	}
 
 	public void OnRestartClick()

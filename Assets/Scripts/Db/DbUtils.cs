@@ -103,6 +103,43 @@ namespace Data
             return specList;
         }
 
+        public static void MergeAbilitiesDb(SpecialAbilityDb abDb, string jsonString)
+        {
+            var jsonRoot =  JSON.Parse(jsonString);
+
+            var abArray = jsonRoot as JSONArray;
+
+            int count = abArray.Count;
+
+            for (int i = 0; i < count; ++i)
+            {
+                var ab = abArray[i];
+
+                string name = ab["Name"].Value;
+                int level = (int)ab["Level"].AsFloat;
+                int initialCount = (int)ab["InitialCount"].AsFloat;
+                float rechargeTime = ab["RechargeTime"].AsFloat;
+                float duaration = ab["Duration"].AsFloat;
+                string description = ab["Description"].Value;
+               
+                var currAbb = abDb.SpecialAbilities.Find(x => x.Name == name);
+
+                if (currAbb == null)
+                {
+                    currAbb = new SpecialAbilityDb.SpecialAbility();
+                    abDb.SpecialAbilities.Add(currAbb);
+                }
+                
+                currAbb.Name = name;
+                currAbb.AvailableForLevel = level;
+                currAbb.InitialCount = initialCount;
+                currAbb.RechargeTime = rechargeTime;
+                currAbb.Duration = duaration;
+                currAbb.Description = description;    
+            }
+        }
+
+
         public static void MergeLevelDb(LevelDb leveDb, string jsonString)
         {
             var jsonRoot =  JSON.Parse(jsonString);
@@ -116,11 +153,13 @@ namespace Data
                 var level = levelArray[i];
 
                 string name = level["Name"].Value;
+                int order = (int)level["Order"].AsFloat;
                 int sizeX = (int)level["SizeX"].AsFloat;
                 int sizeY = (int)level["SizeY"].AsFloat;
                 int fromNum = (int)level["NumFrom"].AsFloat;
                 int toNum = (int)level["NumTo"].AsFloat;
                 int score = (int)level["Score"].AsFloat;
+                int colors = (int)level["Colors"].AsFloat;
                 float time = level["Time"].AsFloat;
                 float utime = level["UTime"].AsFloat;
                 float refillTime = level["RefillTime"].AsFloat;
@@ -148,6 +187,8 @@ namespace Data
                 currLevel.FlipTime = flipTime;
                 currLevel.Goal = goal;
                 currLevel.Name = name;
+                currLevel.Order = order;
+                currLevel.Colors = colors;
 
                 var patternArray = patterns.Split(',').ToList<string>();
                 currLevel.Patterns = patternArray;
@@ -171,7 +212,10 @@ namespace Data
 
                 if ( (currLevel.RefillTime > 0 || currLevel.FlipTime > 0) && (currLevel.FlipNumbers == null || currLevel.FlipNumbers.Count == 0))
                 {
-                    int count = (int)((currLevel.TotalTime / currLevel.FlipTime) + (currLevel.TotalTime / currLevel.RefillTime));
+                    int count = 0;
+                    count += currLevel.RefillTime > 0 ? (int) (currLevel.TotalTime / currLevel.RefillTime) : 0;
+                    count += currLevel.FlipTime > 0 ? (int) (currLevel.TotalTime / currLevel.FlipTime) : 0;
+    
                     currLevel.FlipNumbers = new List<int>(count);
                     for (int j = 0; j < count; ++j)
                         currLevel.FlipNumbers.Add(Utils.Randomizer.GetRandom(currLevel.FromNum, currLevel.ToNum));

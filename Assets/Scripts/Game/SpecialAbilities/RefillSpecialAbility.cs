@@ -10,8 +10,7 @@ using UnityEngine;
 
      protected override bool OnApply()
      {
-         var probabilities = Context.LevelDef.Probabilities.ToArray();
-
+      
          var freeSlots = Context.Model.Slots.FindAll(x => x.Circle == null);
 
          freeSlots.ForEach( (Slot slot) => 

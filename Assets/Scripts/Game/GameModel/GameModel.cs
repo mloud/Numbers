@@ -36,7 +36,7 @@ public class GameModel
         SpecialAbilities = new List<string>();
         Slots = new List<Slot>();
 
-        context.LevelDef.Patterns.ForEach(x => NumberPatterns.Add(PatternFactory.Create(x)));
+        context.LevelDef.Patterns.ForEach(x => NumberPatterns.Add(PatternFactory.Create(x, context)));
        
       
         Circles = new List<CircleController>();

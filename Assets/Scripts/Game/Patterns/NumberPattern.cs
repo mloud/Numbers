@@ -9,6 +9,13 @@ public abstract class NumberPattern
 
 	public abstract NumberResult ComputeScore(List<Number> nums);
 
+    protected GameContext Context { get; private set; }
+
+    public NumberPattern(GameContext context)
+    {
+        Context = context;
+    }
+
     public bool IsSameColor(List<Number> numbers)
     {
         if (numbers.Count < 2)

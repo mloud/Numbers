@@ -5,7 +5,11 @@ using System.Collections.Generic;
 
 public class PlusOneNumberPattern : NumberPattern
 {
-  
+
+    public PlusOneNumberPattern(GameContext context)
+        : base(context)
+    { }
+
 	public override bool IsPattern(List<Number> nums)
 	{
 		bool sequence = true;
@@ -35,7 +39,7 @@ public class PlusOneNumberPattern : NumberPattern
         for (int i = index + 1; i < nums.Count; ++i)
             addon++;
 
-        res.ColorBonusMultiplier = IsSameColor(nums) ? 1.5f : 1;
+        res.ColorBonusMultiplier = (Context.LevelDef.Colors > 0 && IsSameColor(nums)) ? 1.5f : 1;
         res.TotalScore = (int)((nums[index].Value + addon) * nums.Count * 2 * res.ColorBonusMultiplier);
 
         return res;

@@ -93,7 +93,6 @@ public class Game : MonoBehaviour
 
         UnityEngine.Time.timeScale = 0;
 
-
         if (showPauseWindow)
         {
 
@@ -565,22 +564,22 @@ public class Game : MonoBehaviour
 	
 		bool levelFinished = Score >= LevelDef.Score;
 
-	
-	
+        // trigger level over event
+        App.Instance.Events.Trigger(new Evt.LevelFinished() { LeveDef = this.LevelDef, Score = this.Score, Win = levelFinished });
+
 		if (levelFinished)
 		{
 			App.Instance.PlayerStatus.LevelsStatus.Finish (LevelDef.Name, Score);
             var unlockedAbility = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.AvailableForLevel == App.Instance.PlayerStatus.LevelsStatus.LastReachedLevel);
+            
             if (unlockedAbility != null)
                 App.Instance.PlayerStatus.AbilitiesStatus.Unlock(unlockedAbility.Name);
-          
-
+         
 
 			App.Instance.Services.GetService<Srv.SocialService>().ReportScore(Score, LevelDef.LeaderboardId, null);
 
 			bool gameFinished = Data.DbUtils.IsGameFinished ();
 
-			
 			if (gameFinished)
 			{
                 App.Instance.WindowManager.OpenWindow(WindowDef.GameFinished, new GameFinishedWindow.Param() 
@@ -593,12 +592,11 @@ public class Game : MonoBehaviour
             App.Instance.WindowManager.OpenWindow(WindowDef.GameOver, new GameOverWindow.Param() 
 			{ 	
 				Score = this.Score,
-				BestScore = levelStatus == null ? 0 : levelStatus.BestScore,
+				BestScore = levelStatus == null ? Score : levelStatus.BestScore,
 				LevelName = "Level " + (LevelDef.Order + 1),
 				OnRestartClick = OnRestart,
 				OnNextClick = OnNextLevel,
-				OnMenuClick = OnMenu,
-                OnOkClick = OnMenu,
+			    OnOkClick = OnMenu,
                 IsNextLevel = !Data.DbUtils.IsLastLevel(LevelDef),
 				LevelDef = this.LevelDef,
 

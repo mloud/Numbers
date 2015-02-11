@@ -10,11 +10,14 @@ using UnityEngine;
 
      protected override bool OnApply()
      {
-         var probabilities = Context.LevelDef.Probabilities.ToArray();
+         var probabilities = Context.LevelDef.Probabilities != null ? Context.LevelDef.Probabilities.ToArray() : null;
 
          Context.Model.Circles.ForEach( (CircleController circle) => 
          {
-             circle.ChangeValueTo(Utils.Randomizer.GetRandom(Context.LevelDef.FromNum, Context.LevelDef.ToNum, probabilities));
+             if (probabilities != null)
+                circle.ChangeValueTo(Utils.Randomizer.GetRandom(Context.LevelDef.FromNum, Context.LevelDef.ToNum, probabilities));
+             else
+                circle.ChangeValueTo(Utils.Randomizer.GetRandom(Context.LevelDef.FromNum, Context.LevelDef.ToNum));
          });
 
          return true;
