@@ -10,8 +10,19 @@ public class SimpleAnimationExt : MonoBehaviour
     AnimationClip clip;
 
     [SerializeField]
+    List<AnimationClip> clips;
+
+    [SerializeField]
     string sfx;
 
+    [SerializeField]
+    bool runAutomatically = false;
+
+    [SerializeField]
+    float playAfterDelay;
+
+    [SerializeField]
+    bool hideOnStart;
 
     private void Awake()
     {
@@ -20,29 +31,54 @@ public class SimpleAnimationExt : MonoBehaviour
             gameObject.AddComponent<Animation>();
         }
 
-  
-        animation.clip = clip;
-        animation.AddClip(clip, "flyin");
-        animation.playAutomatically = false;
 
+        if (hideOnStart)
+            gameObject.SetActive(false);
+        
+        if (runAutomatically)   
+        {
+            RunIn(playAfterDelay);
+        }
 
+      
     }
 
     public void RunIn(float time)
     {
-        StartCoroutine(RunInCoroutine(time));   
+       App.Instance.CoroutineManager.StartCoroutine(RunInCoroutine(time));   
     }
 
 
     private IEnumerator RunInCoroutine(float time)
     {
+   
+
+        var animsToPlay = new List<AnimationClip>();
+        if (clip != null)
+            animsToPlay.Add(clip);
+        animsToPlay.AddRange(clips);
+
+        
         if (time > 0)
             yield return new WaitForSeconds(time);
+
+        gameObject.SetActive(true);
 
         if (!string.IsNullOrEmpty(sfx))
             App.Instance.Sound.PlayEffect(sfx);
 
-        animation.Play("flyin");
+        while (true)
+        {
+            animation.AddClip(animsToPlay[0], "clip");
+            animation.Play("clip");
+            animsToPlay.RemoveAt(0);
+
+            if (animsToPlay.Count == 0)
+                break;
+
+            while (animation.isPlaying)
+                yield return 0;
+        }
     }
 
 }

@@ -32,6 +32,8 @@ public class App : MonoBehaviour
 	public PersistentData PersistentData { get; private set; }
 
     public WindowManager WindowManager { get; private set; }
+    
+    public CoroutineManager CoroutineManager { get; private set; }
 
     public Sound Sound { get; private set;  }
 
@@ -117,6 +119,11 @@ public class App : MonoBehaviour
 		RootConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__RootConsole__")) as GameObject).GetComponent<RootConsole>();
 		RootConsole.transform.SetParent(transform);
 		DontDestroyOnLoad(RootConsole.gameObject);
+
+        // Coroutine Manager
+        var coroutineManagerGo = new GameObject("__CoroutineManager__");
+        coroutineManagerGo.transform.SetParent(transform);
+        CoroutineManager = coroutineManagerGo.AddComponent<CoroutineManager>();
 
 		// SocialConsole
 		SocialConsole = (Instantiate(Resources.Load<GameObject>("Prefabs/__SocialServiceConsole__")) as GameObject).GetComponent<SocialServiceConsole>();

@@ -47,7 +47,19 @@ public class Window : MonoBehaviour
 		OnInit (param);
 	}
 
-	public void Open()
+    public void Open()
+    {
+        StartCoroutine(OpenCoroutine());    
+    }
+
+    private IEnumerator OpenCoroutine()
+    {
+        yield return 0;
+
+        OpenInternal();
+    }
+
+	private void OpenInternal()
 	{
         if (Animator != null)
             Animator.SetTrigger(OpenAnimType.ToString());

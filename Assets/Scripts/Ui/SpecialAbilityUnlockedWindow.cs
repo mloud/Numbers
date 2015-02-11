@@ -42,8 +42,7 @@ public class SpecialAbilityUnlockedWindow : Window
         abilityItem.SetToImageOnlyMode();
 
         abilityItem.LevelText.gameObject.SetActive(false);
-
-        
+    
     }
 
 
