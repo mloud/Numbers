@@ -138,7 +138,7 @@ public class App : MonoBehaviour
 
 
 		// LogConsole
-#if DEBUG
+#if CONSOLE
 		Console = (Instantiate(Resources.Load<GameObject>("Prefabs/__LogConsole__")) as GameObject).GetComponent<LogConsole>();
 		Console.transform.SetParent(transform);
 		Console.Show(false);
