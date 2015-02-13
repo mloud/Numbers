@@ -11,7 +11,7 @@ using UnityEngine;
      protected override bool OnApply()
      {
       
-         var freeSlots = Context.Model.Slots.FindAll(x => x.Circle == null);
+         var freeSlots = Context.Model.Slots.FindAll(x => x.CanPlaceCircle);
 
          freeSlots.ForEach( (Slot slot) => 
          {

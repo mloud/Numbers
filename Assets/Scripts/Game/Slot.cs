@@ -7,6 +7,10 @@ public class Slot : MonoBehaviour
 
     public CircleController Circle { get; set; }
 
+    public bool CanPlaceCircle { get { return Circle == null && SpecialSlot == null; } }
+
+    public SpecialSlot SpecialSlot { get; set; }
+
 	void Awake () 
     {
         SpriteRenderer = GetComponent<SpriteRenderer>();

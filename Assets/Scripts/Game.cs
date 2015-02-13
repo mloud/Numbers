@@ -310,7 +310,7 @@ public class Game : MonoBehaviour
         {
             RefillTimer = LevelDef.RefillTime;
 
-            var emptySlots = Model.Slots.FindAll(x => x.Circle == null);
+            var emptySlots = Model.Slots.FindAll(x => x.CanPlaceCircle);
 
             if (emptySlots.Count > 0)
             {
@@ -329,7 +329,7 @@ public class Game : MonoBehaviour
 
     public void CreateCircleOnSlot(Slot slot)
     {
-        Core.Dbg.Assert(slot.Circle == null, "Game.CreateCircleOnSlot() - slot must be free!");
+        Core.Dbg.Assert(slot.CanPlaceCircle, "Game.CreateCircleOnSlot() - slot must be free!");
 
         var circle = CreateCircle(Resources.Load<GameObject>("Prefabs/Circle"), slot);
         
@@ -452,6 +452,50 @@ public class Game : MonoBehaviour
         InitSpecialAbilities();
 
 	}
+
+    private void InitSpecialAbilities2()
+    {
+        // Init special abilities;
+        if (SpecialSlots != null)
+            SpecialSlots.ForEach(x => Destroy(x.gameObject));
+        SpecialSlots = new List<SpecialSlot>();
+
+        GameObject specialSlot = Resources.Load<GameObject>("Prefabs/SpecialAbilities/Slot");
+
+        var freeSlots = new List<Slot>(Model.Slots);
+
+
+        foreach (var sa in Model.SpecialAbilities)
+        {
+
+            var rndSlot = freeSlots[Random.Range(0, freeSlots.Count - 1)];
+
+            if (rndSlot.Circle != null)
+            {
+                Model.Circles.Remove(rndSlot.Circle);
+                Destroy(rndSlot.Circle.gameObject);
+            }
+            
+            freeSlots.Remove(rndSlot);
+
+            
+            var slot = (Instantiate(specialSlot) as GameObject).GetComponent<SpecialSlot>();
+            slot.OnClick += OnSpecialSlotClick;
+            slot.transform.SetParent(rndSlot.transform);
+            slot.SpecialAbilityDef = App.Instance.Db.SpecialAbilityDb.SpecialAbilities.Find(x => x.Name == sa);
+            slot.transform.localPosition = Vector3.zero;
+
+            var visual = SpecialAbilityFactory.CreateVisual(sa);
+            slot.SetVisual(visual);
+            slot.StartRecharging();
+
+            slot.gameObject.SetActive(false);
+
+            SpecialSlots.Add(slot);
+        }
+    }
+
+
 
     private void InitSpecialAbilities()
     {
